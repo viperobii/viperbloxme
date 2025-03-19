@@ -5501,7 +5501,7 @@ local v49 = v16.Main:AddToggle("ToggleLevel", {
 
 Title = "Auto Farm Level",
 
-Description = "Fixing (Soon)",
+Description = "Dodge Mobs Skill",
 
 Default = false
 
