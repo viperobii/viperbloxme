@@ -5169,20 +5169,25 @@ function Click()
         local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
         CamShake:Stop()
 
-        -- Check if the player is currently attacking
+        -- Ensure the player is not already attacking
         if not combatFramework.activeController.attacking then
             -- Set the attack parameters
             combatFramework.activeController.attacking = true
             combatFramework.activeController.timeToNextAttack = 0
-            combatFramework.activeController.hitboxMagnitude = 180
+            combatFramework.activeController.hitboxMagnitude = 180  -- Adjust this value if needed
 
             -- Capture the controller and simulate the attack
             game:GetService('VirtualUser '):CaptureController()
             game:GetService('VirtualUser '):Button1Down(Vector2.new(1280, 672))
 
-            -- Optionally, you can add a delay here to prevent spamming
-            wait(0.1) -- Adjust the delay as needed
+            -- Wait for a short duration to ensure the attack registers
+            wait(0.1)  -- Adjust this delay based on the fighting style's attack speed
+
+            -- Release the button
             game:GetService('VirtualUser '):Button1Up(Vector2.new(1280, 672))
+
+            -- Reset the attacking state after a short delay
+            wait(0.1)  -- Adjust this delay if necessary
             combatFramework.activeController.attacking = false
         end
     end
