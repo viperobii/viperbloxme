@@ -5162,19 +5162,31 @@ until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Posit
 end
 
 function Click()
-	if not _G.FastAttack then
-		local Module = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-		local CombatFramework = debug.getupvalues(Module)[2]
-		local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
-		CamShake:Stop()
-		CombatFramework.activeController.attacking = false
-		CombatFramework.activeController.timeToNextAttack = 0
-		CombatFramework.activeController.hitboxMagnitude = 180
-		game:GetService'VirtualUser':CaptureController()
-		game:GetService'VirtualUser':Button1Down(Vector2.new(1280, 672))
-	end
-end
+    if not _G.FastAttack then
+        local player = game.Players.LocalPlayer
+        local combatModule = require(player.PlayerScripts.CombatFramework)
+        local combatFramework = debug.getupvalues(combatModule)[2]
+        local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
+        CamShake:Stop()
 
+        -- Check if the player is currently attacking
+        if not combatFramework.activeController.attacking then
+            -- Set the attack parameters
+            combatFramework.activeController.attacking = true
+            combatFramework.activeController.timeToNextAttack = 0
+            combatFramework.activeController.hitboxMagnitude = 180
+
+            -- Capture the controller and simulate the attack
+            game:GetService('VirtualUser '):CaptureController()
+            game:GetService('VirtualUser '):Button1Down(Vector2.new(1280, 672))
+
+            -- Optionally, you can add a delay here to prevent spamming
+            wait(0.1) -- Adjust the delay as needed
+            game:GetService('VirtualUser '):Button1Up(Vector2.new(1280, 672))
+            combatFramework.activeController.attacking = false
+        end
+    end
+end
 
 function to(v233)
 
