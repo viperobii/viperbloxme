@@ -5162,42 +5162,18 @@ until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Posit
 end
 
 function Click()
-    -- Get the required modules
-    local Module = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-    local CombatFramework = debug.getupvalues(Module)[2]
-    local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
-
-    -- Stop camera shake
-    CamShake:Stop()
-
-    -- Disable current attack to remove cooldowns
-    CombatFramework.activeController.attacking = false
-    CombatFramework.activeController.timeToNextAttack = 0
-    CombatFramework.activeController.hitboxMagnitude = 1000
-
-    -- Check for active fighting style and call appropriate attack
-    if CombatFramework.activeController.currentFightingStyle then
-        local fightingStyle = CombatFramework.activeController.currentFightingStyle
-
-        -- Trigger the attack based on the fighting style
-        if fightingStyle == "DragonTalon" then
-            -- Call Dragon Talon attack (Replace with actual Dragon Talon attack function if needed)
-            CombatFramework.activeController:PerformDragonTalonAttack()
-        elseif fightingStyle == "GodHuman" then
-            -- Call GodHuman attack (Replace with actual God Human attack function if needed)
-            CombatFramework.activeController:PerformGodHumanAttack()
-        else
-            -- If no specific style, perform regular attack
-            game:GetService('VirtualUser'):CaptureController()
-            game:GetService('VirtualUser'):Button1Down(Vector2.new(1280, 672))
-        end
-    else
-        -- If no fighting style is equipped, use the default click attack
-        game:GetService('VirtualUser'):CaptureController()
-        game:GetService('VirtualUser'):Button1Down(Vector2.new(1280, 672))
-    end
+	if not _G.FastAttack then
+		local Module = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+		local CombatFramework = debug.getupvalues(Module)[2]
+		local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
+		CamShake:Stop()
+		CombatFramework.activeController.attacking = false
+		CombatFramework.activeController.timeToNextAttack = 0
+		CombatFramework.activeController.hitboxMagnitude = 180
+		game:GetService'VirtualUser':CaptureController()
+		game:GetService'VirtualUser':Button1Down(Vector2.new(1280, 672))
+	end
 end
-
 
 
 function to(v233)
