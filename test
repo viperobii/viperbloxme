@@ -5180,7 +5180,7 @@ function Click()
             game:GetService('VirtualUser '):CaptureController()
             game:GetService('VirtualUser '):Button1Down(Vector2.new(1280, 672))
 
-            -- Wait for a short duration to ensure the attack registers
+            -- Wait for the attack animation to complete
             wait(0.1)  -- Adjust this delay based on the fighting style's attack speed
 
             -- Release the button
