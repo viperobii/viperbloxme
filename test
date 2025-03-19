@@ -5161,40 +5161,17 @@ until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Posit
 
 end
 
-function AutoAttack()
-    local player = game.Players.LocalPlayer
-    local combatFramework = require(player.PlayerScripts.CombatFramework)
-    local ac = combatFramework.activeController
-
-    -- Function to perform auto attack
-    local function performAttack()
-        -- Ensure the player is equipped with a fighting style or weapon
-        if ac and ac.equipped then
-            -- Check for valid weapon or fighting style and trigger attack
-            if ac.attack then
-                -- Perform attack by manipulating the attack function
-                ac.attack()
-
-                -- Trigger animations
-                for _, anim in pairs(ac.animator.anims.basic) do
-                    anim:Play(0.01, 0.01, 0.01)
-                end
-
-                -- Optionally, send server-side requests to perform the attack
-                game.ReplicatedStorage.RigControllerEvent:FireServer("hit", {})
-                game.ReplicatedStorage.RigControllerEvent:FireServer("weaponChange", tostring(ac.equipped))
-            end
-        end
-    end
-
-    -- Infinite loop to simulate continuous attacking
+function AutoClick()
+    -- Infinite loop to continuously simulate clicks
     while true do
-        performAttack()
-        wait(0.1)  -- Adjust the delay between attacks
+        -- Simulate the mouse button press (Button1 = Left Click)
+        game:GetService('VirtualUser'):CaptureController()
+        game:GetService('VirtualUser'):Button1Down(Vector2.new(1280, 672))
+        wait(0.1)  -- Adjust the interval between clicks (faster or slower)
+        game:GetService('VirtualUser'):Button1Up(Vector2.new(1280, 672))
+        wait(0.1)  -- Adjust the interval between clicks
     end
 end
-
-AutoAttack()  -- Call the function to start auto-attacking
 
 
 function to(v233)
