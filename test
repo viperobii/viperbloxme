@@ -5161,7 +5161,94 @@ until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Posit
 
 end
 
-local a = game.Players.LocalPlayer function b() local c = a.Character if not c then return end local d = nil for _, e in ipairs(c:GetChildren()) do if e:IsA("Tool") then d = e break end end if not d then return end local function f(g) return g and g:FindFirstChild("Humanoid") and g.Humanoid.Health > 0 end local function h(i) local j = game:GetService("Workspace").Enemies:GetChildren() local k, l = {}, c:GetPivot().Position for _, m in ipairs(j) do local n = m:FindFirstChild("HumanoidRootPart") if n and f(m) and (n.Position - l).Magnitude <= i then table.insert(k, m) end end return k end if d:FindFirstChild("LeftClickRemote") then local o, p = 1, h(60) for _, q in ipairs(p) do local r = (q.HumanoidRootPart.Position - c:GetPivot().Position).Unit pcall(function() d.LeftClickRemote:FireServer(r, o) end) o = o + 1 if o > 1000000000 then o = 1 end end else local s, j, l, t = {}, game:GetService("Workspace").Enemies:GetChildren(), c:GetPivot().Position, nil for _, u in ipairs(j) do if not u:GetAttribute("IsBoat") and f(u) then local v = u:FindFirstChild("Head") if v and (l - v.Position).Magnitude <= 60 then table.insert(s, { u, v }) t = v end end end if not t then return end pcall(function() local w = game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE") if #s > 0 then w:WaitForChild("RegisterAttack"):FireServer(0.000000001) w:WaitForChild("RegisterHit"):FireServer(t, s) else task.wait(0.000000001) end end) end end _G["\70\97\115\116\65\116\116\97\99\107"] = true spawn(function() while wait(.1) do if _G["\70\97\115\116\65\116\116\97\99\107"] then pcall(function() repeat task.wait(000.1) b() until not _G["\70\97\115\116\65\116\116\97\99\107"] end) end end end)
+local a = game.Players.LocalPlayer
+function b()
+    local c = a.Character
+    if not c then return end
+    local d = nil
+    -- Find the first tool in the character's inventory
+    for _, e in ipairs(c:GetChildren()) do
+        if e:IsA("Tool") then 
+            d = e 
+            break 
+        end
+    end
+    if not d then return end
+    
+    -- Function to check if a mob has a humanoid and is alive
+    local function f(g) 
+        return g and g:FindFirstChild("Humanoid") and g.Humanoid.Health > 0 
+    end
+    
+    -- Function to get all mobs within a specified range
+    local function h(i)
+        local j = game:GetService("Workspace").Enemies:GetChildren()
+        local k, l = {}, c:GetPivot().Position
+        for _, m in ipairs(j) do
+            local n = m:FindFirstChild("HumanoidRootPart")
+            if n and f(m) and (n.Position - l).Magnitude <= i then 
+                table.insert(k, m) 
+            end
+        end
+        return k
+    end
+
+    -- Check if the tool has LeftClickRemote
+    if d:FindFirstChild("LeftClickRemote") then
+        local o, p = 1, h(60)
+        for _, q in ipairs(p) do
+            local r = (q.HumanoidRootPart.Position - c:GetPivot().Position).Unit
+            -- Use pcall to catch any errors in firing the remote
+            pcall(function() 
+                d.LeftClickRemote:FireServer(r, o) 
+            end)
+            o = o + 1
+            if o > 1000000000 then o = 1 end
+        end
+    else
+        -- Fallback method using Net module
+        local s, j, l, t = {}, game:GetService("Workspace").Enemies:GetChildren(), c:GetPivot().Position, nil
+        for _, u in ipairs(j) do
+            if not u:GetAttribute("IsBoat") and f(u) then
+                local v = u:FindFirstChild("Head")
+                if v and (l - v.Position).Magnitude <= 60 then 
+                    table.insert(s, { u, v }) 
+                    t = v 
+                end
+            end
+        end
+        if not t then return end
+        
+        -- Fire server with the Net module, using pcall for error handling
+        pcall(function()
+            local w = game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE")
+            if #s > 0 then 
+                w:WaitForChild("RegisterAttack"):FireServer(0.000000001) 
+                w:WaitForChild("RegisterHit"):FireServer(t, s)
+            else 
+                task.wait(0.000000001) 
+            end
+        end)
+    end
+end
+
+-- Toggle script on/off using obfuscated global variable
+_G["FastAttack"] = true
+
+-- Main loop to continuously perform attacks
+spawn(function()
+    while wait(0.1) do
+        if _G["FastAttack"] then
+            pcall(function()
+                -- Call the attack function in a loop
+                repeat 
+                    task.wait(0.1)
+                    b()  -- Perform the attack
+                until not _G["FastAttack"]  -- Stop when the toggle is off
+            end)
+        end
+    end
+end)
 
 function to(v233)
 
