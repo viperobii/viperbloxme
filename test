@@ -622,7 +622,7 @@ end
 
 end);
 
-local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))() -- Load Fluent UI
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))() -- Load Fluent UI
 local Key = "ViperNewbie" -- Correct key
 
 local Window = Fluent:CreateWindow({
@@ -635,9 +635,12 @@ local Window = Fluent:CreateWindow({
 })
 
 local KeyTab = Window:AddTab({ Title = "Key System", Icon = "🔑" })
-local InputBox = KeyTab:AddInput({
+
+-- Fix: Make sure to use AddTextbox instead of AddInput
+KeyTab:AddTextbox({
     Title = "Enter Key",
     Placeholder = "Enter Key Here...",
+    Default = "",
     Callback = function(userInput)
         if userInput == Key then
             Window:Destroy() -- Close key UI
@@ -652,6 +655,7 @@ local InputBox = KeyTab:AddInput({
         end
     end
 })
+
 
 local v15 = v14:CreateWindow({
 
