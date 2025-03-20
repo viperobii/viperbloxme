@@ -2,7 +2,7 @@
 
 
 
-shared.LoaderTitle = "Support Viper Hub Discord";
+shared.LoaderTitle = "Viper Hub Premium";
 
 shared.LoaderKeyFrames = {
 
@@ -626,7 +626,7 @@ local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/rel
 
 local v15 = v14:CreateWindow({
 
-Title = "Viper Hub-BloxFruit",
+Title = "Viper Hub-BloxFruit [Premium]",
 
 SubTitle = "by Viper_",
 
@@ -18820,10 +18820,10 @@ end);
 
 v14:Notify({
 
-Title = "Viper Hub",
+Title = "Viper Hub Premium",
 
 Content = "Loaded",
 
-Duration = 10
+Duration = 5
 
 });
