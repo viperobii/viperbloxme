@@ -636,7 +636,7 @@ local Window = Fluent:CreateWindow({
 
 local KeyTab = Window:AddTab({ Title = "Key System", Icon = "🔑" })
 
--- Fix: Make sure to use AddTextbox instead of AddInput
+-- Fix: Properly adding an input box
 KeyTab:AddTextbox({
     Title = "Enter Key",
     Placeholder = "Enter Key Here...",
