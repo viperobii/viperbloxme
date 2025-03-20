@@ -5164,7 +5164,10 @@ end
 local a = game.Players.LocalPlayer
 function b()
     local c = a.Character
-    if not c then return end
+    if not c then 
+        print("Character not found!")
+        return 
+    end
     local d = nil
     -- Find the first tool in the character's inventory
     for _, e in ipairs(c:GetChildren()) do
@@ -5173,7 +5176,10 @@ function b()
             break 
         end
     end
-    if not d then return end
+    if not d then 
+        print("No tool found!")
+        return 
+    end
     
     -- Function to check if a mob has a humanoid and is alive
     local function f(g) 
@@ -5190,11 +5196,13 @@ function b()
                 table.insert(k, m) 
             end
         end
+        print("Enemies within range:", #k)
         return k
     end
 
     -- Check if the tool has LeftClickRemote
     if d:FindFirstChild("LeftClickRemote") then
+        print("LeftClickRemote found!")
         local o, p = 1, h(60)
         for _, q in ipairs(p) do
             local r = (q.HumanoidRootPart.Position - c:GetPivot().Position).Unit
@@ -5206,6 +5214,7 @@ function b()
             if o > 1000000000 then o = 1 end
         end
     else
+        print("Using fallback method with Net module.")
         -- Fallback method using Net module
         local s, j, l, t = {}, game:GetService("Workspace").Enemies:GetChildren(), c:GetPivot().Position, nil
         for _, u in ipairs(j) do
@@ -5217,11 +5226,18 @@ function b()
                 end
             end
         end
-        if not t then return end
+        if not t then 
+            print("No valid target found!")
+            return 
+        end
         
         -- Fire server with the Net module, using pcall for error handling
         pcall(function()
             local w = game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE")
+            if not w then
+                print("Net module not found!")
+                return
+            end
             if #s > 0 then 
                 w:WaitForChild("RegisterAttack"):FireServer(0.000000001) 
                 w:WaitForChild("RegisterHit"):FireServer(t, s)
