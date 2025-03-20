@@ -636,15 +636,26 @@ local Window = Fluent:CreateWindow({
 
 local KeyTab = Window:AddTab({ Title = "Key System", Icon = "🔑" })
 
--- Fix: Using AddInput properly
-local KeyTab:AddInput("KeyInput", {
+-- Store User Input
+local userInputKey = ""
+
+-- Add Input Box
+KeyTab:AddInput("KeyInput", {
     Title = "Enter Key",
-    Default = "",
-    Placeholder = "Input Key Here...",
-    Numeric = false,
-    Finished = false,
-    Callback = function(userInput)
-        if userInput == Key then
+    Description = "Input the correct key",
+    Placeholder = "Type key here...",
+    Numeric = false, -- Allows any text
+    Finished = false, -- Doesn't require Enter
+    Callback = function(Value)
+        userInputKey = Value -- Save input
+    end
+})
+
+-- Add Submit Button
+KeyTab:AddButton({
+    Title = "Submit Key",
+    Callback = function()
+        if userInputKey == Key then
             Window:Destroy() -- Close key UI
             print("Key Verified! Loading UI...")
             -- Load your main script UI here
