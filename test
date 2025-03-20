@@ -5161,56 +5161,32 @@ until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Posit
 
 end
 
-function Click()
-    if not _G.FastAttack then
-        local player = game.Players.LocalPlayer
-        local character = player.Character or player.CharacterAdded:Wait()
-        local combatModule = require(player.PlayerScripts.CombatFramework)
-        local combatFramework = debug.getupvalues(combatModule)[2]
-        local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
-        CamShake:Stop()
-
-        -- Find the nearest mob
-        local nearestMob = nil
-        local nearestDistance = math.huge
-
+function AutoClick()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local humanoid = character and character:FindFirstChild("Humanoid")
+    
+    if humanoid then
+        -- Get all mobs within the range of the hitbox size
+        local mobsInRange = {}
         for _, mob in pairs(workspace:GetChildren()) do
-            if mob:IsA("Model") and mob:FindFirstChild("Humanoid") then
-                local distance = (mob.PrimaryPart.Position - character.PrimaryPart.Position).magnitude
-                if distance < nearestDistance then
-                    nearestDistance = distance
-                    nearestMob = mob
-                end
+            if mob:FindFirstChild("Humanoid") and (mob.HumanoidRootPart.Position - character.HumanoidRootPart.Position).Magnitude <= hitboxSize then
+                table.insert(mobsInRange, mob)
             end
         end
-
-        -- If a mob is found and it's within a reasonable distance, attack
-        if nearestMob and nearestDistance <= 180 then  -- Adjust this distance as needed
-            -- Move closer to the mob if necessary
-            character.HumanoidRootPart.CFrame = nearestMob.PrimaryPart.CFrame * CFrame.new(0, 0, -5)  -- Move slightly closer
-
-            -- Ensure the player is not already attacking
-            if not combatFramework.activeController.attacking then
-                combatFramework.activeController.attacking = true
-                combatFramework.activeController.timeToNextAttack = 0
-                combatFramework.activeController.hitboxMagnitude = 180  -- Adjust this value if needed
-
-                -- Capture the controller and simulate the attack
-                game:GetService('VirtualUser '):CaptureController()
-                game:GetService('VirtualUser '):Button1Down(Vector2.new(1280, 672))
-
-                -- Wait for the attack animation to complete
-                wait(0.1)  -- Adjust this delay based on the fighting style's attack speed
-
-                -- Release the button
-                game:GetService('VirtualUser '):Button1Up(Vector2.new(1280, 672))
-
-                -- Reset the attacking state after a short delay
-                wait(0.1)  -- Adjust this delay if necessary
-                combatFramework.activeController.attacking = false
-            end
+        
+        -- Click and damage the mobs in range
+        for _, mob in pairs(mobsInRange) do
+            -- Damage logic here (you can replace with your specific damage function)
+            mob.Humanoid:TakeDamage(10)  -- Example damage value
         end
     end
+end
+
+-- Auto Click loop
+while true do
+    wait(damageCooldown)  -- Wait to avoid spamming clicks
+    AutoClick()  -- Perform the auto click function
 end
 
 function to(v233)
