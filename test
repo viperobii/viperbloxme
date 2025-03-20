@@ -622,7 +622,36 @@ end
 
 end);
 
-local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))() -- Load Fluent UI
+local Key = "ViperNewbie" -- Correct key
+
+local Window = Fluent:CreateWindow({
+    Title = "Viper Hub Key System",
+    SubTitle = "Enter Key to Access",
+    TabWidth = 160,
+    Size = UDim2.new(0, 500, 0, 300),
+    Acrylic = true,
+    Theme = "Dark"
+})
+
+local KeyTab = Window:AddTab({ Title = "Key System", Icon = "🔑" })
+local InputBox = KeyTab:AddInput({
+    Title = "Enter Key",
+    Placeholder = "Enter Key Here...",
+    Callback = function(userInput)
+        if userInput == Key then
+            Window:Destroy() -- Close key UI
+            -- Load your main script UI here
+            print("Key Verified! Loading UI...")
+        else
+            Fluent:Notify({
+                Title = "Incorrect Key",
+                Content = "Provide Correct Key in Discord",
+                Duration = 5
+            })
+        end
+    end
+})
 
 local v15 = v14:CreateWindow({
 
@@ -712,7 +741,7 @@ Title = "Tab ESP & Fruits"
 
 Raid = v15:AddTab({
 
-Title = "Tab Race"
+Title = "Tab Raids"
 
 }),
 
@@ -5516,7 +5545,7 @@ end
 
 v16.Home:AddButton({
 
-Title = "Discord",
+Title = "Discord Viper Hub",
 
 Description = "Join For Updates And Fix And Suggestions (Click To Copy)",
 
@@ -5766,9 +5795,9 @@ end);
 
 local v50 = v16.Main:AddToggle("ToggleMobAura", {
 
-Title = "Auto Farm Nearest Mob",
+Title = "Auto Farm Nearest Mob / Auto Raid",
 
-Description = "",
+Description = "Nearest Mob Or Raid Mobs",
 
 Default = false
 
