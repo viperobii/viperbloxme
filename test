@@ -1,3 +1,51 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))() -- Load Fluent UI
+local Key = "ViperNewbie" -- Correct key
+
+local Window = Fluent:CreateWindow({
+    Title = "Viper Hub Key System",
+    SubTitle = "Enter Key to Access",
+    TabWidth = 160,
+    Size = UDim2.new(0, 500, 0, 300),
+    Acrylic = true,
+    Theme = "Dark"
+})
+
+local KeyTab = Window:AddTab({ Title = "Key System", Icon = "🔑" })
+
+-- Store User Input
+local userInputKey = ""
+
+-- Add Input Box
+KeyTab:AddInput("KeyInput", {
+    Title = "Enter Key",
+    Description = "Input the correct key",
+    Placeholder = "Type key here...",
+    Numeric = false, -- Allows any text
+    Finished = false, -- Doesn't require Enter
+    Callback = function(Value)
+        userInputKey = Value -- Save input
+    end
+})
+
+-- Add Submit Button
+KeyTab:AddButton({
+    Title = "Submit Key",
+    Callback = function()
+        if userInputKey == Key then
+            Window:Destroy() -- Close key UI
+            print("Key Verified! Loading UI...")
+            -- Load your main script UI here
+        else
+            Fluent:Notify({
+                Title = "Incorrect Key",
+                Content = "Provide Correct Key in Discord",
+                Duration = 5
+            })
+        end
+    end
+})
+
+
 
 
 
@@ -622,52 +670,7 @@ end
 
 end);
 
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))() -- Load Fluent UI
-local Key = "ViperNewbie" -- Correct key
-
-local Window = Fluent:CreateWindow({
-    Title = "Viper Hub Key System",
-    SubTitle = "Enter Key to Access",
-    TabWidth = 160,
-    Size = UDim2.new(0, 500, 0, 300),
-    Acrylic = true,
-    Theme = "Dark"
-})
-
-local KeyTab = Window:AddTab({ Title = "Key System", Icon = "🔑" })
-
--- Store User Input
-local userInputKey = ""
-
--- Add Input Box
-KeyTab:AddInput("KeyInput", {
-    Title = "Enter Key",
-    Description = "Input the correct key",
-    Placeholder = "Type key here...",
-    Numeric = false, -- Allows any text
-    Finished = false, -- Doesn't require Enter
-    Callback = function(Value)
-        userInputKey = Value -- Save input
-    end
-})
-
--- Add Submit Button
-KeyTab:AddButton({
-    Title = "Submit Key",
-    Callback = function()
-        if userInputKey == Key then
-            Window:Destroy() -- Close key UI
-            print("Key Verified! Loading UI...")
-            -- Load your main script UI here
-        else
-            Fluent:Notify({
-                Title = "Incorrect Key",
-                Content = "Provide Correct Key in Discord",
-                Duration = 5
-            })
-        end
-    end
-})
+local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local v15 = v14:CreateWindow({
 
