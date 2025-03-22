@@ -1,3 +1,4 @@
+ -- VIPER IS GOD
 local player = game:GetService("Players").LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local screenGui = Instance.new("ScreenGui", playerGui)
@@ -27,8 +28,7 @@ textLabel.TextTransparency = 0
 wait(1)
 textLabel:TweenPosition(UDim2.new(0.5, -100, 0.5, -25), "Out", "Quint", 1, true)
 
-
-
+-- Load Fluent UI
 local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local v15 = v14:CreateWindow({
@@ -79,6 +79,26 @@ floatingButton.MouseButton1Click:Connect(toggleUI)
 
 
 
+
+local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local v15 = v14:CreateWindow({
+
+Title = "Viper Hub-BloxFruit [Premium]",
+
+SubTitle = "by Viper_",
+
+TabWidth = 160,
+
+Theme = "Dark",
+
+Acrylic = false,
+
+Size = UDim2.fromOffset(500, 320),
+
+MinimizeKey = Enum.KeyCode.End
+
+});
 
 local v16 = {
 
