@@ -18841,13 +18841,16 @@ local v178 = v16.Player:AddToggle("SuperDashToggle", {
     Default = false
 })
 
-DashToggle:OnChanged(function(state)
+v178:OnChanged(function(state)
     local player = game.Players.LocalPlayer
-    if player.Character then
-        if state then
-            player.Character:SetAttribute("DashLength", 300) -- Enable Super Dash
-        else
-            player.Character:SetAttribute("DashLength", 1)   -- Reset to default when turned off
+    if player and player.Character then
+        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if state then
+                player.Character:SetAttribute("DashLength", 300) -- Enable Super Dash
+            else
+                player.Character:SetAttribute("DashLength", 1)   -- Reset to default
+            end
         end
     end
 end)
