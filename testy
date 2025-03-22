@@ -18,35 +18,6 @@ MinimizeKey = Enum.KeyCode.End
 
 });
 
--- Create Floating UI Toggle Button
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FloatingUI"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
-
-local floatingButton = Instance.new("ImageButton")
-floatingButton.Name = "ToggleButton"
-floatingButton.Image = "rbxassetid://7229442422" -- Crying Cat Image
-floatingButton.Size = UDim2.new(0, 40, 0, 40)
-floatingButton.Position = UDim2.new(0, 20, 0, 100)
-floatingButton.BackgroundTransparency = 1
-floatingButton.Active = true
-floatingButton.Draggable = true
-floatingButton.Parent = screenGui
-
--- Ensure UI is initially visible
-Window.Root.Visible = true
-
--- Toggle UI visibility with floating button
-local uiVisible = true
-local function toggleUI()
-    uiVisible = not uiVisible
-    Window.Root.Visible = uiVisible
-end
-
-floatingButton.MouseButton1Click:Connect(toggleUI)
-
-
 local v16 = {
 
 Home = v15:AddTab({
