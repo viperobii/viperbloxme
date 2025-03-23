@@ -18908,49 +18908,52 @@ spawn(function()
 end)
 
 -- WalkSpeed Toggle
-local WalkSpeedEnabled = false  -- Default off
+local WalkSpeedEnabled = false
+local WalkSpeedValue = 200  -- Default WalkSpeed
 
+-- Function to apply WalkSpeed
+local function UpdateWalkSpeed()
+    local player = game.Players.LocalPlayer
+    if not player.Character then return end
+    
+    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = WalkSpeedEnabled and WalkSpeedValue or 16
+    end
+end
+
+-- Toggle for WalkSpeed
 v16.Player:AddToggle("ToggleWalkSpeed", {
     Title = "Enable WalkSpeed",
     Description = "Make You Faster",
-    Default = false,  -- Starts off
+    Default = false,
     Callback = function(state)
         WalkSpeedEnabled = state
-        local player = game.Players.LocalPlayer
-        local char = player.Character
-        if char then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = state and WalkSpeedValue or 16  -- Default WalkSpeed if off
-            end
-        end
+        UpdateWalkSpeed()
     end
 })
 
--- WalkSpeed Slider
-local WalkSpeedValue = 200  -- Default speed
-
+-- Slider for WalkSpeed
 v16.Player:AddSlider("SliderWalkSpeed", {
     Title = "WalkSpeed",
-    Description = "Adjust your WalkSpeed",
-    Default = 200,  -- Default value
-    Min = 0,        -- Minimum WalkSpeed
-    Max = 300,      -- Maximum WalkSpeed
-    Rounding = 1,   -- Rounds the number
+    Description = "Adjust Your Speed",
+    Default = 200,
+    Min = 0,
+    Max = 300,
+    Rounding = 1,
     Callback = function(value)
         WalkSpeedValue = value
         if WalkSpeedEnabled then
-            local player = game.Players.LocalPlayer
-            local char = player.Character
-            if char then
-                local humanoid = char:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid.WalkSpeed = value
-                end
-            end
+            UpdateWalkSpeed()
         end
     end
 })
+
+-- Make sure WalkSpeed stays after respawn
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)  -- Small delay to ensure character loads
+    UpdateWalkSpeed()
+end)
 
 
 v14:Notify({
