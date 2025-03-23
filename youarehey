@@ -16317,7 +16317,7 @@ v16.Race:AddButton({
 
 Title = "Teleport To TempleClock",
 
-Description = "",
+Description = "Only Works When You Are At Temple Of Time",
 
 Callback = function()
 
@@ -16374,7 +16374,7 @@ end
 
 local v144 = v16.Race:AddToggle("ToggleHumanandghoul", {
 
-Title = "Complete Trial [Human/Ghoul]",
+Title = "Auto Complete Trial [Human/Ghoul]",
 
 Description = "",
 
@@ -18907,6 +18907,50 @@ spawn(function()
     end
 end)
 
+-- WalkSpeed Toggle
+local WalkSpeedEnabled = false  -- Default off
+
+v16.Player:AddToggle("ToggleWalkSpeed", {
+    Title = "Enable WalkSpeed",
+    Description = "Make You Faster",
+    Default = false,  -- Starts off
+    Callback = function(state)
+        WalkSpeedEnabled = state
+        local player = game.Players.LocalPlayer
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = state and WalkSpeedValue or 16  -- Default WalkSpeed if off
+            end
+        end
+    end
+})
+
+-- WalkSpeed Slider
+local WalkSpeedValue = 200  -- Default speed
+
+v16.Player:AddSlider("SliderWalkSpeed", {
+    Title = "WalkSpeed",
+    Description = "Adjust your WalkSpeed",
+    Default = 200,  -- Default value
+    Min = 0,        -- Minimum WalkSpeed
+    Max = 300,      -- Maximum WalkSpeed
+    Rounding = 1,   -- Rounds the number
+    Callback = function(value)
+        WalkSpeedValue = value
+        if WalkSpeedEnabled then
+            local player = game.Players.LocalPlayer
+            local char = player.Character
+            if char then
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid.WalkSpeed = value
+                end
+            end
+        end
+    end
+})
 
 
 v14:Notify({
