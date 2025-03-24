@@ -17445,50 +17445,6 @@ v118();
 
 end
 
-local PotatoEnabled = false
-
-function TogglePotatoGraphics()
-    PotatoEnabled = not PotatoEnabled
-    
-    if PotatoEnabled then
-        PotatoGraphics()
-        print("Potato Graphics: ON")
-    else
-        -- Reset Graphics to Default
-        local lighting = game:GetService("Lighting")
-        lighting.GlobalShadows = true
-        lighting.Brightness = 1
-        lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
-        lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
-        lighting.FogEnd = 100000
-
-        -- Restore Materials
-        for _, v in pairs(workspace:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.Material = Enum.Material.Plastic -- Restore default material
-                v.Reflectance = 0
-            elseif v:IsA("ParticleEmitter") or v:IsA("Beam") or v:IsA("Trail") then
-                v.Enabled = true -- Re-enable visual effects
-            end
-        end
-
-        -- Restore Graphics Quality
-        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-        print("Potato Graphics: OFF")
-    end
-end
-
--- Add Fluent UI Toggle Button
-v16.Misc:AddToggle({
-    Title = "Potato Graphics",
-    Default = false,
-    Callback = function(Value)
-        TogglePotatoGraphics()
-    end
-})
-
-
-
 local v56 = v16.Misc:AddSection("Team");
 
 v16.Misc:AddButton({
@@ -18972,6 +18928,60 @@ spawn(function()
         end
     end
 end)
+
+local PotatoGraphicsToggle = v16.Misc:AddToggle("PotatoGraphicsToggle", {
+    Title = "Potato Graphics",
+    Default = false
+})
+
+PotatoGraphicsToggle:OnChanged(function(state)
+    _G.PotatoGraphics = state
+    ApplyPotatoGraphics()
+end)
+
+function ApplyPotatoGraphics()
+    local lighting = game:GetService("Lighting")
+
+    if _G.PotatoGraphics then
+        -- Extreme low graphics mode
+        lighting.GlobalShadows = false
+        lighting.Brightness = 2
+        lighting.Ambient = Color3.new(1, 1, 1)
+        lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+        lighting.FogEnd = 9e9
+
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.SmoothPlastic
+                v.Reflectance = 0
+            elseif v:IsA("ParticleEmitter") or v:IsA("Beam") or v:IsA("Trail") then
+                v.Enabled = false
+            end
+        end
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        print("Potato Graphics: ON")
+    else
+        -- Restore Default Graphics
+        lighting.GlobalShadows = true
+        lighting.Brightness = 1
+        lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
+        lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+        lighting.FogEnd = 100000
+
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.Plastic
+                v.Reflectance = 0
+            elseif v:IsA("ParticleEmitter") or v:IsA("Beam") or v:IsA("Trail") then
+                v.Enabled = true
+            end
+        end
+
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        print("Potato Graphics: OFF")
+    end
+end
 
 
 
