@@ -13081,6 +13081,28 @@ end
 
 end);
 
+-- Remove Damage Text
+local ToggleRemove = v16.Setting:AddToggle("ToggleRemove", {
+    Title = "Enable Remove Dame Text",
+    Default = false
+})
+
+ToggleRemove:OnChanged(function(Value)
+    _G.RemoveDameText = Value
+end)
+
+Options.ToggleRemove:SetValue(true)
+
+spawn(function()
+    while wait() do
+        if _G.RemoveDameText then
+            game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = false
+        else
+            game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = true
+        end
+    end
+end)
+
 local v92 = v16.Setting:AddToggle("ToggleWhite", {
 
 Title = "Enable White Screen",
@@ -17423,6 +17445,50 @@ v118();
 
 end
 
+local PotatoEnabled = false
+
+function TogglePotatoGraphics()
+    PotatoEnabled = not PotatoEnabled
+    
+    if PotatoEnabled then
+        PotatoGraphics()
+        print("Potato Graphics: ON")
+    else
+        -- Reset Graphics to Default
+        local lighting = game:GetService("Lighting")
+        lighting.GlobalShadows = true
+        lighting.Brightness = 1
+        lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
+        lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+        lighting.FogEnd = 100000
+
+        -- Restore Materials
+        for _, v in pairs(workspace:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.Material = Enum.Material.Plastic -- Restore default material
+                v.Reflectance = 0
+            elseif v:IsA("ParticleEmitter") or v:IsA("Beam") or v:IsA("Trail") then
+                v.Enabled = true -- Re-enable visual effects
+            end
+        end
+
+        -- Restore Graphics Quality
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+        print("Potato Graphics: OFF")
+    end
+end
+
+-- Add Fluent UI Toggle Button
+v16.Misc:AddToggle({
+    Title = "Potato Graphics",
+    Default = false,
+    Callback = function(Value)
+        TogglePotatoGraphics()
+    end
+})
+
+
+
 local v56 = v16.Misc:AddSection("Team");
 
 v16.Misc:AddButton({
@@ -18907,27 +18973,7 @@ spawn(function()
     end
 end)
 
--- Remove Damage Text
-local ToggleRemove = v16.Setting:AddToggle("ToggleRemove", {
-    Title = "Enable Remove Dame Text",
-    Default = true
-})
 
-ToggleRemove:OnChanged(function(Value)
-    _G.RemoveDameText = Value
-end)
-
-Options.ToggleRemove:SetValue(true)
-
-spawn(function()
-    while wait() do
-        if _G.RemoveDameText then
-            game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = false
-        else
-            game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = true
-        end
-    end
-end)
 
 
 v14:Notify({
