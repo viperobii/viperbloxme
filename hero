@@ -18907,6 +18907,28 @@ spawn(function()
     end
 end)
 
+-- Remove Damage Text
+local ToggleRemove = v16.Setting:AddToggle("ToggleRemove", {
+    Title = "Enable Remove Dame Text",
+    Default = true
+})
+
+ToggleRemove:OnChanged(function(Value)
+    _G.RemoveDameText = Value
+end)
+
+Options.ToggleRemove:SetValue(true)
+
+spawn(function()
+    while wait() do
+        if _G.RemoveDameText then
+            game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = false
+        else
+            game:GetService("ReplicatedStorage").Assets.GUI.DamageCounter.Enabled = true
+        end
+    end
+end)
+
 
 v14:Notify({
 
