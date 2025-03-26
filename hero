@@ -44,7 +44,7 @@ v23.Size = UDim2.new(0, 50, 0, 50);
 
 v23.Draggable = true;
 
-v23.Image = "rbxassetid://121232564397370";
+v23.Image = "http://www.roblox.com/asset/?id=5732855928";
 
 v24.Parent = v23;
 
