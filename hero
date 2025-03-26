@@ -64,29 +64,29 @@ Keyframes = shared.LoaderKeyFrames or {
 
 1,
 
-10
+25
 
 },
 
 [2] = {
 
-2,
+1,
 
-30
+50
 
 },
 
 [3] = {
 
-3,
+1,
 
-60
+75
 
 },
 
 [4] = {
 
-2,
+1,
 
 100
 
@@ -354,7 +354,7 @@ end
 
 function UpdatePercentage(v193, v194)
 
-TweenObject(v12, 0.9, {
+TweenObject(v12, 0.5, {
 
 Size = UDim2.new(v193 / 100, 0, 0, 24)
 
@@ -634,7 +634,7 @@ Theme = "Dark",
 
 Acrylic = false,
 
-Size = UDim2.fromOffset(500, 370),
+Size = UDim2.fromOffset(500, 360),
 
 MinimizeKey = Enum.KeyCode.End
 
