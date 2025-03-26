@@ -13111,6 +13111,51 @@ end
 
 end);
 
+local SpectatePlayer = v16.Player:AddToggle("ToggleSpectatePlayer", {
+
+Title = "Spectate Player",
+
+Description = "Spectate Selected Player",
+
+});
+
+_G.Spectating = false
+
+function SpectatePlayer()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+
+    -- Ensure a valid target player is selected
+    local targetPlayer = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+    if not targetPlayer or not targetPlayer.Character then 
+        StopSpectating() -- Stop if the player is invalid
+        return 
+    end
+
+    -- Set camera to target player
+    camera.CameraSubject = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = true
+
+    -- Stop spectating if the target dies or leaves
+    local connection
+    connection = targetPlayer.CharacterRemoving:Connect(function()
+        if _G.Spectating then
+            StopSpectating()
+            connection:Disconnect()
+        end
+    end)
+end
+
+function StopSpectating()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+    if localPlayer.Character then
+        camera.CameraSubject = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+    end
+    _G.Spectating = false
+end
+
+
 local v56 = v16.Player:AddSection("Setting Player");
 
 local v115 = v16.Player:AddToggle("ToggleNoClip", {
@@ -18312,7 +18357,7 @@ local DashNoCooldownToggle = v16.Misc:AddToggle("DashNoCooldownToggle", {
     Description = "Unlimted Dash"
 })
 
-_G.DashNoCd = true -- Set to false to disable
+_G.DashNoCd = false -- Set to false to disable
 
 function DodgeNoCoolDown()
     local player = game.Players.LocalPlayer
@@ -18335,11 +18380,19 @@ function DodgeNoCoolDown()
     end
 end
 
--- Run in a loop to keep it enabled
+-- Loop to ensure cooldown stays at 0
 spawn(function()
     while _G.DashNoCd do
         DodgeNoCoolDown()
-        wait(0.1)
+        wait(0.3) -- More frequent to ensure cooldown stays removed
+    end
+end)
+
+-- Reapply on respawn
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    if _G.DashNoCd then
+        wait(1) -- Small delay for Character to load
+        DodgeNoCoolDown()
     end
 end)
 
