@@ -1,18 +1,640 @@
+shared.LoaderTitle = "BloxFruit Viper Freemium Hub";
+
+shared.LoaderKeyFrames = {
+
+[1] = {
+
+1,
+
+10
+
+},
+
+[2] = {
+
+2,
+
+30
+
+},
+
+[3] = {
+
+3,
+
+60
+
+},
+
+[4] = {
+
+2,
+
+100
+
+}
+
+};
+
+local v2 = {
+
+LoaderData = {
+
+Name = shared.LoaderTitle or "A Loader",
+
+Colors = shared.LoaderColors or {
+
+Main = Color3.fromRGB(10, 10, 50),
+
+Topic = Color3.fromRGB(200, 200, 200),
+
+Title = Color3.fromRGB(255, 255, 255),
+
+LoaderBackground = Color3.fromRGB(40, 40, 40),
+
+LoaderSplash = Color3.fromRGB(252, 3, 3)
+
+}
+
+},
+
+Keyframes = shared.LoaderKeyFrames or {
+
+[1] = {
+
+1,
+
+10
+
+},
+
+[2] = {
+
+2,
+
+30
+
+},
+
+[3] = {
+
+3,
+
+60
+
+},
+
+[4] = {
+
+2,
+
+100
+
+}
+
+}
+
+};
+
+local v3 = {
+
+[1] = "",
+
+[2] = "",
+
+[3] = "",
+
+[4] = ""
+
+};
+
+function TweenObject(v178, v179, v180)
+
+game.TweenService:Create(v178, TweenInfo.new(v179, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), v180):Play();
+
+end
+
+function CreateObject(v181, v182)
+
+local v183 = Instance.new(v181);
+
+local v184;
+
+for v416, v417 in pairs(v182) do
+
+if (v416 ~= "Parent") then
+
+v183[v416] = v417;
+
+else
+
+v184 = v417;
+
+end
+
+end
+
+v183.Parent = v184;
+
+return v183;
+
+end
+
+local function v4(v186, v187)
+
+local v188 = Instance.new("UICorner");
+
+v188.CornerRadius = UDim.new(0, v186);
+
+v188.Parent = v187;
+
+end
+
+local v5 = CreateObject("ScreenGui", {
+
+Name = "Core",
+
+Parent = game.CoreGui
+
+});
+
+local v6 = CreateObject("Frame", {
+
+Name = "Main",
+
+Parent = v5,
+
+BackgroundColor3 = v2.LoaderData.Colors.Main,
+
+BorderSizePixel = 0,
+
+ClipsDescendants = true,
+
+Position = UDim2.new(0.5, 0, 0.5, 0),
+
+AnchorPoint = Vector2.new(0.5, 0.5),
+
+Size = UDim2.new(0, 0, 0, 0)
+
+});
+
+v4(12, v6);
+
+local v7 = CreateObject("ImageLabel", {
+
+    Name = "UserImage",
+
+    Parent = v6,
+
+    BackgroundTransparency = 1,
+
+    Image = "rbxassetid://7229442422", 
+
+    Position = UDim2.new(0, 15, 0, 10),
+
+    Size = UDim2.new(0, 50, 0, 50)
+
+});
+
+v4(25, v7);
+
+local v8 = CreateObject("TextLabel", {
+
+Name = "UserName",
+
+Parent = v6,
+
+BackgroundTransparency = 1,
+
+Text = "Viper Freemium Hub",
+
+Position = UDim2.new(0, 75, 0, 10),
+
+Size = UDim2.new(0, 200, 0, 50),
+
+Font = Enum.Font.GothamBold,
+
+TextColor3 = v2.LoaderData.Colors.Title,
+
+TextSize = 14,
+
+TextXAlignment = Enum.TextXAlignment.Left
+
+});
+
+local v9 = CreateObject("TextLabel", {
+
+Name = "Top",
+
+TextTransparency = 1,
+
+Parent = v6,
+
+BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+
+BackgroundTransparency = 1,
+
+Position = UDim2.new(0, 30, 0, 70),
+
+Size = UDim2.new(0, 301, 0, 20),
+
+Font = Enum.Font.Gotham,
+
+Text = "Loader",
+
+TextColor3 = v2.LoaderData.Colors.Topic,
+
+TextSize = 10,
+
+TextXAlignment = Enum.TextXAlignment.Left
+
+});
+
+local v10 = CreateObject("TextLabel", {
+
+Name = "Title",
+
+Parent = v6,
+
+TextTransparency = 1,
+
+BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+
+BackgroundTransparency = 1,
+
+Position = UDim2.new(0, 30, 0, 90),
+
+Size = UDim2.new(0, 301, 0, 46),
+
+Font = Enum.Font.Gotham,
+
+RichText = true,
+
+Text = "<b>" .. v2.LoaderData.Name .. "</b>",
+
+TextColor3 = v2.LoaderData.Colors.Title,
+
+TextSize = 14,
+
+TextXAlignment = Enum.TextXAlignment.Left
+
+});
+
+local v11 = CreateObject("Frame", {
+
+Name = "BG",
+
+Parent = v6,
+
+AnchorPoint = Vector2.new(0.5, 0),
+
+BackgroundTransparency = 1,
+
+BackgroundColor3 = v2.LoaderData.Colors.LoaderBackground,
+
+BorderSizePixel = 0,
+
+Position = UDim2.new(0.5, 0, 0, 70),
+
+Size = UDim2.new(0.8500000238418579, 0, 0, 24)
+
+});
+
+v4(8, v11);
+
+local v12 = CreateObject("Frame", {
+
+Name = "Progress",
+
+Parent = v11,
+
+BackgroundColor3 = v2.LoaderData.Colors.LoaderSplash,
+
+BackgroundTransparency = 1,
+
+BorderSizePixel = 0,
+
+Size = UDim2.new(0, 0, 0, 24)
+
+});
+
+v4(8, v12);
+
+local v13 = CreateObject("TextLabel", {
+
+Name = "StepLabel",
+
+Parent = v6,
+
+BackgroundTransparency = 1,
+
+Position = UDim2.new(0.5, 0, 1, - 25),
+
+Size = UDim2.new(1, - 20, 0, 20),
+
+Font = Enum.Font.Gotham,
+
+Text = "",
+
+TextColor3 = v2.LoaderData.Colors.Topic,
+
+TextSize = 14,
+
+TextXAlignment = Enum.TextXAlignment.Center,
+
+AnchorPoint = Vector2.new(0.5, 0.5)
+
+});
+
+function UpdateStepText(v191)
+
+v13.Text = v3[v191] or "" ;
+
+end
+
+function UpdatePercentage(v193, v194)
+
+TweenObject(v12, 0.3, {
+
+Size = UDim2.new(v193 / 100, 0, 0, 24)
+
+});
+
+UpdateStepText(v194);
+
+end
+
+TweenObject(v6, 0.25, {
+
+Size = UDim2.new(0, 346, 0, 121)
+
+});
+
+wait();
+
+TweenObject(v9, 0.5, {
+
+TextTransparency = 0
+
+});
+
+TweenObject(v10, 0.5, {
+
+TextTransparency = 0
+
+});
+
+TweenObject(v11, 0.5, {
+
+BackgroundTransparency = 0
+
+});
+
+TweenObject(v12, 0.5, {
+
+BackgroundTransparency = 0
+
+});
+
+for v195, v196 in pairs(v2.Keyframes) do
+
+wait(v196[1]);
+
+UpdatePercentage(v196[2], v195);
+
+end
+
+UpdatePercentage(100, 4);
+
+TweenObject(v9, 0.5, {
+
+TextTransparency = 1
+
+});
+
+TweenObject(v10, 0.5, {
+
+TextTransparency = 1
+
+});
+
+TweenObject(v11, 0.5, {
+
+BackgroundTransparency = 1
+
+});
+
+TweenObject(v12, 0.5, {
+
+BackgroundTransparency = 1
+
+});
+
+wait(0.5);
+
+TweenObject(v6, 0.25, {
+
+Size = UDim2.new(0, 0, 0, 0)
+
+});
+
+wait(0.25);
+
+v5:Destroy();
+
+spawn(function()
+
+while wait() do
+
+function print()
+
+end
+
+function warn()
+
+end
+
+function error()
+
+end
+
+debug.traceback = function()
+
+return "Traceback blocked";
+
+end;
+
+debug.info = function()
+
+return "Info blocked";
+
+end;
+
+local v420 = getrawmetatable(game);
+
+if (v420 and not v420.__metatable) then
+
+setreadonly(v420, false);
+
+local v658 = v420.__index;
+
+local v659 = v420.__newindex;
+
+v420.__index = function(v759, v760)
+
+if ((v760 == "debug") or (v760 == "getrawmetatable")) then
+
+error("Anti Skid: Tampering detected!");
+
+end
+
+return v658(v759, v760);
+
+end;
+
+v420.__newindex = function(v761, v762, v763)
+
+if ((v762 == "debug") or (v762 == "getrawmetatable")) then
+
+error("Anti Skid: Tampering detected!");
+
+end
+
+return v659(v761, v762, v763);
+
+end;
+
+setreadonly(v420, true);
+
+end
+
+local function v421()
+
+local v568 = {
+
+"_G",
+
+"debug",
+
+"getgenv",
+
+"getrawmetatable",
+
+"setfenv",
+
+"loadstring",
+
+"hookfunction"
+
+};
+
+for v662, v663 in ipairs(v568) do
+
+local v664, v665 = pcall(function()
+
+return _G[v663];
+
+end);
+
+if (v664 and v665) then
+
+error("Anti Skid: Environment tampering detected!");
+
+end
+
+end
+
+end
+
+local function v422()
+
+local v569 = {
+
+getrawmetatable,
+
+setreadonly,
+
+getgenv,
+
+debug.getinfo,
+
+debug.getregistry
+
+};
+
+for v666, v667 in ipairs(v569) do
+
+if v667 then
+
+error("Anti Skid: Hook tampering detected!");
+
+end
+
+end
+
+end
+
+local v423 = game:FindService("HttpService");
+
+if v423 then
+
+v423.RequestAsync = function()
+
+error("HTTP Requests Blocked");
+
+end;
+
+v423.GetAsync = function()
+
+error("HTTP Get Blocked");
+
+end;
+
+v423.PostAsync = function()
+
+error("HTTP Post Blocked");
+
+end;
+
+end
+
+function collectgarbage()
+
+error("GC Blocked");
+
+end
+
+os.time = function()
+
+error("OS Time Blocked");
+
+end;
+
+pcall(v421);
+
+pcall(v422);
+
+end
+
+end);
+
+
+
 local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local v15 = v14:CreateWindow({
 
-Title = "Viper Hub-BloxFruit [Premium]",
+Title = "Viper Hub-BloxFruit [Freemium]",
 
 SubTitle = "by Viper_",
 
 TabWidth = 160,
 
-Theme = "Darker",
+Theme = "Dark",
 
 Acrylic = false,
 
-Size = UDim2.fromOffset(500, 320),
+Size = UDim2.fromOffset(500, 380),
 
 MinimizeKey = Enum.KeyCode.End
 
@@ -22,91 +644,97 @@ local v16 = {
 
 Home = v15:AddTab({
 
-Title = "Information & Updates"
+Title = "Tab Updates"
 
 }),
 
 Main = v15:AddTab({
 
-Title = "Farms"
+Title = "Tab Farms"
 
 }),
 
 Sea = v15:AddTab({
 
-Title = "Sea Events & Island Events"
+Title = "Tab Sea Events"
 
 }),
 
 ITM = v15:AddTab({
 
-Title = "Buy Items"
+Title = "Tab Items"
 
 }),
 
 Setting = v15:AddTab({
 
-Title = "Settings"
+Title = "Tab Settings"
 
 }),
 
 Status = v15:AddTab({
 
-Title = "Webhook Server"
+Title = "Tab Webhook Server"
 
 }),
 
 Stats = v15:AddTab({
 
-Title = "Stats"
+Title = "Tab Auto Stats"
 
 }),
 
 Player = v15:AddTab({
 
-Title = "Combat Players"
+Title = "Tab Combat PVP"
 
 }),
 
 Teleport = v15:AddTab({
 
-Title = "Teleport Sea"
+Title = "Tab Teleport Sea"
 
 }),
 
 Visual = v15:AddTab({
 
-Title = "Fake Fun Level"
+Title = "Tab Fake Fun Level"
 
 }),
 
 Fruit = v15:AddTab({
 
-Title = "ESP & Fruits"
+Title = "Tab Fruits"
+
+}),
+
+ESP = v15:AddTab({
+
+Title = "Tab ESP"
 
 }),
 
 Raid = v15:AddTab({
 
-Title = "Raids"
+Title = "Tab Raids"
 
 }),
 
 Race = v15:AddTab({
 
-Title = "Race V4"
+Title = "Tab V4 Race"
 
 }),
 
 Shop = v15:AddTab({
 
-Title = "Shop"
+Title = "Tab Shop"
 
 }),
 
 Misc = v15:AddTab({
 
-Title = "Miscellaneous"
+Title = "Tab Misc"
 
 })
 
@@ -4851,8 +5479,6 @@ v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 2
 
 local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 
-Rotation = 360
-
 });
 
 v23.MouseButton1Down:Connect(function()
@@ -8693,7 +9319,11 @@ pcall(function()
 
 if (game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") or game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") or game:GetService("ReplicatedStorage"):FindFirstChild("Urban") or game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or game:GetService("Workspace").Enemies:FindFirstChild("Urban")) then
 
+v529:SetDesc("Elite Boss: ✅️ | Killed:  " .. game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
+
 else
+
+v529:SetDesc("Elite Boss: ❌️ | Killed: " .. game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
 
 end
 
@@ -9169,13 +9799,27 @@ Tween(CFrame.new(- 1610.00757, 11.5049858, 164.001587, 0.984807551, - 0.16772228
 
 end
 
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup");
+
 wait(0.5);
 
 EquipTool("Cup");
 
 wait(0.5);
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", game:GetService("Players").LocalPlayer.Character.Cup);
+
 wait(0);
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan");
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0) then
 
 if (game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader") or game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader")) then
 
@@ -9224,6 +9868,10 @@ end
 end
 
 end
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
 
 wait(0.5);
 
@@ -9274,6 +9922,8 @@ until (v1461.Humanoid.Health <= 0) or not _G.Auto_Saber
 bringmob = true;
 
 if (v1461.Humanoid.Health <= 0) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "PlaceRelic");
 
 end
 
@@ -9683,6 +10333,8 @@ while wait() do
 
 if _G.AutoYama then
 
+if (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress") >= 30) then
+
 repeat
 
 wait();
@@ -9973,6 +10625,8 @@ while wait(0.1) do
 
 if _G.Auto_MusketeerHat then
 
+if ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1800) and (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress").KilledBandits == false)) then
+
 if (string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Forest Pirate") and string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "50") and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true)) then
 
 if game:GetService("Workspace").Enemies:FindFirstChild("Forest Pirate") then
@@ -10037,6 +10691,8 @@ end
 
 end
 
+elseif ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1800) and (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress").KilledBoss == false)) then
+
 if (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible and string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Captain Elephant") and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true)) then
 
 if game:GetService("Workspace").Enemies:FindFirstChild("Captain Elephant") then
@@ -10091,9 +10747,13 @@ if ((CFrame.new(- 12443.8671875, 332.40396118164, - 7675.4892578125).Position - 
 
 wait(1.5);
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen");
+
 end
 
 end
+
+elseif ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1800) and (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen") == 2)) then
 
 Tween(CFrame.new(- 12512.138671875, 340.39279174805, - 9872.8203125));
 
@@ -10133,6 +10793,8 @@ pcall(function()
 
 if _G.Auto_ObservationV2 then
 
+if (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen") == 3) then
+
 _G.Auto_MusketeerHat = false;
 
 if (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Banana") and game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Apple") and game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Pineapple")) then
@@ -10146,6 +10808,8 @@ wait();
 until not _G.Auto_ObservationV2 or ((game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(- 12444.78515625, 332.40396118164, - 7673.1806640625)).Magnitude <= 10)
 
 wait(0.5);
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen");
 
 elseif (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Fruit Bowl") or game:GetService("Players").LocalPlayer.Character:FindFirstChild("Fruit Bowl")) then
 
@@ -10613,6 +11277,8 @@ if game:GetService("Workspace").NPCs:FindFirstChild("Ghost") then
 
 local v1798 = {
 
+[1] = "GuitarPuzzleProgress",
+
 [2] = "Ghost"
 
 };
@@ -10859,6 +11525,8 @@ Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
+
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Evil");
 
 elseif (GetMaterial("Alucard Fragment") == 1) then
@@ -10874,6 +11542,8 @@ Auto_Quest_Tushita_1 = false;
 Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Evil");
 
@@ -10891,6 +11561,8 @@ Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
+
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Evil");
 
 elseif (GetMaterial("Alucard Fragment") == 3) then
@@ -10906,6 +11578,8 @@ Auto_Quest_Tushita_1 = true;
 Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Good");
 
@@ -10923,6 +11597,8 @@ Auto_Quest_Tushita_2 = true;
 
 Auto_Quest_Tushita_3 = false;
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
+
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Good");
 
 elseif (GetMaterial("Alucard Fragment") == 5) then
@@ -10938,6 +11614,8 @@ Auto_Quest_Tushita_1 = false;
 Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = true;
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Good");
 
@@ -10997,7 +11675,11 @@ end
 
 elseif ((CFrame.new(- 12361.7060546875, 603.3547973632812, - 6550.5341796875).Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100) then
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
+
 wait(1);
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
 
 wait(1);
 
@@ -13057,7 +13739,7 @@ Title = "Enable NoClip",
 
 Description = "",
 
-Default = true
+Default = false
 
 });
 
@@ -13221,6 +13903,8 @@ until ((v1346.Position - game:GetService("Players").LocalPlayer.Character.Humano
 
 wait(1.1);
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("DressrosaQuestProgress", "Detective");
+
 wait(0.5);
 
 EquipTool("Key");
@@ -13335,11 +14019,15 @@ if ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1500) and World2
 
 _G.AutoLevel = false;
 
+if (game:GetService("ReplicatedStorage").Remotes['CommF_']:InvokeServer("ZQuestProgress", "General") == 0) then
+
 Tween(CFrame.new(- 1926.3221435547, 12.819851875305, 1738.3092041016));
 
 if ((CFrame.new(- 1926.3221435547, 12.819851875305, 1738.3092041016).Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10) then
 
 wait(1.5);
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ZQuestProgress", "Begin");
 
 end
 
@@ -14483,9 +15171,9 @@ end
 
 end);
 
-local v56 = v16.Fruit:AddSection("Esp Visuals");
+local v56 = v16.ESP:AddSection("Esp Visuals");
 
-local v130 = v16.Fruit:AddToggle("ToggleEspPlayer", {
+local v130 = v16.ESP:AddToggle("ToggleEspPlayer", {
 
 Title = "Esp Players",
 
@@ -14505,7 +15193,7 @@ end);
 
 v17.ToggleEspPlayer:SetValue(false);
 
-local v131 = v16.Fruit:AddToggle("ToggleEspFruit", {
+local v131 = v16.ESP:AddToggle("ToggleEspFruit", {
 
 Title = "Esp Fruits",
 
@@ -14531,7 +15219,7 @@ end);
 
 v17.ToggleEspFruit:SetValue(false);
 
-local v132 = v16.Fruit:AddToggle("ToggleEspIsland", {
+local v132 = v16.ESP:AddToggle("ToggleEspIsland", {
 
 Title = "Esp Island",
 
@@ -14557,7 +15245,7 @@ end);
 
 v17.ToggleEspIsland:SetValue(false);
 
-local v133 = v16.Fruit:AddToggle("ToggleEspFlower", {
+local v133 = v16.ESP:AddToggle("ToggleEspFlower", {
 
 Title = "Esp Flowers",
 
@@ -14615,9 +15303,9 @@ end
 
 end);
 
-local v134 = v16.Fruit:AddToggle("ToggleEspRealFruit", {
+local v134 = v16.ESP:AddToggle("ToggleEspRealFruit", {
 
-Title = "Esp Real Fruits",
+Title = "Esp Fruit Berries",
 
 Description = "",
 
@@ -14813,7 +15501,7 @@ end
 
 end
 
-local v135 = v16.Fruit:AddToggle("ToggleIslandMirageEsp", {
+local v135 = v16.ESP:AddToggle("ToggleIslandMirageEsp", {
 
 Title = "Esp Mirage Island",
 
@@ -15958,6 +16646,21 @@ end);
 
 end);
 
+v16.Race:AddButton({
+
+Title = "Stop Flying Cyborg",
+
+Description = "Use This To Stop Flying Auto Trial Only Cyborg Race (Cyborg Trial Will Tween Fly Outside So Stop it Before It Reach Long, Stop It When You Already Fly At Outside But Not Too Far In Trial Of Machine)",
+
+Callback = function()
+
+CancelTween();
+
+end
+
+});
+
+
 local v146 = v16.Race:AddToggle("ToggleKillTrial", {
 
 Title = "Auto Kill Players In Trial",
@@ -16933,7 +17636,7 @@ Title = "Rejoin The Server",
 
 Description = "",
 
-Default = true
+Default = false
 
 });
 
@@ -18232,4 +18935,4 @@ Content = "Viper Hub Loaded",
 
 Duration = 5
 
-});'
+});
