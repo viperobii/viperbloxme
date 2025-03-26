@@ -13113,22 +13113,38 @@ end
 
 end);
 
-local SpectatePlayer = v16.Player:AddToggle("ToggleSpectatePlayer", {
+local ToggleQuanSat = v16.Player:AddToggle("ToggleQuanSat", {
 
-Title = "Spectate Player",
+    Title = "Spectate Player",
 
-Description = "Spectate Selected Player",
+    Description = "",
+
+    Default = false
 
 });
+
+ToggleQuanSat:OnChanged(function(Value)
+
+    _G.Spectating = Value;
+
+    if _G.Spectating then
+        SpectatePlayer();
+    else
+        StopSpectating();
+    end
+
+end);
 
 _G.Spectating = false
 
 function SpectatePlayer()
+
     local localPlayer = game:GetService("Players").LocalPlayer
     local camera = game:GetService("Workspace").Camera
 
     -- Ensure a valid target player is selected
     local targetPlayer = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+    
     if not targetPlayer or not targetPlayer.Character then 
         StopSpectating() -- Stop if the player is invalid
         return 
@@ -13146,15 +13162,20 @@ function SpectatePlayer()
             connection:Disconnect()
         end
     end)
+
 end
 
 function StopSpectating()
+
     local localPlayer = game:GetService("Players").LocalPlayer
     local camera = game:GetService("Workspace").Camera
+
     if localPlayer.Character then
         camera.CameraSubject = localPlayer.Character:FindFirstChildOfClass("Humanoid")
     end
+
     _G.Spectating = false
+
 end
 
 
