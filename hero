@@ -18364,7 +18364,7 @@ _G.SelectPly = nil -- No default player
 local ToggleSelect = v16.Hunt:AddDropdown("SelectedPly", {
     Title = "Select Player",
     Description = "Choose a player to spectate",
-    Values = {}, -- Will be updated dynamically
+    Values = v112, 
     Multi = false,
     Default = nil
 })
