@@ -4931,17 +4931,7 @@ end
 
 });
 
-local ToggleQuanSat = v16.Home:AddToggle("ToggleQuanSat", {Title = "Spectate Player",Description = "", Default = false })
-ToggleQuanSat:OnChanged(function(Value)
-    SpectatePlys = Value
-    local plr1 = game:GetService("Players").LocalPlayer.Character.Humanoid
-    local plr2 = game:GetService("Players"):FindFirstChild(_G.SelectPly)
-    repeat wait(.1)
-        game:GetService("Workspace").Camera.CameraSubject = game:GetService("Players"):FindFirstChild(_G.SelectPly).Character.Humanoid
-    until SpectatePlys == false 
-    game:GetService("Workspace").Camera.CameraSubject = game:GetService("Players").LocalPlayer.Character.Humanoid
-end)
-Options.ToggleQuanSat:SetValue(false)
+
 
 
 _G.FastAttackStrix_Mode = "Super Fast Attack";
@@ -18318,6 +18308,43 @@ spawn(function()
             storedEnergy = player.Character.Energy.Value
             InfiniteStamina()
         end
+    end
+end)
+
+-- Inf dash 
+local InfiniteDashToggle = v16.Player:AddToggle("InfiniteStaminaToggle", {
+    Title = "Dash No Cd",
+    Default = false
+})
+
+_G.DashNoCd = false -- Set to false to disable
+
+function DodgeNoCoolDown()
+    local player = game.Players.LocalPlayer
+    if not player or not player.Character then return end
+
+    local dodgeScript = player.Character:FindFirstChild("Dodge")
+    if not dodgeScript then return end
+
+    for _, v in next, getgc(true) do
+        if type(v) == "function" and islclosure(v) then
+            local env = getfenv(v)
+            if env and env.script == dodgeScript then
+                for index, value in next, getupvalues(v) do
+                    if type(value) == "number" and value == 0.4 then
+                        setupvalue(v, index, 0)
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Run in a loop to keep it enabled
+spawn(function()
+    while _G.DashNoCd do
+        DodgeNoCoolDown()
+        wait(0.1)
     end
 end)
 
