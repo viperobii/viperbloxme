@@ -180,6 +180,12 @@ Title = "Tab Bounty Hunt"
 
 }),
 
+Hunt = v15:AddTab({
+
+Title = "Tab Player Settings"
+
+}),
+
 Teleport = v15:AddTab({
 
 Title = "Tab Teleport Sea"
@@ -18350,6 +18356,100 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
         DodgeNoCoolDown()
     end
 end)
+
+_G.Spectating = false
+_G.SelectPly = nil -- No default player
+
+-- Create Dropdown
+local ToggleSelect = v16.Hunt:AddDropdown("SelectedPly", {
+    Title = "Select Player",
+    Description = "Choose a player to spectate",
+    Values = {}, -- Will be updated dynamically
+    Multi = false,
+    Default = nil
+})
+
+-- Create Toggle
+local ToggleSpectate = v16.Hunt:AddToggle("ToggleSpectate", {
+    Title = "Spectate Player",
+    Description = "Enable or disable spectating",
+    Default = false
+})
+
+-- Update the dropdown when players join/leave
+function UpdatePlayerList()
+    local players = {}
+    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
+        table.insert(players, v.Name)
+    end
+    v113:SetValues(players)
+end
+
+-- Call function to populate dropdown initially
+UpdatePlayerList()
+
+-- Update the player list dynamically
+game:GetService("Players").PlayerAdded:Connect(UpdatePlayerList)
+game:GetService("Players").PlayerRemoving:Connect(UpdatePlayerList)
+
+-- Detect when a player is selected in dropdown
+v113:OnChanged(function(selectedPlayer)
+    _G.SelectPly = selectedPlayer
+end)
+
+-- Spectate Function
+function SpectatePlayer()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+
+    -- Ensure a valid target player is selected
+    if not _G.SelectPly or _G.SelectPly == "" then
+        warn("No player selected!")
+        StopSpectating()
+        return
+    end
+
+    local targetPlayer = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+    if not targetPlayer or not targetPlayer.Character then 
+        warn("Invalid player selected or player not in-game!")
+        StopSpectating()
+        return
+    end
+
+    -- Set camera to target player
+    camera.CameraSubject = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = true
+
+    -- Stop spectating if the target dies or leaves
+    local connection
+    connection = targetPlayer.CharacterRemoving:Connect(function()
+        if _G.Spectating then
+            StopSpectating()
+            connection:Disconnect()
+        end
+    end)
+
+    print("Now spectating:", _G.SelectPly)
+end
+
+-- Stop Spectating Function
+function StopSpectating()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+    camera.CameraSubject = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = false
+    print("Stopped spectating.")
+end
+
+-- Toggle Spectate
+ToggleSpectate:OnChanged(function(state)
+    if state then
+        SpectatePlayer()
+    else
+        StopSpectating()
+    end
+end)
+
 
 
 
