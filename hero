@@ -13019,15 +13019,15 @@ end
 
 local v113 = v16.Player:AddDropdown("SelectedPly", {
 
-    Title = "Select Players",
+Title = "Select Players",
 
-    Description = "",
+Description = "",
 
-    Values = v112,
+Values = v112,
 
-    Multi = false,
+Multi = false,
 
-    Default = 1
+Default = 1
 
 });
 
@@ -13035,9 +13035,7 @@ v113:SetValue(_G.SelectPly);
 
 v113:OnChanged(function(v310)
 
-    _G.SelectPly = v310;
-
-    SpectatePlayer(); -- Automatically spectate the selected player
+_G.SelectPly = v310;
 
 end);
 
