@@ -354,7 +354,7 @@ end
 
 function UpdatePercentage(v193, v194)
 
-TweenObject(v12, 0.3, {
+TweenObject(v12, 0.9, {
 
 Size = UDim2.new(v193 / 100, 0, 0, 24)
 
@@ -634,7 +634,7 @@ Theme = "Dark",
 
 Acrylic = false,
 
-Size = UDim2.fromOffset(500, 380),
+Size = UDim2.fromOffset(500, 370),
 
 MinimizeKey = Enum.KeyCode.End
 
