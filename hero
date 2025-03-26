@@ -13065,6 +13065,14 @@ end
 
 });
 
+-- Create Toggle
+local ToggleSpectate = v16.Player:AddToggle("ToggleSpectate", {
+    Title = "Spectate Player",
+    Description = "Enable or disable spectating",
+    Default = false
+})
+
+
 local v114 = v16.Player:AddToggle("ToggleTeleport", {
 
 Title = "Auto Kill Player",
@@ -18360,42 +18368,7 @@ end)
 _G.Spectating = false
 _G.SelectPly = nil -- No default player
 
--- Create Dropdown
-local ToggleSelect = v16.Hunt:AddDropdown("SelectedPly", {
-    Title = "Select Player",
-    Description = "Choose a player to spectate",
-    Values = v112, 
-    Multi = false,
-    Default = nil
-})
 
--- Create Toggle
-local ToggleSpectate = v16.Hunt:AddToggle("ToggleSpectate", {
-    Title = "Spectate Player",
-    Description = "Enable or disable spectating",
-    Default = false
-})
-
--- Update the dropdown when players join/leave
-function UpdatePlayerList()
-    local players = {}
-    for _, v in pairs(game:GetService("Players"):GetPlayers()) do
-        table.insert(players, v.Name)
-    end
-    v113:SetValues(players)
-end
-
--- Call function to populate dropdown initially
-UpdatePlayerList()
-
--- Update the player list dynamically
-game:GetService("Players").PlayerAdded:Connect(UpdatePlayerList)
-game:GetService("Players").PlayerRemoving:Connect(UpdatePlayerList)
-
--- Detect when a player is selected in dropdown
-v113:OnChanged(function(selectedPlayer)
-    _G.SelectPly = selectedPlayer
-end)
 
 -- Spectate Function
 function SpectatePlayer()
