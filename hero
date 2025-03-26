@@ -1,7 +1,3 @@
-shared.LoaderTitle = "BloxFruit Viper Freemium Hub";
-
-shared.LoaderKeyFrames = {
-
 [1] = {
 
 1,
@@ -38,27 +34,15 @@ shared.LoaderKeyFrames = {
 
 local v2 = {
 
-LoaderData = {
-
-Name = shared.LoaderTitle or "A Loader",
-
-Colors = shared.LoaderColors or {
-
 Main = Color3.fromRGB(10, 10, 50),
 
 Topic = Color3.fromRGB(200, 200, 200),
 
 Title = Color3.fromRGB(255, 255, 255),
 
-LoaderBackground = Color3.fromRGB(40, 40, 40),
-
-LoaderSplash = Color3.fromRGB(252, 3, 3)
-
 }
 
 },
-
-Keyframes = shared.LoaderKeyFrames or {
 
 [1] = {
 
@@ -164,8 +148,6 @@ Name = "Main",
 
 Parent = v5,
 
-BackgroundColor3 = v2.LoaderData.Colors.Main,
-
 BorderSizePixel = 0,
 
 ClipsDescendants = true,
@@ -206,15 +188,13 @@ Parent = v6,
 
 BackgroundTransparency = 1,
 
-Text = "Viper Freemium Hub",
+Text = "Viper Premium Hub",
 
 Position = UDim2.new(0, 75, 0, 10),
 
 Size = UDim2.new(0, 200, 0, 50),
 
 Font = Enum.Font.GothamBold,
-
-TextColor3 = v2.LoaderData.Colors.Title,
 
 TextSize = 14,
 
@@ -239,10 +219,6 @@ Position = UDim2.new(0, 30, 0, 70),
 Size = UDim2.new(0, 301, 0, 20),
 
 Font = Enum.Font.Gotham,
-
-Text = "Loader",
-
-TextColor3 = v2.LoaderData.Colors.Topic,
 
 TextSize = 10,
 
@@ -270,10 +246,6 @@ Font = Enum.Font.Gotham,
 
 RichText = true,
 
-Text = "<b>" .. v2.LoaderData.Name .. "</b>",
-
-TextColor3 = v2.LoaderData.Colors.Title,
-
 TextSize = 14,
 
 TextXAlignment = Enum.TextXAlignment.Left
@@ -290,8 +262,6 @@ AnchorPoint = Vector2.new(0.5, 0),
 
 BackgroundTransparency = 1,
 
-BackgroundColor3 = v2.LoaderData.Colors.LoaderBackground,
-
 BorderSizePixel = 0,
 
 Position = UDim2.new(0.5, 0, 0, 70),
@@ -304,11 +274,7 @@ v4(8, v11);
 
 local v12 = CreateObject("Frame", {
 
-Name = "Progress",
-
 Parent = v11,
-
-BackgroundColor3 = v2.LoaderData.Colors.LoaderSplash,
 
 BackgroundTransparency = 1,
 
@@ -335,8 +301,6 @@ Size = UDim2.new(1, - 20, 0, 20),
 Font = Enum.Font.Gotham,
 
 Text = "",
-
-TextColor3 = v2.LoaderData.Colors.Topic,
 
 TextSize = 14,
 
@@ -624,17 +588,17 @@ local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/rel
 
 local v15 = v14:CreateWindow({
 
-Title = "Viper Hub-BloxFruit [Freemium]",
+Title = "Viper Hub-BloxFruit [Premium]",
 
 SubTitle = "by Viper_",
 
 TabWidth = 160,
 
-Theme = "Dark",
+Theme = "Darker",
 
 Acrylic = false,
 
-Size = UDim2.fromOffset(500, 360),
+Size = UDim2.fromOffset(500, 320),
 
 MinimizeKey = Enum.KeyCode.End
 
@@ -644,97 +608,91 @@ local v16 = {
 
 Home = v15:AddTab({
 
-Title = "Tab Updates"
+Title = "Information & Updates"
 
 }),
 
 Main = v15:AddTab({
 
-Title = "Tab Farms"
+Title = "Farms"
 
 }),
 
 Sea = v15:AddTab({
 
-Title = "Tab Sea Events"
+Title = "Sea Events & Island Events"
 
 }),
 
 ITM = v15:AddTab({
 
-Title = "Tab Items"
+Title = "Buy Items"
 
 }),
 
 Setting = v15:AddTab({
 
-Title = "Tab Settings"
+Title = "Settings"
 
 }),
 
 Status = v15:AddTab({
 
-Title = "Tab Webhook Server"
+Title = "Webhook Server"
 
 }),
 
 Stats = v15:AddTab({
 
-Title = "Tab Auto Stats"
+Title = "Stats"
 
 }),
 
 Player = v15:AddTab({
 
-Title = "Tab Combat PVP"
+Title = "Combat Players"
 
 }),
 
 Teleport = v15:AddTab({
 
-Title = "Tab Teleport Sea"
+Title = "Teleport Sea"
 
 }),
 
 Visual = v15:AddTab({
 
-Title = "Tab Fake Fun Level"
+Title = "Fake Fun Level"
 
 }),
 
 Fruit = v15:AddTab({
 
-Title = "Tab Fruits"
-
-}),
-
-ESP = v15:AddTab({
-
-Title = "Tab ESP"
+Title = "ESP & Fruits"
 
 }),
 
 Raid = v15:AddTab({
 
-Title = "Tab Raids"
+Title = "Raids"
 
 }),
 
 Race = v15:AddTab({
 
-Title = "Tab V4 Race"
+Title = "Race V4"
 
 }),
 
 Shop = v15:AddTab({
 
-Title = "Tab Shop"
+Title = "Shop"
 
 }),
 
 Misc = v15:AddTab({
 
-Title = "Tab Misc"
+Title = "Miscellaneous"
 
 })
 
@@ -5479,6 +5437,8 @@ v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 2
 
 local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 
+Rotation = 360
+
 });
 
 v23.MouseButton1Down:Connect(function()
@@ -9319,11 +9279,7 @@ pcall(function()
 
 if (game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") or game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") or game:GetService("ReplicatedStorage"):FindFirstChild("Urban") or game:GetService("Workspace").Enemies:FindFirstChild("Diablo") or game:GetService("Workspace").Enemies:FindFirstChild("Deandre") or game:GetService("Workspace").Enemies:FindFirstChild("Urban")) then
 
-v529:SetDesc("Elite Boss: ✅️ | Killed:  " .. game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
-
 else
-
-v529:SetDesc("Elite Boss: ❌️ | Killed: " .. game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress"));
 
 end
 
@@ -9799,27 +9755,13 @@ Tween(CFrame.new(- 1610.00757, 11.5049858, 164.001587, 0.984807551, - 0.16772228
 
 end
 
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup");
-
 wait(0.5);
 
 EquipTool("Cup");
 
 wait(0.5);
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", game:GetService("Players").LocalPlayer.Character.Cup);
-
 wait(0);
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan");
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0) then
 
 if (game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader") or game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader")) then
 
@@ -9868,10 +9810,6 @@ end
 end
 
 end
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
 
 wait(0.5);
 
@@ -9922,8 +9860,6 @@ until (v1461.Humanoid.Health <= 0) or not _G.Auto_Saber
 bringmob = true;
 
 if (v1461.Humanoid.Health <= 0) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "PlaceRelic");
 
 end
 
@@ -10333,8 +10269,6 @@ while wait() do
 
 if _G.AutoYama then
 
-if (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress") >= 30) then
-
 repeat
 
 wait();
@@ -10625,8 +10559,6 @@ while wait(0.1) do
 
 if _G.Auto_MusketeerHat then
 
-if ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1800) and (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress").KilledBandits == false)) then
-
 if (string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Forest Pirate") and string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "50") and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true)) then
 
 if game:GetService("Workspace").Enemies:FindFirstChild("Forest Pirate") then
@@ -10691,8 +10623,6 @@ end
 
 end
 
-elseif ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1800) and (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress").KilledBoss == false)) then
-
 if (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible and string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Captain Elephant") and (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true)) then
 
 if game:GetService("Workspace").Enemies:FindFirstChild("Captain Elephant") then
@@ -10747,13 +10677,9 @@ if ((CFrame.new(- 12443.8671875, 332.40396118164, - 7675.4892578125).Position - 
 
 wait(1.5);
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen");
-
 end
 
 end
-
-elseif ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1800) and (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen") == 2)) then
 
 Tween(CFrame.new(- 12512.138671875, 340.39279174805, - 9872.8203125));
 
@@ -10793,8 +10719,6 @@ pcall(function()
 
 if _G.Auto_ObservationV2 then
 
-if (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen") == 3) then
-
 _G.Auto_MusketeerHat = false;
 
 if (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Banana") and game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Apple") and game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Pineapple")) then
@@ -10808,8 +10732,6 @@ wait();
 until not _G.Auto_ObservationV2 or ((game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(- 12444.78515625, 332.40396118164, - 7673.1806640625)).Magnitude <= 10)
 
 wait(0.5);
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CitizenQuestProgress", "Citizen");
 
 elseif (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Fruit Bowl") or game:GetService("Players").LocalPlayer.Character:FindFirstChild("Fruit Bowl")) then
 
@@ -11277,8 +11199,6 @@ if game:GetService("Workspace").NPCs:FindFirstChild("Ghost") then
 
 local v1798 = {
 
-[1] = "GuitarPuzzleProgress",
-
 [2] = "Ghost"
 
 };
@@ -11525,8 +11445,6 @@ Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
-
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Evil");
 
 elseif (GetMaterial("Alucard Fragment") == 1) then
@@ -11542,8 +11460,6 @@ Auto_Quest_Tushita_1 = false;
 Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Evil");
 
@@ -11561,8 +11477,6 @@ Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
-
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Evil");
 
 elseif (GetMaterial("Alucard Fragment") == 3) then
@@ -11578,8 +11492,6 @@ Auto_Quest_Tushita_1 = true;
 Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = false;
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Good");
 
@@ -11597,8 +11509,6 @@ Auto_Quest_Tushita_2 = true;
 
 Auto_Quest_Tushita_3 = false;
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
-
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Good");
 
 elseif (GetMaterial("Alucard Fragment") == 5) then
@@ -11614,8 +11524,6 @@ Auto_Quest_Tushita_1 = false;
 Auto_Quest_Tushita_2 = false;
 
 Auto_Quest_Tushita_3 = true;
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
 
 game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "StartTrial", "Good");
 
@@ -11675,11 +11583,7 @@ end
 
 elseif ((CFrame.new(- 12361.7060546875, 603.3547973632812, - 6550.5341796875).Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100) then
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Good");
-
 wait(1);
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("CDKQuest", "Progress", "Evil");
 
 wait(1);
 
@@ -13739,7 +13643,7 @@ Title = "Enable NoClip",
 
 Description = "",
 
-Default = false
+Default = true
 
 });
 
@@ -13903,8 +13807,6 @@ until ((v1346.Position - game:GetService("Players").LocalPlayer.Character.Humano
 
 wait(1.1);
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("DressrosaQuestProgress", "Detective");
-
 wait(0.5);
 
 EquipTool("Key");
@@ -14019,15 +13921,11 @@ if ((game:GetService("Players").LocalPlayer.Data.Level.Value >= 1500) and World2
 
 _G.AutoLevel = false;
 
-if (game:GetService("ReplicatedStorage").Remotes['CommF_']:InvokeServer("ZQuestProgress", "General") == 0) then
-
 Tween(CFrame.new(- 1926.3221435547, 12.819851875305, 1738.3092041016));
 
 if ((CFrame.new(- 1926.3221435547, 12.819851875305, 1738.3092041016).Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10) then
 
 wait(1.5);
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ZQuestProgress", "Begin");
 
 end
 
@@ -15171,9 +15069,9 @@ end
 
 end);
 
-local v56 = v16.ESP:AddSection("Esp Visuals");
+local v56 = v16.Fruit:AddSection("Esp Visuals");
 
-local v130 = v16.ESP:AddToggle("ToggleEspPlayer", {
+local v130 = v16.Fruit:AddToggle("ToggleEspPlayer", {
 
 Title = "Esp Players",
 
@@ -15193,7 +15091,7 @@ end);
 
 v17.ToggleEspPlayer:SetValue(false);
 
-local v131 = v16.ESP:AddToggle("ToggleEspFruit", {
+local v131 = v16.Fruit:AddToggle("ToggleEspFruit", {
 
 Title = "Esp Fruits",
 
@@ -15219,7 +15117,7 @@ end);
 
 v17.ToggleEspFruit:SetValue(false);
 
-local v132 = v16.ESP:AddToggle("ToggleEspIsland", {
+local v132 = v16.Fruit:AddToggle("ToggleEspIsland", {
 
 Title = "Esp Island",
 
@@ -15245,7 +15143,7 @@ end);
 
 v17.ToggleEspIsland:SetValue(false);
 
-local v133 = v16.ESP:AddToggle("ToggleEspFlower", {
+local v133 = v16.Fruit:AddToggle("ToggleEspFlower", {
 
 Title = "Esp Flowers",
 
@@ -15303,9 +15201,9 @@ end
 
 end);
 
-local v134 = v16.ESP:AddToggle("ToggleEspRealFruit", {
+local v134 = v16.Fruit:AddToggle("ToggleEspRealFruit", {
 
-Title = "Esp Fruit Berries",
+Title = "Esp Real Fruits",
 
 Description = "",
 
@@ -15501,7 +15399,7 @@ end
 
 end
 
-local v135 = v16.ESP:AddToggle("ToggleIslandMirageEsp", {
+local v135 = v16.Fruit:AddToggle("ToggleIslandMirageEsp", {
 
 Title = "Esp Mirage Island",
 
@@ -16646,21 +16544,6 @@ end);
 
 end);
 
-v16.Race:AddButton({
-
-Title = "Stop Flying Cyborg",
-
-Description = "Use This To Stop Flying Auto Trial Only Cyborg Race (Cyborg Trial Will Tween Fly Outside So Stop it Before It Reach Long, Stop It When You Already Fly At Outside But Not Too Far In Trial Of Machine)",
-
-Callback = function()
-
-CancelTween();
-
-end
-
-});
-
-
 local v146 = v16.Race:AddToggle("ToggleKillTrial", {
 
 Title = "Auto Kill Players In Trial",
@@ -17636,7 +17519,7 @@ Title = "Rejoin The Server",
 
 Description = "",
 
-Default = false
+Default = true
 
 });
 
