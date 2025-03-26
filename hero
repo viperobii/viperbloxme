@@ -624,7 +624,7 @@ local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/rel
 
 local v15 = v14:CreateWindow({
 
-Title = "Viper Hub-BloxFruit [Premium]",
+Title = "Viper Hub-BloxFruit [Freemium]",
 
 SubTitle = "by Viper_",
 
@@ -13739,7 +13739,7 @@ Title = "Enable NoClip",
 
 Description = "",
 
-Default = true
+Default = false
 
 });
 
@@ -16646,6 +16646,21 @@ end);
 
 end);
 
+v16.Race:AddButton({
+
+Title = "Stop Flying Cyborg",
+
+Description = "Use This To Stop Flying Auto Trial Only Cyborg Race (Cyborg Trial Will Tween Fly Outside So Stop it Before It Reach Long, Stop It When You Already Fly At Outside But Not Too Far In Trial Of Machine)",
+
+Callback = function()
+
+CancelTween();
+
+end
+
+});
+
+
 local v146 = v16.Race:AddToggle("ToggleKillTrial", {
 
 Title = "Auto Kill Players In Trial",
@@ -17621,7 +17636,7 @@ Title = "Rejoin The Server",
 
 Description = "",
 
-Default = true
+Default = false
 
 });
 
