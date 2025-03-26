@@ -28,7 +28,7 @@ local v25 = Instance.new("ParticleEmitter");
 
 local v26 = game:GetService("TweenService");
 
-v22.Parent = game.PlayerGui;
+v22.Parent = game.CoreGui;
 
 v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
 
