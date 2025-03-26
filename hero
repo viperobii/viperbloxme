@@ -354,7 +354,7 @@ end
 
 function UpdatePercentage(v193, v194)
 
-TweenObject(v12, 0.5, {
+TweenObject(v12, 0.3, {
 
 Size = UDim2.new(v193 / 100, 0, 0, 24)
 
@@ -406,7 +406,7 @@ end
 
 UpdatePercentage(100, 4);
 
-TweenObject(v9, 0.5, {
+TweenObject(v9, 0.3, {
 
 TextTransparency = 1
 
@@ -686,7 +686,7 @@ Title = "Tab Auto Stats"
 
 Player = v15:AddTab({
 
-Title = "Tab Combat PVP"
+Title = "Tab Bounty Hunt"
 
 }),
 
