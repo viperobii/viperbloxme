@@ -18266,7 +18266,7 @@ end
 
 end);
 
-local v178 = v16.Player:AddToggle("SuperDashToggle", {
+local v178 = v16.Hunt:AddToggle("SuperDashToggle", {
     Title = "Super Dash", 
     Description = "Make Your Dash Longer Lol",
     Default = false
@@ -18287,7 +18287,7 @@ v178:OnChanged(function(state)
 end)
 
 -- Inf Stamina
-local InfiniteStaminaToggle = v16.Player:AddToggle("InfiniteStaminaToggle", {
+local InfiniteStaminaToggle = v16.Hunt:AddToggle("InfiniteStaminaToggle", {
     Title = "Infinite Stamina",
     Default = false
 })
@@ -18321,7 +18321,7 @@ spawn(function()
 end)
 
 -- Dash No CD
-local DashNoCooldownToggle = v16.Misc:AddToggle("DashNoCooldownToggle", {
+local DashNoCooldownToggle = v16.Hunt:AddToggle("DashNoCooldownToggle", {
     Title = "Dash No Cooldown",
     Description = "Unlimted Dash"
 })
@@ -18365,6 +18365,7 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
+-- Spectate Player
 _G.Spectating = false
 _G.SelectPly = nil -- No default player
 
