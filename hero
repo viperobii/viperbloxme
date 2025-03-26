@@ -18309,27 +18309,25 @@ end)
 -- Dash No CD
 local DashNoCooldownToggle = v16.Misc:AddToggle("DashNoCooldownToggle", {
     Title = "Dash No Cooldown",
-    Default = false
+    Description = "Unlimted Dash"
 })
 
-DashNoCooldownToggle:OnChanged(function(state)
-    _G.DashNoCd = state
-end)
-
-local player = game.Players.LocalPlayer
+_G.DashNoCd = false -- Set to false to disable
 
 function DodgeNoCoolDown()
-    if player.Character and player.Character:FindFirstChild("Dodge") then
-        local dodgeScript = player.Character.Dodge
+    local player = game.Players.LocalPlayer
+    if not player or not player.Character then return end
 
-        for _, v in next, getgc(true) do
-            if type(v) == "function" and islclosure(v) then
-                local env = getfenv(v)
-                if env and env.script == dodgeScript then
-                    for index, value in next, getupvalues(v) do
-                        if type(value) == "number" and value == 0.4 then
-                            setupvalue(v, index, 0)
-                        end
+    local dodgeScript = player.Character:FindFirstChild("Dodge")
+    if not dodgeScript then return end
+
+    for _, v in next, getgc(true) do
+        if type(v) == "function" and islclosure(v) then
+            local env = getfenv(v)
+            if env and env.script == dodgeScript then
+                for index, value in next, getupvalues(v) do
+                    if type(value) == "number" and value == 0.4 then
+                        setupvalue(v, index, 0)
                     end
                 end
             end
@@ -18337,11 +18335,11 @@ function DodgeNoCoolDown()
     end
 end
 
+-- Run in a loop to keep it enabled
 spawn(function()
-    while wait(0.3) do
-        if _G.DashNoCd then
-            DodgeNoCoolDown()
-        end
+    while _G.DashNoCd do
+        DodgeNoCoolDown()
+        wait(0.1)
     end
 end)
 
