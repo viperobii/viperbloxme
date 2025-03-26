@@ -13111,7 +13111,6 @@ end
 
 end);
 
-
 local v56 = v16.Player:AddSection("Setting Player");
 
 local v115 = v16.Player:AddToggle("ToggleNoClip", {
