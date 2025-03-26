@@ -18306,6 +18306,46 @@ spawn(function()
     end
 end)
 
+-- Dash No CD
+local DashNoCooldownToggle = v16.Player:AddToggle("DashNoCooldownToggle", {
+    Title = "Dash No Cooldown",
+    Default = false
+})
+
+DashNoCooldownToggle:OnChanged(function(state)
+    _G.DashNoCd = state
+end)
+
+local player = game.Players.LocalPlayer
+
+function DodgeNoCoolDown()
+    if player.Character and player.Character:FindFirstChild("Dodge") then
+        local dodgeScript = player.Character.Dodge
+
+        for _, v in next, getgc(true) do
+            if type(v) == "function" and islclosure(v) then
+                local env = getfenv(v)
+                if env and env.script == dodgeScript then
+                    for index, value in next, getupvalues(v) do
+                        if type(value) == "number" and value == 0.4 then
+                            setupvalue(v, index, 0)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+spawn(function()
+    while wait(0.3) do
+        if _G.DashNoCd then
+            DodgeNoCoolDown()
+        end
+    end
+end)
+
+
 
 v14:Notify({
 
