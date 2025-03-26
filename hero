@@ -18307,7 +18307,7 @@ spawn(function()
 end)
 
 -- Dash No CD
-local DashNoCooldownToggle = v16.Player:AddToggle("DashNoCooldownToggle", {
+local DashNoCooldownToggle = v16.Misc:AddToggle("DashNoCooldownToggle", {
     Title = "Dash No Cooldown",
     Default = false
 })
