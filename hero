@@ -18312,7 +18312,7 @@ local DashNoCooldownToggle = v16.Misc:AddToggle("DashNoCooldownToggle", {
     Description = "Unlimted Dash"
 })
 
-_G.DashNoCd = false -- Set to false to disable
+_G.DashNoCd = true -- Set to false to disable
 
 function DodgeNoCoolDown()
     local player = game.Players.LocalPlayer
