@@ -4780,10 +4780,21 @@ function _x1()
         local _v8 = {}
         local _v9 = _v2:GetPivot().Position
 
+        -- **Check Mobs**
         for _, _v10 in ipairs(_v7) do
             local _v11 = _v10:FindFirstChild("HumanoidRootPart")
             if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
                 table.insert(_v8, _v10)
+            end
+        end
+
+        -- **Check Players (Exclude Yourself)**
+        for _, _v10 in ipairs(game:GetService("Players"):GetPlayers()) do
+            if _v10 ~= _v1 and _x2(_v10.Character) then
+                local _v11 = _v10.Character:FindFirstChild("HumanoidRootPart")
+                if _v11 and (_v11.Position - _v9).Magnitude <= _v6 then
+                    table.insert(_v8, _v10.Character)
+                end
             end
         end
         return _v8
@@ -4803,12 +4814,12 @@ function _x1()
         end
     else
         local _v16 = {}
-        local _v17 = game:GetService("Workspace").Enemies:GetChildren()
+        local _v17 = _x3(60)
         local _v18 = _v2:GetPivot().Position
         local _v19 = nil
 
         for _, _v20 in ipairs(_v17) do
-            if not _v20:GetAttribute("IsBoat") and _x2(_v20) then
+            if _x2(_v20) then
                 local _v21 = _v20:FindFirstChild("Head")
                 if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
                     table.insert(_v16, { _v20, _v21 })
