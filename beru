@@ -2,7 +2,7 @@ local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/rel
 
 local v15 = v14:CreateWindow({
 
-Title = "Viper Dynamic BloxFruit [Freemium]",
+Title = "Viper Cat Hub BloxFruit [Goddess]",
 
 SubTitle = "by Viper_",
 
@@ -140,19 +140,19 @@ Title = "Tab Updates Info"
 
 Main = v15:AddTab({
 
-Title = "Tab Farms"
+Title = "Tab Farm"
 
 }),
 
 Sea = v15:AddTab({
 
-Title = "Tab Sea Events"
+Title = "Sea Events"
 
 }),
 
 ITM = v15:AddTab({
 
-Title = "Tab Items"
+Title = "Get Items"
 
 }),
 
@@ -164,7 +164,7 @@ Title = "Tab Settings"
 
 Status = v15:AddTab({
 
-Title = "Tab Webhook JobId Server"
+Title = "Webhook JobId Server"
 
 }),
 
@@ -176,13 +176,13 @@ Title = "Tab Auto Stats"
 
 Player = v15:AddTab({
 
-Title = "Tab Bounty Hunt"
+Title = "Bounty Hunt"
 
 }),
 
 Hunt = v15:AddTab({
 
-Title = "Tab Player Settings"
+Title = "Combat Player"
 
 }),
 
@@ -194,7 +194,7 @@ Title = "Tab Teleport Sea"
 
 Visual = v15:AddTab({
 
-Title = "Tab Fake Fun Level"
+Title = "Fake Fun Level"
 
 }),
 
@@ -18223,7 +18223,7 @@ end);
 
 local v175 = v16.Sea:AddToggle("ToggleKillAura", {
 
-Title = "Kill Aura",
+Title = "Kill Aura Golem",
 
 Description = "",
 
