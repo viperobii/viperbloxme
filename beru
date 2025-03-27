@@ -44,7 +44,7 @@ v23.Size = UDim2.new(0, 50, 0, 50);
 
 v23.Draggable = true;
 
-v23.Image = "http://www.roblox.com/asset/?id=958004892325";
+v23.Image = "rbxassetid://95800489232564";
 
 v24.Parent = v23;
 
@@ -18540,7 +18540,7 @@ end)
 
 v14:Notify({
 
-Title = "Viper Hub Deluxe",
+Title = "Viper Hub Goddess",
 
 Content = "Viper Hub Loaded",
 
