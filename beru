@@ -18551,9 +18551,8 @@ local vWalkSpeed = v16.Hunt:AddToggle("WalkSpeedToggle", {
     Default = false
 })
 
-
--- Walk Speed
-WalkSpeedToggle:OnChanged(function(state)
+-- Walk Speed Toggle
+vWalkSpeed:OnChanged(function(state)
     if state then
         SetWalkSpeed(300)
     else
@@ -18566,12 +18565,11 @@ function SetWalkSpeed(speed)
     local character = player.Character
     if character and character:FindFirstChild("Humanoid") then
         local humanoid = character.Humanoid
-        humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
-            humanoid.WalkSpeed = speed
-        end)
         humanoid.WalkSpeed = speed
     end
 end
+
+
 
 
 v14:Notify({
