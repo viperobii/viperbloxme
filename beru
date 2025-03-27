@@ -16153,7 +16153,7 @@ end);
 
 end);
 
-v16.Race:AddButton({
+local vCyborg = v16.Race:AddToggle("ToggleCyborgFly", {
 
 Title = "Stop Flying Cyborg",
 
@@ -17228,6 +17228,14 @@ Callback = function()
 v152();
 
 end
+
+});
+
+local vInfo = v16.Home:AddParagraph({
+
+Title = "For Safety Purposes",
+
+Content = "After You Turn On Anti Reset Account Please Make Sure You Won't Last 50 Minutes On The Game For Safety Purposes No Reset Account Or Ban"
 
 });
 
