@@ -17231,7 +17231,7 @@ end
 
 });
 
-local vInfo = v16.Home:AddParagraph({
+local vInfo = v16.Banned:AddParagraph({
 
 Title = "For Safety Purposes",
 
@@ -18544,6 +18544,34 @@ ToggleSpectate:OnChanged(function(state)
         StopSpectating()
     end
 end)
+
+local vWalkSpeed = v16.Hunt:AddToggle("WalkSpeedToggle", {
+    Title = "Walk Speed", 
+    Description = "Fast And Smooth Lol",
+    Default = false
+})
+
+
+-- Walk Speed
+WalkSpeedToggle:OnChanged(function(state)
+    if state then
+        SetWalkSpeed(300)
+    else
+        SetWalkSpeed(16) -- Default WalkSpeed
+    end
+end)
+
+function SetWalkSpeed(speed)
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if character and character:FindFirstChild("Humanoid") then
+        local humanoid = character.Humanoid
+        humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+            humanoid.WalkSpeed = speed
+        end)
+        humanoid.WalkSpeed = speed
+    end
+end
 
 
 v14:Notify({
