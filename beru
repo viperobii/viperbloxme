@@ -18487,7 +18487,7 @@ game.Players.LocalPlayer.CharacterAdded:Connect(function()
 end)
 
 local FastAttackToggle = v16.Hunt:AddToggle("FastAttackToggle", {
-    Title = "Fast Attack",
+    Title = "Auto Fast Attack",
     Description = "Attacks faster",
     Default = true
 })
@@ -18597,16 +18597,15 @@ local attackLoop
 
 FastAttackToggle:OnChanged(function(state)
     if state then
-        attackLoop = task.spawn(function()
-            while FastAttackToggle.Value do
+        attackLoop = true
+        task.spawn(function()
+            while attackLoop do
                 task.wait(0.1)
                 pcall(_x1)
             end
         end)
     else
-        if attackLoop then
-            task.cancel(attackLoop)
-        end
+        attackLoop = false
     end
 end)
 
