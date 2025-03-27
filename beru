@@ -2,7 +2,7 @@ local v14 = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/rel
 
 local v15 = v14:CreateWindow({
 
-Title = "Viper Hub-BloxFruit [Beta]",
+Title = "Viper Dynamic BloxFruit [Freemium]",
 
 SubTitle = "by Viper_",
 
@@ -12,7 +12,7 @@ Theme = "Dark",
 
 Acrylic = false,
 
-Size = UDim2.fromOffset(500, 370),
+Size = UDim2.fromOffset(500, 320),
 
 MinimizeKey = Enum.KeyCode.End
 
@@ -4678,167 +4678,169 @@ function Click()
     end
 end
 
+-- blade hits 
+function getAllBladeHits(range)
+    local hits = {}
+    local player = game.Players.LocalPlayer
+
+    -- Get all NPCs
+    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            if (player.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude <= range then
+                table.insert(hits, enemy.HumanoidRootPart)
+            end
+        end
+    end
+
+    -- Get all Players
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") and otherPlayer.Character:FindFirstChild("Humanoid") then
+            if (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude <= range then
+                table.insert(hits, otherPlayer.Character.HumanoidRootPart)
+            end
+        end
+    end
+
+    return hits
+end
+
+-- auto attack player
+function AttackFunction()
+    local ac = CombatFrameworkR.activeController
+    if ac and ac.equipped then
+        for indexincrement = 1, 1 do
+            local bladehit = getAllBladeHits(60) -- Now includes players
+            if #bladehit > 0 then
+                local AcAttack8 = debug.getupvalue(ac.attack, 5)
+                local AcAttack9 = debug.getupvalue(ac.attack, 6)
+                local AcAttack7 = debug.getupvalue(ac.attack, 4)
+                local AcAttack10 = debug.getupvalue(ac.attack, 7)
+                local NumberAc12 = (AcAttack8 * 798405 + AcAttack7 * 727595) % AcAttack9
+                local NumberAc13 = AcAttack7 * 798405
+                (function()
+                    NumberAc12 = (NumberAc12 * AcAttack9 + NumberAc13) % 1099511627776
+                    AcAttack8 = math.floor(NumberAc12 / AcAttack9)
+                    AcAttack7 = NumberAc12 - AcAttack8 * AcAttack9
+                end)()
+                AcAttack10 = AcAttack10 + 1
+                debug.setupvalue(ac.attack, 5, AcAttack8)
+                debug.setupvalue(ac.attack, 6, AcAttack9)
+                debug.setupvalue(ac.attack, 4, AcAttack7)
+                debug.setupvalue(ac.attack, 7, AcAttack10)
+                for k, v in pairs(ac.animator.anims.basic) do
+                    v:Play(0.01, 0.01, 0.01)
+                end
+                if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and ac.blades and ac.blades[1] then
+                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("weaponChange", tostring(CurrentWeapon()))
+                    game.ReplicatedStorage.Remotes.Validator:FireServer(math.floor(NumberAc12 / 1099511627776 * 16777215), AcAttack10)
+                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", bladehit, indexincrement, "")
+                end
+            end
+        end
+    end
+end
+
 
     
 -- Auto Attack
 local _v1 = game.Players.LocalPlayer
 
 function _x1()
-
     local _v2 = _v1.Character
-
     if not _v2 then return end
 
+    -- Find the equipped weapon/tool
     local _v3 = nil
-
     for _, _v4 in ipairs(_v2:GetChildren()) do
-
         if _v4:IsA("Tool") then
-
             _v3 = _v4
-
             break
-
         end
+    end
 
+    -- Auto Equip Melee if no tool is found
+    if not _v3 then
+        for _, _v4 in ipairs(_v1.Backpack:GetChildren()) do
+            if _v4:IsA("Tool") then
+                _v3 = _v4
+                _v1.Character.Humanoid:EquipTool(_v3)
+                break
+            end
+        end
     end
 
     if not _v3 then return end
 
     local function _x2(_v5)
-
         return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
-
     end
 
     local function _x3(_v6)
-
         local _v7 = game:GetService("Workspace").Enemies:GetChildren()
-
         local _v8 = {}
-
         local _v9 = _v2:GetPivot().Position
 
         for _, _v10 in ipairs(_v7) do
-
             local _v11 = _v10:FindFirstChild("HumanoidRootPart")
-
             if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
-
                 table.insert(_v8, _v10)
-
             end
-
         end
-
         return _v8
-
     end
 
     if _v3:FindFirstChild("LeftClickRemote") then
-
-        local _v12 = 1  
-
+        local _v12 = 1
         local _v13 = _x3(60)
 
         for _, _v14 in ipairs(_v13) do
-
             local _v15 = (_v14.HumanoidRootPart.Position - _v2:GetPivot().Position).Unit
-
             pcall(function()
-
                 _v3.LeftClickRemote:FireServer(_v15, _v12)
-
             end)
-
             _v12 = _v12 + 1
-
             if _v12 > 1000000000 then _v12 = 1 end
-
         end
-
     else
-
         local _v16 = {}
-
         local _v17 = game:GetService("Workspace").Enemies:GetChildren()
-
         local _v18 = _v2:GetPivot().Position
-
         local _v19 = nil
 
         for _, _v20 in ipairs(_v17) do
-
             if not _v20:GetAttribute("IsBoat") and _x2(_v20) then
-
                 local _v21 = _v20:FindFirstChild("Head")
-
                 if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
-
                     table.insert(_v16, { _v20, _v21 })
-
                     _v19 = _v21
-
                 end
-
             end
-
         end
 
         if not _v19 then return end
 
         pcall(function()
-
             local _v22 = game:GetService("ReplicatedStorage")
+            local _v23 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterAttack")
+            local _v24 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterHit")
 
-            local _v23 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterAttack")
-
-            local _v24 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit")
-
-            if #_v16 > 0 then
-
+            if _v23 and _v24 then
                 _v23:FireServer(0.000000001)
-
                 _v24:FireServer(_v19, _v16)
-
             else
-
-                task.wait(0.000000001)
-
+                warn("Error: RegisterAttack or RegisterHit RemoteEvent not found!")
             end
-
         end)
-
     end
-
 end
-
-
 
 _G.FastAttack = true
 
-
-
 spawn(function()
-
-    while wait(.1) do
-
-        if _G.FastAttack then
-
-            pcall(function()
-
-                repeat task.wait(000.1)
-
-                    _x1()
-
-                until not _G.FastAttack
-
-            end)
-
-        end
-
+    while _G.FastAttack do
+        task.wait(0.1)
+        pcall(_x1)
     end
-
 end)
 
 function to(v233)
@@ -5061,63 +5063,115 @@ Default = false
 
 });
 
-v49:OnChanged(function(v50)
-    _G.AutoLevel = v50
-    if v50 == false then
-        wait()
-        toTarget(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-        wait()
-    end
-end)
+v49:OnChanged(function(v237)
 
-v51.ToggleLevel:SetValue(false)
+_G.AutoLevel = v237;
+
+if (v237 == false) then
+
+wait();
+
+Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
+
+wait();
+
+end
+
+end);
+
+v17.ToggleLevel:SetValue(false);
 
 spawn(function()
-    while task.wait() do
-        if _G.AutoLevel then
-            pcall(function()
-                v52()
-                if not string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, v53) or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    toTarget(v54)
-                    if (v54.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 5 then
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", v55, v56)
-                    end
-                elseif string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, v53) or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
-                    for v57, v58 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if v58:FindFirstChild("Humanoid") and v58:FindFirstChild("HumanoidRootPart") and v58.Humanoid.Health > 0 then
-                            if v58.Name == v59 then
-                                repeat wait(_G.Fast_Delay)
-                                    v60()
-                                    v61 = true
-                                    v62()
-                                    v63(v64)
-                                    toTarget(v58.HumanoidRootPart.CFrame * CFrame.new(v65, v66, v67))
-                                    v58.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                    v58.HumanoidRootPart.Transparency = 1
-                                    v58.Humanoid.JumpPower = 0
-                                    v58.Humanoid.WalkSpeed = 0
-                                    v58.HumanoidRootPart.CanCollide = false
-                                    v68 = v58.HumanoidRootPart.CFrame
-                                    v69 = v58.Name
-                                    --Click
-                                until not _G.AutoLevel or not v58.Parent or v58.Humanoid.Health <= 0 or not game:GetService("Workspace").Enemies:FindFirstChild(v58.Name) or game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false
-                                v61 = false
-                            end
-                        end
-                    end
-                    for v70, v71 in pairs(game:GetService("Workspace")["_WorldOrigin"].EnemySpawns:GetChildren()) do
-                        if string.find(v71.Name, v53) then
-                            if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v71.Position).Magnitude >= 10 then
-                                toTarget(v71.CFrame * CFrame.new(v65, v66, v67))
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
+
+while task.wait() do
+
+if _G.AutoLevel then
+
+pcall(function()
+
+CheckLevel();
+
+if (not string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) or (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false)) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
+
+Tween(CFrameQ);
+
+if ((CFrameQ.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 5) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv);
+
+end
+
+elseif (string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) or (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true)) then
+
+for v1432, v1433 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (v1433:FindFirstChild("Humanoid") and v1433:FindFirstChild("HumanoidRootPart") and (v1433.Humanoid.Health > 0)) then
+
+if (v1433.Name == Ms) then
+
+repeat
+
+wait(_G.Fast_Delay);
+
+AttackNoCoolDown();
+
+bringmob = true;
+
+AutoHaki();
+
+EquipTool(SelectWeapon);
+
+Tween(v1433.HumanoidRootPart.CFrame * Pos);
+
+v1433.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v1433.HumanoidRootPart.Transparency = 1;
+
+v1433.Humanoid.JumpPower = 0;
+
+v1433.Humanoid.WalkSpeed = 0;
+
+v1433.HumanoidRootPart.CanCollide = false;
+
+FarmPos = v1433.HumanoidRootPart.CFrame;
+
+MonFarm = v1433.Name;
+
+until not _G.AutoLevel or not v1433.Parent or (v1433.Humanoid.Health <= 0) or not game:GetService("Workspace").Enemies:FindFirstChild(v1433.Name) or (game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false)
+
+bringmob = false;
+
+end
+
+end
+
+end
+
+for v1434, v1435 in pairs(game:GetService("Workspace")['_WorldOrigin'].EnemySpawns:GetChildren()) do
+
+if string.find(v1435.Name, NameMon) then
+
+if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v1435.Position).Magnitude >= 10) then
+
+Tween(v1435.HumanoidRootPart.CFrame * Pos);
+
+end
+
+end
+
+end
+
+end
+
+end);
+
+end
+
+end
+
+end);
 
 local v50 = v16.Main:AddToggle("ToggleMobAura", {
 
