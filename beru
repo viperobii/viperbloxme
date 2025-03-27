@@ -5066,77 +5066,123 @@ end);
 
 local v49 = v16.Main:AddToggle("ToggleLevel", {
 
-Title = "Farm Level",
-	Description = "",
-	Default = false,
-	Callback = function(Value)
-		_G.AutoFarmLevel = Value
-		StopTween(_G.AutoFarmLevel)
-	end
-})
+Title = "Auto Farm Level",
+
+Description = "Fast Farm With Dodge Skill Mobs",
+
+Default = false
+
+});
+
+v49:OnChanged(function(v237)
+
+_G.AutoLevel = v237;
+
+if (v237 == false) then
+
+wait();
+
+Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
+
+wait();
+
+end
+
+end);
+
+v17.ToggleLevel:SetValue(false);
+
 spawn(function()
-	while task.wait() do
-		if _G.AutoFarmLevel then
-			pcall(function()
-				local QuestTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
-				if not string.find(QuestTitle, NameMonster) then
-					BringFarmLevel = false
-					game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-				end
-				if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
-					BringFarmLevel = false
-					CheckLevel()
-					if BypassTP then
-						if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 1500 then
-							BTP(CFrameQuest)
-						elseif (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude < 1500 then
-							Tween(CFrameQuest)
-						end
-					else
-						Tween(CFrameQuest)
-					end
-					if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5 then
-						game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LvQuest)
-					end
-				elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
-					CheckLevel()
-					if game:GetService("Workspace").Enemies:FindFirstChild(Monster) then
-						for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-							if v:FindFirstChild("HumanoidRootPart") and v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
-								if v.Name == Monster then
-									if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMonster) then
-										repeat
-											task.wait()
-											Equip_Weapon_Farm_All(_G.SelectWeapon)
-											AutoHaki()
-											PosMon = v.HumanoidRootPart.CFrame
-											Tween(v.HumanoidRootPart.CFrame * CFrame.new(0, 30, 3))
-											v.HumanoidRootPart.CanCollide = false
-											v.Humanoid.WalkSpeed = 0
-											v.Head.CanCollide = false
-											v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-											BringFarmLevel = true
-										until not _G.AutoFarmLevel or v.Humanoid.Health <= 0 or not v.Parent or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false
-									else
-										BringFarmLevel = false
-										game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-									end
-								end
-							end
-						end
-					else
-						Tween(CFrameMonster * randomPos)
-						UnEquip_Weapon_Farm_All(_G.SelectWeapon)
-						BringFarmLevel = false
-						if game:GetService("ReplicatedStorage"):FindFirstChild(Monster) then
-							Tween(game:GetService("ReplicatedStorage"):FindFirstChild(Monster).HumanoidRootPart.CFrame * randomPos)
-						end
-					end
-				end
-			end)
-		end
-	end
-end)
+
+while task.wait() do
+
+if _G.AutoLevel then
+
+pcall(function()
+
+CheckLevel();
+
+if (not string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) or (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false)) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
+
+Tween(CFrameQ);
+
+if ((CFrameQ.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 5) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv);
+
+end
+
+elseif (string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) or (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true)) then
+
+for v1432, v1433 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (v1433:FindFirstChild("Humanoid") and v1433:FindFirstChild("HumanoidRootPart") and (v1433.Humanoid.Health > 0)) then
+
+if (v1433.Name == Ms) then
+
+repeat
+
+wait(_G.Fast_Delay);
+
+AttackNoCoolDown();
+
+bringmob = true;
+
+AutoHaki();
+
+EquipTool(SelectWeapon);
+
+Tween(v1433.HumanoidRootPart.CFrame * Pos);
+
+v1433.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v1433.HumanoidRootPart.Transparency = 1;
+
+v1433.Humanoid.JumpPower = 0;
+
+v1433.Humanoid.WalkSpeed = 0;
+
+v1433.HumanoidRootPart.CanCollide = false;
+
+FarmPos = v1433.HumanoidRootPart.CFrame;
+
+MonFarm = v1433.Name;
+
+until not _G.AutoLevel or not v1433.Parent or (v1433.Humanoid.Health <= 0) or not game:GetService("Workspace").Enemies:FindFirstChild(v1433.Name) or (game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false)
+
+bringmob = false;
+
+end
+
+end
+
+end
+
+for v1434, v1435 in pairs(game:GetService("Workspace")['_WorldOrigin'].EnemySpawns:GetChildren()) do
+
+if string.find(v1435.Name, NameMon) then
+
+if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v1435.Position).Magnitude >= 10) then
+
+Tween(v1435.HumanoidRootPart.CFrame * Pos);
+
+end
+
+end
+
+end
+
+end
+
+end);
+
+end
+
+end
+
+end);
 
 local v50 = v16.Main:AddToggle("ToggleMobAura", {
 
@@ -8003,6 +8049,190 @@ v521();
 end
 
 });
+
+local Toggle = Tabs.SE:AddToggle("Auto Ghost Ship", {
+
+	Title = "Auto Ghost Ship",
+
+	Description = "",
+
+	Default = false,
+
+	Callback = function(Value)
+
+		_G.GhostShip = Value
+
+	end
+
+})
+
+local SeaBeast = v16.Sea:AddToggle("Auto Sea Beast", {
+
+	Title = "Auto Sea Beast",
+
+	Description = "",
+
+	Default = false,
+
+	Callback = function(Value)
+
+		_G.Auto_Sea_King = Value
+
+		StopTween(_G.Auto_Sea_King)
+
+	end
+
+})
+
+spawn(function()
+
+	while wait() do
+
+		pcall(function()
+
+			if _G.Auto_Sea_King then
+
+				if workspace.SeaBeasts:FindFirstChild("SeaBeast1") then
+
+					getgenv().ToTarget(workspace.SeaBeasts:FindFirstChild("SeaBeast1").HumanoidRootPart.CFrame * CFrame.new(0, 460, 0))
+
+					for i , v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+
+						if v.ToolTip == "Sword" then
+
+							if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
+
+								EquipWeapon(v.Name)
+
+							end
+
+						end
+
+					end
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+
+					wait(0.5)
+
+					for i , v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+
+						if v.ToolTip == "Blox Fruit" then
+
+							if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
+
+								EquipWeapon(v.Name)
+
+							end
+
+						end
+
+					end
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "C", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "C", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "V", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "V", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "F", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "F", false, game)
+
+					wait(0.5)
+
+					for i , v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+
+						if v.ToolTip == "Melee" then
+
+							if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
+
+								EquipWeapon(v.Name)
+
+							end
+
+						end
+
+					end
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "C", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "C", false, game)
+
+					wait(0.5)
+
+					for i , v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+
+						if v.ToolTip == "Gun" then
+
+							if game.Players.LocalPlayer.Backpack:FindFirstChild(tostring(v.Name)) then
+
+								EquipWeapon(v.Name)
+
+							end
+
+						end
+
+					end
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+
+					wait(0.5)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+
+					game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+
+					wait(0.5)
+
+				end
+
+			end
+
+		end)
+
+	end
+
+end)
 
 local v522 = v16.Sea:AddToggle("ToggleTerrorshark", {
 
