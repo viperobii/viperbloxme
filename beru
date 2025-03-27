@@ -18489,7 +18489,7 @@ end)
 local FastAttackToggle = v16.Hunt:AddToggle("FastAttackToggle", {
     Title = "Auto Fast Attack",
     Description = "Attacks faster",
-    Default = true
+    Default = false
 })
 
 local function _x1()
