@@ -5095,11 +5095,14 @@ spawn(function()
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
                     end
                 else
+                    -- **Lock Character Position**
+                    local farmPos = humanoidRootPart.CFrame
+                    humanoidRootPart.Velocity = Vector3.new(0, 0, 0) 
+                    humanoidRootPart.Anchored = true  
+
                     for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                         if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                             if enemy.Name == Ms then
-                                FarmPos = humanoidRootPart.CFrame -- Keep character stable
-
                                 repeat
                                     task.wait(_G.Fast_Delay)
                                     AttackNoCoolDown()
@@ -5107,8 +5110,10 @@ spawn(function()
                                     AutoHaki()
                                     EquipTool(SelectWeapon)
 
-                                    -- Instead of moving character, bring mobs to player
-                                    enemy.HumanoidRootPart.CFrame = FarmPos
+                                    -- **Move mobs to player instead of moving**
+                                    enemy.HumanoidRootPart.CFrame = farmPos + Vector3.new(0, 0, 5)
+
+                                    -- **Lock enemy movement**
                                     enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                     enemy.HumanoidRootPart.Transparency = 1
                                     enemy.Humanoid.JumpPower = 0
@@ -5123,14 +5128,8 @@ spawn(function()
                         end
                     end
 
-                    -- Ensure the character doesn't move and waits for mobs to respawn
-                    for _, spawnPoint in pairs(game:GetService("Workspace")['_WorldOrigin'].EnemySpawns:GetChildren()) do
-                        if string.find(spawnPoint.Name, NameMon) then
-                            if (humanoidRootPart.Position - spawnPoint.Position).Magnitude >= 10 then
-                                Tween(FarmPos) -- Stay in place instead of chasing mobs
-                            end
-                        end
-                    end
+                    -- **Keep Character in One Spot**
+                    humanoidRootPart.CFrame = farmPos  
                 end
             end)
         end
