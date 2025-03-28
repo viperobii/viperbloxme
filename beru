@@ -18592,47 +18592,53 @@ local AutoKillSeaKingToggle = v16.Best:AddToggle("AutoKillSeaKingToggle", {
     Title = "Auto Kill Sea Beast",
     Description = "",
     Default = false
-});
+})
 
 AutoKillSeaKingToggle:OnChanged(function(value)
-    _G.Auto_Kill_Sea_King = value;
-end);
+    _G.Auto_Kill_Sea_King = value
+end)
 
-AutoKillSeaKingToggle:SetValue(false);
+AutoKillSeaKingToggle:SetValue(false)
 
 spawn(function()
     while task.wait() do
-        if _G.Auto_Kill_Sea_King then
-            pcall(function()
-                local seaBeast = workspace.SeaBeasts:FindFirstChild("SeaBeast1")
-                if seaBeast and seaBeast:FindFirstChild("HumanoidRootPart") then
-                    Tween(seaBeast.HumanoidRootPart.CFrame * CFrame.new(0, 460, 0))
+        if not _G.Auto_Kill_Sea_King then continue end
 
-                    local player = game.Players.LocalPlayer
-                    local backpack = player.Backpack
-                    local vim = game:GetService("VirtualInputManager")
+        pcall(function()
+            local seaBeast = workspace.SeaBeasts:FindFirstChild("SeaBeast1")
+            if seaBeast and seaBeast:FindFirstChild("HumanoidRootPart") and seaBeast:FindFirstChild("Humanoid") and seaBeast.Humanoid.Health > 0 then
+                -- Move above the Sea Beast's neck for better attack targeting
+                local targetPosition = seaBeast.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0)
+                Tween(targetPosition)
 
-                    local function equipAndAttack(tooltip)
-                        for _, tool in pairs(backpack:GetChildren()) do
-                            if tool.ToolTip == tooltip then
-                                EquipTool(tool.Name)
-                                task.wait(0.5)
-                                for _, key in ipairs({"Z", "X", "C", "V", "F"}) do
-                                    vim:SendKeyEvent(true, key, false, game)
-                                    vim:SendKeyEvent(false, key, false, game)
-                                    task.wait(0.5)
-                                end
-                            end
-                        end
+                local player = game.Players.LocalPlayer
+                local backpack = player.Backpack
+                local character = player.Character or player.CharacterAdded:Wait()
+                local vim = game:GetService("VirtualInputManager")
+
+                local function equipTool(toolName)
+                    local tool = backpack:FindFirstChild(toolName)
+                    if tool then
+                        player.Character.Humanoid:EquipTool(tool)
                     end
-
-                    equipAndAttack("Sword")
-                    equipAndAttack("Blox Fruit")
-                    equipAndAttack("Melee")
-                    equipAndAttack("Gun")
                 end
-            end)
-        end
+
+                local function attackWithSkills()
+                    for _, key in ipairs({"Z", "X", "C", "V", "F"}) do
+                        if not _G.Auto_Kill_Sea_King then return end -- Stop attacking if toggle is off
+                        vim:SendKeyEvent(true, key, false, game)
+                        vim:SendKeyEvent(false, key, false, game)
+                        task.wait(0.3)
+                    end
+                end
+
+                -- Equip and attack in order
+                equipTool("Sword") attackWithSkills()
+                equipTool("Blox Fruit") attackWithSkills()
+                equipTool("Melee") attackWithSkills()
+                equipTool("Gun") attackWithSkills()
+            end
+        end)
     end
 end)
 
