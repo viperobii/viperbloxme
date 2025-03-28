@@ -18657,39 +18657,38 @@ spawn(function()
     end
 end)
 
-local AimbotNearestToggle = v16.Hunt:AddToggle("AimbotNearest", {
-    Title = "Aimbot Nearest",
-    Description = "Locks onto the nearest enemy",
-    Default = false
-})
-
-AimbotNearestToggle:OnChanged(function(state)
+local AimbotToggle = v16.Hunt:AddToggle("Aimbot Nearest", false, function(state)
     _G.AimNearest = state
 end)
 
-spawn(function()
-    while wait() do
-        if _G.AimNearest then
-            pcall(function()
-                local closestPlayer = nil
-                local shortestDistance = math.huge
-                local players = game:GetService("Players")
-                local localPlayer = players.LocalPlayer
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
-                for _, player in pairs(players:GetPlayers()) do
-                    if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                        if player.Team ~= localPlayer.Team and player.Team.Name ~= "Marines" then
-                            local distance = (localPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                            if distance < shortestDistance then
-                                closestPlayer = player
-                                shortestDistance = distance
-                            end
-                        end
-                    end
+local function GetNearestEnemy()
+    local closestEnemy = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            if player.Team ~= LocalPlayer.Team and player.Team.Name ~= "Marines" then
+                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if distance < shortestDistance then
+                    closestEnemy = player
+                    shortestDistance = distance
                 end
+            end
+        end
+    end
 
-                _G.AimTarget = closestPlayer
-            end)
+    return closestEnemy
+end
+
+RunService.RenderStepped:Connect(function()
+    if _G.AimNearest then
+        local target = GetNearestEnemy()
+        if target then
+            _G.Aim_Players = target
         end
     end
 end)
@@ -18703,9 +18702,11 @@ metaTable.__namecall = newcclosure(function(...)
     local args = {...}
 
     if tostring(method) == "FireServer" and tostring(args[1]) == "RemoteEvent" then
-        if _G.AimNearest and _G.AimTarget and _G.AimTarget.Character then
-            args[2] = _G.AimTarget.Character.HumanoidRootPart.Position
-            return oldNamecall(unpack(args))
+        if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
+            if _G.AimNearest and _G.Aim_Players then
+                args[2] = _G.Aim_Players.Character.HumanoidRootPart.Position
+                return oldNamecall(unpack(args))
+            end
         end
     end
 
