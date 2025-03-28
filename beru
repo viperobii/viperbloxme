@@ -5755,79 +5755,190 @@ Default = false
 });
 
 v486:OnChanged(function(v571)
-    _G.AutoBone = v571;
 
-    if not v571 then
-        wait()
-        Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-        wait()
-    end
-end)
+_G.AutoBone = v571;
 
-v17.ToggleBone:SetValue(false)
+if (v571 == false) then
 
-local BoneQuestPos = CFrame.new(-9515.75, 174.8521728515625, 6079.40625)
+wait();
+
+Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
+
+wait();
+
+end
+
+end);
+
+v17.ToggleBone:SetValue(false);
+
+local v487 = CFrame.new(- 9515.75, 174.8521728515625, 6079.40625);
 
 spawn(function()
-    while wait() do
-        if _G.AutoBone then
-            pcall(function()
-                local questTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
 
-                -- If not on the correct quest, abandon it
-                if not string.find(questTitle, "Demonic Soul") then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                end
+while wait() do
 
-                -- If no active quest, go to quest giver
-                if not game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible then
-                    Tween(BoneQuestPos)
+if _G.AutoBone then
 
-                    if (BoneQuestPos.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 3 then
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "HauntedQuest2", 1)
-                    end
+pcall(function()
 
-                else
-                    -- Find mobs
-                    for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                            if mob.Name == "Reborn Skeleton" or mob.Name == "Living Zombie" or mob.Name == "Demonic Soul" or mob.Name == "Posessed Mummy" then
+local v894 = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text;
 
-                                -- Follow the mob smoothly
-                                local farmPos = mob.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0)
-                                if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - farmPos.Position).Magnitude > 5 then
-                                    Tween(farmPos)
-                                end
+if not string.find(v894, "Demonic Soul") then
 
-                                -- Attack the mob
-                                repeat
-                                    wait(_G.Fast_Delay)
-                                    AttackNoCoolDown()
-                                    AutoHaki()
-                                    bringmob = true
-                                    EquipTool(SelectWeapon)
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
 
-                                    -- Stop mob movement
-                                    mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                    mob.HumanoidRootPart.Transparency = 1
-                                    mob.Humanoid.JumpPower = 0
-                                    mob.Humanoid.WalkSpeed = 0
-                                    mob.HumanoidRootPart.CanCollide = false
+end
 
-                                    FarmPos = mob.HumanoidRootPart.CFrame
-                                    MonFarm = mob.Name
+if (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false) then
 
-                                until not _G.AutoBone or mob.Humanoid.Health <= 0 or not mob.Parent or not game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible
+Tween(v487);
 
-                                bringmob = false
-                            end
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
+if ((v487.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 3) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", "HauntedQuest2", 1);
+
+end
+
+elseif (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true) then
+
+if (game:GetService("Workspace").Enemies:FindFirstChild("Reborn Skeleton") or game:GetService("Workspace").Enemies:FindFirstChild("Living Zombie") or game:GetService("Workspace").Enemies:FindFirstChild("Demonic Soul") or game:GetService("Workspace").Enemies:FindFirstChild("Posessed Mummy")) then
+
+for v1661, v1662 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (v1662:FindFirstChild("HumanoidRootPart") and v1662:FindFirstChild("Humanoid") and (v1662.Humanoid.Health > 0)) then
+
+if ((v1662.Name == "Reborn Skeleton") or (v1662.Name == "Living Zombie") or (v1662.Name == "Demonic Soul") or (v1662.Name == "Posessed Mummy")) then
+
+if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, "Demonic Soul") then
+
+repeat
+
+wait(_G.Fast_Delay);
+
+AttackNoCoolDown();
+
+AutoHaki();
+
+bringmob = true;
+
+EquipTool(SelectWeapon);
+
+Tween(v1662.HumanoidRootPart.CFrame * Pos);
+
+v1662.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v1662.HumanoidRootPart.Transparency = 1;
+
+v1662.Humanoid.JumpPower = 0;
+
+v1662.Humanoid.WalkSpeed = 0;
+
+v1662.HumanoidRootPart.CanCollide = false;
+
+FarmPos = v1662.HumanoidRootPart.CFrame;
+
+MonFarm = v1662.Name;
+
+until not _G.AutoBone or (v1662.Humanoid.Health <= 0) or not v1662.Parent or (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false)
+
+else
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
+
+bringmob = false;
+
+end
+
+end
+
+end
+
+end
+
+else
+
+end
+
+end
+
+end);
+
+end
+
+end
+
+end);
+
+local v488 = CFrame.new(- 9515.75, 174.8521728515625, 6079.40625);
+
+spawn(function()
+
+while wait() do
+
+if _G.AutoBoneNoQuest then
+
+pcall(function()
+
+Tween(v488);
+
+if ((v488.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 3) then
+
+end
+
+if (game:GetService("Workspace").Enemies:FindFirstChild("Reborn Skeleton") or game:GetService("Workspace").Enemies:FindFirstChild("Living Zombie") or game:GetService("Workspace").Enemies:FindFirstChild("Demonic Soul") or game:GetService("Workspace").Enemies:FindFirstChild("Posessed Mummy")) then
+
+for v1436, v1437 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (v1437:FindFirstChild("HumanoidRootPart") and v1437:FindFirstChild("Humanoid") and (v1437.Humanoid.Health > 0)) then
+
+if ((v1437.Name == "Reborn Skeleton") or (v1437.Name == "Living Zombie") or (v1437.Name == "Demonic Soul") or (v1437.Name == "Posessed Mummy")) then
+
+repeat
+
+wait(_G.Fast_Delay);
+
+AttackNoCoolDown();
+
+AutoHaki();
+
+bringmob = true;
+
+EquipTool(SelectWeapon);
+
+Tween(v1437.HumanoidRootPart.CFrame * Pos);
+
+v1437.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v1437.HumanoidRootPart.Transparency = 1;
+
+v1437.Humanoid.JumpPower = 0;
+
+v1437.Humanoid.WalkSpeed = 0;
+
+v1437.HumanoidRootPart.CanCollide = false;
+
+FarmPos = v1437.HumanoidRootPart.CFrame;
+
+MonFarm = v1437.Name;
+
+until not _G.AutoBoneNoQuest or (v1437.Humanoid.Health <= 0) or not v1437.Parent
+
+end
+
+end
+
+end
+
+end
+
+end);
+
+end
+
+end
+
+end);
 
 v16.Main:AddButton({
 
