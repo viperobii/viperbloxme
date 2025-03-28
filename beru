@@ -5112,8 +5112,11 @@ spawn(function()
                     for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                         if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                             if enemy.Name == Ms then
-                                repeat
-                                    task.wait(_G.Fast_Delay)
+                                -- Keep tracking enemy position while it's alive
+                                while _G.AutoLevel and enemy.Parent and enemy.Humanoid.Health > 0 and questGui.Visible do
+                                    task.wait(0.1) -- Reduce lag and ensure smooth tracking
+
+                                    -- Attack & auto farm logic
                                     AttackNoCoolDown()
                                     bringmob = true
                                     AutoHaki()
@@ -5126,15 +5129,10 @@ spawn(function()
                                     enemy.Humanoid.WalkSpeed = 0
                                     enemy.HumanoidRootPart.CanCollide = false
 
-                                    -- Update position only if the enemy moves
+                                    -- Continuously move with the enemy
                                     local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 50, 0)
-                                    local currentPos = player.Character.HumanoidRootPart.Position
-
-                                    if (currentPos - targetPos).Magnitude > 5 then
-                                        Tween(CFrame.new(targetPos))
-                                    end
-
-                                until not _G.AutoLevel or not enemy.Parent or enemy.Humanoid.Health <= 0 or not game:GetService("Workspace").Enemies:FindFirstChild(enemy.Name) or not questGui.Visible
+                                    Tween(CFrame.new(targetPos))
+                                end
 
                                 bringmob = false
                             end
