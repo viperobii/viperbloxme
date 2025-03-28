@@ -5161,72 +5161,86 @@ Default = false
 });
 
 v50:OnChanged(function(v238)
-    _G.AutoNear = v238;
 
-    if not v238 then
-        wait()
-        Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-        wait()
-    end
-end)
+_G.AutoNear = v238;
 
-v17.ToggleMobAura:SetValue(false)
+if (v238 == false) then
+
+wait();
+
+Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
+
+wait();
+
+end
+
+end);
+
+v17.ToggleMobAura:SetValue(false);
 
 spawn(function()
-    while wait() do
-        if _G.AutoNear then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local char = player.Character
-                if not char then return end
 
-                local humanoidRootPart = char:FindFirstChild("HumanoidRootPart")
-                if not humanoidRootPart then return end
+while wait() do
 
-                -- Find the nearest enemy
-                local closestEnemy, closestDistance = nil, 5000
-                for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-                        if distance < closestDistance then
-                            closestDistance = distance
-                            closestEnemy = enemy
-                        end
-                    end
-                end
+if _G.AutoNear then
 
-                -- If a valid enemy is found, follow them smoothly
-                if closestEnemy then
-                    local enemyHRP = closestEnemy:FindFirstChild("HumanoidRootPart")
-                    if enemyHRP then
-                        while _G.AutoNear and closestEnemy.Parent and closestEnemy.Humanoid.Health > 0 do
-                            wait(_G.Fast_Delay)
+pcall(function()
 
-                            -- Attack & auto farm logic
-                            AttackNoCoolDown()
-                            bringmob = true
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
+for v838, v839 in pairs(game.Workspace.Enemies:GetChildren()) do
 
-                            -- Keep the enemy in place
-                            enemyHRP.Size = Vector3.new(60, 60, 60)
-                            enemyHRP.Transparency = 1
-                            closestEnemy.Humanoid.JumpPower = 0
-                            closestEnemy.Humanoid.WalkSpeed = 0
-                            enemyHRP.CanCollide = false
+if (v839:FindFirstChild("Humanoid") and v839:FindFirstChild("HumanoidRootPart") and (v839.Humanoid.Health > 0)) then
 
-                            -- Move smoothly to stay near the enemy
-                            local followPosition = enemyHRP.Position + Vector3.new(0, 50, 0)
-                            Tween(CFrame.new(followPosition))
-                        end
-                    end
-                end
+if v839.Name then
 
-                bringmob = false
-            end)
-        end
-    end
-end)
+if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v839:FindFirstChild("HumanoidRootPart").Position).Magnitude <= 5000) then
+
+repeat
+
+wait(_G.Fast_Delay);
+
+AttackNoCoolDown();
+
+bringmob = true;
+
+AutoHaki();
+
+EquipTool(SelectWeapon);
+
+Tween(v839.HumanoidRootPart.CFrame * Pos);
+
+v839.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v839.HumanoidRootPart.Transparency = 1;
+
+v839.Humanoid.JumpPower = 0;
+
+v839.Humanoid.WalkSpeed = 0;
+
+v839.HumanoidRootPart.CanCollide = false;
+
+FarmPos = v839.HumanoidRootPart.CFrame;
+
+MonFarm = v839.Name;
+
+until not _G.AutoNear or not v839.Parent or (v839.Humanoid.Health <= 0) or not game.Workspace.Enemies:FindFirstChild(v839.Name)
+
+bringmob = false;
+
+end
+
+end
+
+end
+
+end
+
+end);
+
+end
+
+end
+
+end);
 
 local v51 = v16.Main:AddToggle("ToggleCastleRaid", {
 
