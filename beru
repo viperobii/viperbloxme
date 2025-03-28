@@ -12308,7 +12308,7 @@ local v90 = v16.Setting:AddToggle("ToggleBringMob", {
 
 Title = "Bring Mob",
 
-Description = "Not Recommended Sometimes Bug",
+Description = "Bring The Mobs",
 
 Default = false
 
@@ -12320,7 +12320,7 @@ _G.BringMob = v277;
 
 end);
 
-v17.ToggleBringMob:SetValue(true);
+v17.ToggleBringMob:SetValue(false);
 
 spawn(function()
 
@@ -13110,7 +13110,7 @@ _G.LOf = v312;
 
 end);
 
-v17.ToggleNoClip:SetValue(true);
+v17.ToggleNoClip:SetValue(false);
 
 spawn(function()
 
