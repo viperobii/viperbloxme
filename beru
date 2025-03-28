@@ -4948,9 +4948,9 @@ end
 
 v16.Home:AddButton({
 
-Title = "Discord Viper Hub",
+Title = "Copy And Join Discord",
 
-Description = "Join For Updates And Fix And Suggestions (Click To Copy)",
+Description = "Click To Join",
 
 Callback = function()
 
