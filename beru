@@ -18657,7 +18657,13 @@ spawn(function()
     end
 end)
 
-local AimbotToggle = v16.Hunt:AddToggle("Aimbot Nearest", false, function(state)
+local AimbotNearestToggle = v16.Best:AddToggle("AimbotNeareetToggle", {
+    Title = "Aimbot Nearest",
+    Description = "",
+    Default = false
+})
+
+AutoKillLeviathanToggle:OnChanged(function(state)
     _G.AimNearest = state
 end)
 
