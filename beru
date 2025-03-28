@@ -8008,7 +8008,7 @@ local v522 = v16.Sea:AddToggle("ToggleTerrorshark", {
 
 Title = "Auto Kill Terror Shark",
 
-Description = "",
+Description = "Turn Off Bring Mob In Tab Settings To Prevent Or No Bug",
 
 Default = false
 
@@ -12171,22 +12171,33 @@ Default = false
 });
 
 v86:OnChanged(function(v274)
-    _G.AutoY = v274;
+
+_G.AutoY = v274;
+
 end);
 
 v17.ToggleAutoY:SetValue(false);
 
 spawn(function()
-    while wait(0.1) do -- Added a small delay to prevent key spamming
-        pcall(function()
-            if _G.AutoY then
-                local vim = game:GetService("VirtualInputManager")
-                vim:SendKeyEvent(true, "Y", false, game)
-                wait(0.1) -- Small delay for better input handling
-                vim:SendKeyEvent(false, "Y", false, game)
-            end
-        end)
-    end
+
+while wait() do
+
+pcall(function()
+
+if _G.AutoY then
+
+game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game);
+
+wait();
+
+game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game);
+
+end
+
+end);
+
+end
+
 end);
 
 local v87 = v16.Setting:AddToggle("ToggleAutoKen", {
@@ -12431,7 +12442,7 @@ local v92 = v16.Setting:AddToggle("ToggleWhite", {
 
 Title = "Enable White Screen",
 
-Description = "To Prevent Overheating For Only Afk Lol",
+Description = "White Your All Screen",
 
 Default = false
 
@@ -13033,7 +13044,7 @@ local v114 = v16.Player:AddToggle("ToggleTeleport", {
 
 Title = "Auto Kill Player",
 
-Description = "Target Selected Player",
+Description = "Target Selected Player And Manual Use Your Skils",
 
 Default = false
 
@@ -16107,7 +16118,7 @@ local v146 = v16.Race:AddToggle("ToggleKillTrial", {
 
 Title = "Auto Kill Players In Trial",
 
-Description = "Kill Players After Trial",
+Description = "Manual Use Skill To Win Only Melee Skills",
 
 Default = false
 
