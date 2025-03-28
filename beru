@@ -12171,33 +12171,22 @@ Default = false
 });
 
 v86:OnChanged(function(v274)
-
-_G.AutoY = v274;
-
+    _G.AutoY = v274;
 end);
 
 v17.ToggleAutoY:SetValue(false);
 
 spawn(function()
-
-while wait() do
-
-pcall(function()
-
-if _G.AutoY then
-
-game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game);
-
-wait();
-
-game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game);
-
-end
-
-end);
-
-end
-
+    while wait(0.1) do -- Added a small delay to prevent key spamming
+        pcall(function()
+            if _G.AutoY then
+                local vim = game:GetService("VirtualInputManager")
+                vim:SendKeyEvent(true, "Y", false, game)
+                wait(0.1) -- Small delay for better input handling
+                vim:SendKeyEvent(false, "Y", false, game)
+            end
+        end)
+    end
 end);
 
 local v87 = v16.Setting:AddToggle("ToggleAutoKen", {
@@ -15851,7 +15840,7 @@ local v145 = v16.Race:AddToggle("ToggleAutotrial", {
 
 Title = "Auto Trial",
 
-Description = "",
+Description = "For Ghoul Trial, Double Jump First And Turn On Auto Trial (Instant Kill Mobs)",
 
 Default = false
 
@@ -18503,7 +18492,7 @@ Content = "This Area Is Beta Which Means Sometimes Works And Sometimes Bug So Pl
 
 local AutoKillLeviathanToggle = v16.Best:AddToggle("AutoKillLeviathanToggle", {
     Title = "Auto Kill Leviathan",
-    Description = "",
+    Description = "Don't Use Fixing And Testing",
     Default = false
 });
 
@@ -18600,7 +18589,7 @@ end)
 
 local AutoKillSeaKingToggle = v16.Best:AddToggle("AutoKillSeaKingToggle", {
     Title = "Auto Kill Sea Beast",
-    Description = "",
+    Description = "Don't Use Fixing",
     Default = false
 })
 
@@ -18657,69 +18646,7 @@ spawn(function()
     end
 end)
 
-local AimbotNearestToggle = v16.Hunt:AddToggle("AimbotNearestToggle", {
-    Title = "Aimbot Nearest",
-    Description = "",
-    Default = false
-})
 
-AimbotNearestToggle:OnChanged(function(state)
-    _G.AimNearest = state
-end)
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-
-local function GetNearestEnemy()
-    local closestEnemy = nil
-    local shortestDistance = math.huge
-
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
-            if player.Team ~= LocalPlayer.Team and player.Team.Name ~= "Marines" and player.Character.Humanoid.Health > 0 then
-                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                if distance < shortestDistance then
-                    closestEnemy = player
-                    shortestDistance = distance
-                end
-            end
-        end
-    end
-
-    return closestEnemy
-end
-
-RunService.RenderStepped:Connect(function()
-    if _G.AimNearest then
-        local target = GetNearestEnemy()
-        if target then
-            _G.Aim_Players = target
-        end
-    end
-end)
-
-local metaTable = getrawmetatable(game)
-local oldNamecall = metaTable.__namecall
-setreadonly(metaTable, false)
-
-metaTable.__namecall = newcclosure(function(...)
-    local method = getnamecallmethod()
-    local args = {...}
-
-    if tostring(method) == "FireServer" and tostring(args[1]) == "RemoteEvent" then
-        if tostring(args[2]) ~= "true" and tostring(args[2]) ~= "false" then
-            if _G.AimNearest and _G.Aim_Players and _G.Aim_Players.Character and _G.Aim_Players.Character:FindFirstChild("HumanoidRootPart") then
-                args[2] = _G.Aim_Players.Character.HumanoidRootPart.Position
-                return oldNamecall(unpack(args))
-            end
-        end
-    end
-
-    return oldNamecall(...)
-end)
-
-setreadonly(metaTable, true)
 
 
 v14:Notify({
