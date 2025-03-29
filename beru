@@ -21923,168 +21923,77 @@ v75:Button("Next Island", function()
 end);
 
 v75:Toggle("Auto Next Island", _G.Dungeon, function(v563)
-
 	_G.Dungeon = v563;
-
 	StopTween(_G.Dungeon);
-
 end);
 
 spawn(function()
-
-	pcall(function()
-
-		while wait() do
-
-			if _G.Dungeon then
-
-				if (game:GetService("Players")['LocalPlayer'].PlayerGui.Main.Timer.Visible == true) then
-
-					if game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 5") then
-
-						topos(game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 5").CFrame * RaidPos );
-
-					elseif game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 4") then
-
-						topos(game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 4").CFrame * RaidPos );
-
-					elseif game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 3") then
-
-						topos(game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 3").CFrame * RaidPos );
-
-					elseif game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 2") then
-
-						topos(game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 2").CFrame * RaidPos );
-
-					elseif game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 1") then
-
-						topos(game:GetService("Workspace")['_WorldOrigin'].Locations:FindFirstChild("Island 1").CFrame * RaidPos );
-
+	while wait(0.1) do
+		pcall(function()
+			if _G.Dungeon and game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible then
+				for i = 5, 1, -1 do -- Loop from Island 5 to Island 1
+					local island = game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island " .. i)
+					if island then
+						topos(island.CFrame * RaidPos) -- Teleport to the island
+						break -- Stop the loop once an island is found
 					end
-
 				end
-
 			end
-
-		end
-
-	end);
-
-end);
-
-Type = 1;
-
-spawn(function()
-
-	while wait(0.1) do
-
-		if (Type == 1) then
-
-			RaidPos = CFrame.new(0, 25, 0);
-
-		elseif (Type == 2) then
-
-			RaidPos = CFrame.new(0, 25, -40);
-
-		elseif (Type == 3) then
-
-			RaidPos = CFrame.new(40, 25, 0);
-
-		elseif (Type == 4) then
-
-			RaidPos = CFrame.new(0, 25, 40);
-
-		elseif (Type == 5) then
-
-			RaidPos = CFrame.new( -40, 25, 0);
-
-		elseif (Type == 6) then
-
-			RaidPos = CFrame.new(0, 25, 0);
-
-		end
-
+		end)
 	end
+end)
 
-end);
+Type = 1
 
 spawn(function()
-
 	while wait(0.1) do
-
-		Type = 1;
-
-		wait(0.9);
-
-		Type = 2;
-
-		wait(0.9);
-
-		Type = 3;
-
-		wait(0.9);
-
-		Type = 4;
-
-		wait(0.9);
-
-		Type = 5;
-
-		wait(0.9);
-
+		if Type == 1 then
+			RaidPos = CFrame.new(0, 25, 0)
+		elseif Type == 2 then
+			RaidPos = CFrame.new(0, 25, -40)
+		elseif Type == 3 then
+			RaidPos = CFrame.new(40, 25, 0)
+		elseif Type == 4 then
+			RaidPos = CFrame.new(0, 25, 40)
+		elseif Type == 5 then
+			RaidPos = CFrame.new(-40, 25, 0)
+		end
 	end
+end)
 
-end);
+spawn(function()
+	while wait(0.9) do
+		for i = 1, 5 do
+			Type = i
+			wait(0.9)
+		end
+	end
+end)
 
-v75:Toggle("Kill Aura", nil, function(v564)
-
-	_G.Kill_Aura = v564;
-
+v75:Toggle("Auto Raid Mobs", nil, function(v564)
+	_G.RaidFarm = v564;
 end);
 
 spawn(function()
-
-	pcall(function()
-
-		while wait() do
-
-			if _G.Kill_Aura then
-
-				if (game:GetService("Players")['LocalPlayer'].PlayerGui.Main.Timer.Visible == true) then
-
-					for v2123, v2124 in pairs(game:GetService("Workspace").Enemies:GetDescendants()) do
-
-						if (v2124:FindFirstChild("Humanoid") and v2124:FindFirstChild("HumanoidRootPart") and (v2124.Humanoid.Health > 0)) then
-
-							pcall(function()
-
-								repeat
-
-									wait();
-
-									sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge);
-
-									v2124.Humanoid.Health = 0;
-
-									v2124.HumanoidRootPart.CanCollide = false;
-
-								until  not _G.Kill_Aura or  not v2124.Parent or (v2124.Humanoid.Health <= 0)
-
-							end);
-
+	while wait() do
+		pcall(function()
+			if _G.RaidFarm and game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible then
+				for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+					if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+						if enemy:FindFirstChild("NameTag") and string.find(enemy.NameTag.Text, "Raid") then -- Only target raid mobs
+							repeat
+								wait()
+								sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+								topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)) -- Move near the enemy
+								enemy.Humanoid.Health = 0 -- Kill the enemy
+							until not _G.RaidFarm or not enemy.Parent or enemy.Humanoid.Health <= 0
 						end
-
 					end
-
 				end
-
 			end
-
-		end
-
-	end);
-
-end);
+		end)
+	end
+end)
 
 v75:Toggle("Auto Awakener", _G.Awakener, function(v565)
 
