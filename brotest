@@ -4746,120 +4746,6 @@ function AttackFunction()
     end
 end
 
-
-    
--- Auto Attack
-local _v1 = game.Players.LocalPlayer
-
-function _x1()
-    local _v2 = _v1.Character
-    if not _v2 then return end
-
-    -- Find the equipped weapon/tool
-    local _v3 = nil
-    for _, _v4 in ipairs(_v2:GetChildren()) do
-        if _v4:IsA("Tool") then
-            _v3 = _v4
-            break
-        end
-    end
-
-    -- Auto Equip Melee if no tool is found
-    if not _v3 then
-        for _, _v4 in ipairs(_v1.Backpack:GetChildren()) do
-            if _v4:IsA("Tool") then
-                _v3 = _v4
-                _v1.Character.Humanoid:EquipTool(_v3)
-                break
-            end
-        end
-    end
-
-    if not _v3 then return end
-
-    local function _x2(_v5)
-        return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
-    end
-
-    local function _x3(_v6)
-        local _v7 = game:GetService("Workspace").Enemies:GetChildren()
-        local _v8 = {}
-        local _v9 = _v2:GetPivot().Position
-
-        -- **Check Mobs**
-        for _, _v10 in ipairs(_v7) do
-            local _v11 = _v10:FindFirstChild("HumanoidRootPart")
-            if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
-                table.insert(_v8, _v10)
-            end
-        end
-
-        -- **Check Players (Exclude Yourself)**
-        for _, _v10 in ipairs(game:GetService("Players"):GetPlayers()) do
-            if _v10 ~= _v1 and _x2(_v10.Character) then
-                local _v11 = _v10.Character:FindFirstChild("HumanoidRootPart")
-                if _v11 and (_v11.Position - _v9).Magnitude <= _v6 then
-                    table.insert(_v8, _v10.Character)
-                end
-            end
-        end
-        return _v8
-    end
-
-    if _v3:FindFirstChild("LeftClickRemote") then
-        local _v12 = 1
-        local _v13 = _x3(60)
-
-        for _, _v14 in ipairs(_v13) do
-            local _v15 = (_v14.HumanoidRootPart.Position - _v2:GetPivot().Position).Unit
-            pcall(function()
-                _v3.LeftClickRemote:FireServer(_v15, _v12)
-            end)
-            _v12 = _v12 + 1
-            if _v12 > 1000000000 then _v12 = 1 end
-        end
-    else
-        local _v16 = {}
-        local _v17 = _x3(60)
-        local _v18 = _v2:GetPivot().Position
-        local _v19 = nil
-
-        for _, _v20 in ipairs(_v17) do
-            if _x2(_v20) then
-                local _v21 = _v20:FindFirstChild("Head")
-                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
-                    table.insert(_v16, { _v20, _v21 })
-                    _v19 = _v21
-                end
-            end
-        end
-
-        if not _v19 then return end
-
-        pcall(function()
-            local _v22 = game:GetService("ReplicatedStorage")
-            local _v23 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterAttack")
-            local _v24 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterHit")
-
-            if _v23 and _v24 then
-                _v23:FireServer(0.000000001)
-                _v24:FireServer(_v19, _v16)
-            else
-                warn("Error: RegisterAttack or RegisterHit RemoteEvent not found!")
-            end
-        end)
-    end
-end
-
-_G.FastAttack = true
-
-spawn(function()
-    while _G.FastAttack do
-        task.wait(0.1)
-        pcall(_x1)
-    end
-end)
-
 function to(v233)
 
 pcall(function()
@@ -5832,7 +5718,7 @@ bringmob = true;
 
 EquipTool(SelectWeapon);
 
-Tween(CFrame.new(v839.HumanoidRootPart.Position + Vector3.new(0, 20, 0)));
+Tween(v1662.HumanoidRootPart.CFrame * Pos);
 
 v1662.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
 
@@ -16204,9 +16090,7 @@ if (game.Players.LocalPlayer.Character.RaceTransformed.Value == true) then
 
 _G.AutoBoneNoQuest = false;
 
-if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(-9698.473, 445.094, 6545.852)).Magnitude > 5 then  
-    Tween(CFrame.new(-9698.473, 445.094, 6545.852));  
-end
+Tween(CFrame.new(- 9698.4736328125, 445.09442138671875, 6545.8525390625));
 
 elseif (game.Players.LocalPlayer.Character.RaceTransformed.Value == false) then
 
@@ -18483,7 +18367,154 @@ ToggleSpectate:OnChanged(function(state)
     end
 end)
 
+local player = game.Players.LocalPlayer
 
+-- Create Toggle for Fast Attack
+local FastAttackToggle = v16.Hunt:AddToggle("FastAttackToggle", {
+    Title = "Fast Attack",
+    Default = false
+})
+
+-- Function to Handle Fast Attack
+function AutoAttack()
+    -- Ensure Character is Fully Loaded
+    repeat task.wait() until player.Character and player.Character:FindFirstChild("Humanoid")
+
+    local character = player.Character
+    if not character then return end
+
+    -- Find equipped tool (weapon)
+    local equippedWeapon = nil
+    for _, tool in ipairs(character:GetChildren()) do
+        if tool:IsA("Tool") then
+            equippedWeapon = tool
+            break
+        end
+    end
+
+    -- Auto Equip Weapon if not equipped
+    if not equippedWeapon then
+        for _, tool in ipairs(player.Backpack:GetChildren()) do
+            if tool:IsA("Tool") then
+                equippedWeapon = tool
+                player.Character.Humanoid:EquipTool(equippedWeapon)
+                break
+            end
+        end
+    end
+
+    if not equippedWeapon then 
+        warn("No weapon/tool found!")
+        return 
+    end
+
+    -- Function to check if entity is alive
+    local function IsAlive(entity)
+        return entity and entity:FindFirstChild("Humanoid") and entity.Humanoid.Health > 0
+    end
+
+    -- Function to get nearby targets
+    local function GetTargets(range)
+        local enemies = game:GetService("Workspace").Enemies:GetChildren()
+        local targets = {}
+        local playerPosition = character:GetPivot().Position
+
+        -- Find Nearby Mobs
+        for _, enemy in ipairs(enemies) do
+            local rootPart = enemy:FindFirstChild("HumanoidRootPart")
+            if rootPart and IsAlive(enemy) and (rootPart.Position - playerPosition).Magnitude <= range then
+                table.insert(targets, enemy)
+            end
+        end
+
+        -- Find Nearby Players (excluding self)
+        for _, otherPlayer in ipairs(game:GetService("Players"):GetPlayers()) do
+            if otherPlayer ~= player and IsAlive(otherPlayer.Character) then
+                local rootPart = otherPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if rootPart and (rootPart.Position - playerPosition).Magnitude <= range then
+                    table.insert(targets, otherPlayer.Character)
+                end
+            end
+        end
+        return targets
+    end
+
+    -- Check if weapon has "LeftClickRemote" (for attack)
+    if equippedWeapon:FindFirstChild("LeftClickRemote") then
+        local attackID = 1
+        local targets = GetTargets(60)
+
+        for _, target in ipairs(targets) do
+            local attackDirection = (target.HumanoidRootPart.Position - character:GetPivot().Position).Unit
+            pcall(function()
+                equippedWeapon.LeftClickRemote:FireServer(attackDirection, attackID)
+            end)
+            attackID = attackID + 1
+            if attackID > 1000000000 then attackID = 1 end
+        end
+    else
+        local attackData = {}
+        local targets = GetTargets(60)
+        local playerPosition = character:GetPivot().Position
+        local attackTarget = nil
+
+        for _, target in ipairs(targets) do
+            if IsAlive(target) then
+                local head = target:FindFirstChild("Head")
+                if head and (playerPosition - head.Position).Magnitude <= 60 then
+                    table.insert(attackData, { target, head })
+                    attackTarget = head
+                end
+            end
+        end
+
+        if not attackTarget then return end
+
+        -- Fire Attack Remotes
+        pcall(function()
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local RegisterAttack = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net") and ReplicatedStorage.Modules.Net:FindFirstChild("RE/RegisterAttack")
+            local RegisterHit = ReplicatedStorage:FindFirstChild("Modules") and ReplicatedStorage.Modules:FindFirstChild("Net") and ReplicatedStorage.Modules.Net:FindFirstChild("RE/RegisterHit")
+
+            if RegisterAttack and RegisterHit then
+                RegisterAttack:FireServer(0.000000001)
+                RegisterHit:FireServer(attackTarget, attackData)
+            else
+                warn("Error: Attack RemoteEvents not found!")
+            end
+        end)
+    end
+end
+
+-- **Fix for Infinite Yield Issue**
+task.spawn(function()
+    local PlayerGui = player:FindFirstChild("PlayerGui")
+    
+    -- **Check if PlayerGui exists before waiting for "Main" UI**
+    if PlayerGui then
+        local MainUI = PlayerGui:FindFirstChild("Main")
+        
+        -- If "Main" does not exist, prevent infinite yield
+        if not MainUI then
+            warn("Warning: 'Main' UI not found! Skipping UI dependency.")
+        end
+    else
+        warn("Warning: 'PlayerGui' not found! Skipping UI dependency.")
+    end
+end)
+
+-- **Toggle Function for Fast Attack**
+FastAttackToggle:OnChanged(function(state)
+    _G.FastAttack = state
+    if state then
+        spawn(function()
+            while _G.FastAttack do
+                task.wait(0.1)
+                pcall(AutoAttack) -- Continue even if an error occurs
+            end
+        end)
+    end
+end)
 
 
 
