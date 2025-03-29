@@ -18670,7 +18670,7 @@ ToggleWalkSpeed:OnChanged(function(enabled)
     local function applyWalkSpeed()
         while ToggleWalkSpeed.Value do
             if player.Character and player.Character:FindFirstChild("Humanoid") then
-                player.Character.Humanoid.WalkSpeed = 300
+                player.Character.Humanoid.WalkSpeed = 480
             end
             wait(0.1) -- Check more frequently to prevent game resets
         end
