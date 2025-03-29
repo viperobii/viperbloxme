@@ -21970,86 +21970,43 @@ spawn(function()
 	end
 end)
 
-v75:Toggle("Auto Raid Mobs", nil, function(v564)
-_G.AutoNear = v564;
+_G.FarmRaid = false
 
-if (v564 == false) then
-
-wait();
-
-Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
-
-wait();
-
-end
-
-end);
-
-v17.ToggleMobAura:SetValue(false);
+v75:Toggle("Auto Raid Mobs", _G.FarmRaid, function(v380)
+	_G.FarmRaid = v380
+	StopTween(_G.FarmRaid)
+end)
 
 spawn(function()
+	while wait() do
+		if _G.FarmRaid and game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible then
+			for _, v1739 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+				if v1739.Name and v1739:FindFirstChild("Humanoid") and v1739.Humanoid.Health > 0 then
+					if v1739:FindFirstChild("NameTag") and string.find(v1739.NameTag.Text, "Raid") then -- Only target raid mobs
+						repeat
+							wait()
+							EquipWeapon(_G.SelectWeapon)
 
-while wait() do
+							if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+								game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+							end
 
-if _G.AutoNear then
+							topos(v1739.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)) -- Move near enemy
+							v1739.HumanoidRootPart.CanCollide = false
+							Fastattack = true
+							v1739.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+							AutoFarmNearestMagnet = true
+							PosMon = v1739.HumanoidRootPart.CFrame
+						until not _G.FarmRaid or not v1739.Parent or v1739.Humanoid.Health <= 0
 
-pcall(function()
-
-for v838, v839 in pairs(game.Workspace.Enemies:GetChildren()) do
-
-if (v839:FindFirstChild("Humanoid") and v839:FindFirstChild("HumanoidRootPart") and (v839.Humanoid.Health > 0)) then
-
-if v839.Name then
-
-if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v839:FindFirstChild("HumanoidRootPart").Position).Magnitude <= 5000) then
-
-repeat
-
-wait(_G.Fast_Delay);
-
-AttackNoCoolDown();
-
-bringmob = true;
-
-AutoHaki();
-
-EquipTool(SelectWeapon);
-
-Tween(v839.HumanoidRootPart.CFrame * Pos);
-
-v839.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-
-v839.HumanoidRootPart.Transparency = 1;
-
-v839.Humanoid.JumpPower = 0;
-
-v839.Humanoid.WalkSpeed = 0;
-
-v839.HumanoidRootPart.CanCollide = false;
-
-FarmPos = v839.HumanoidRootPart.CFrame;
-
-MonFarm = v839.Name;
-
-until not _G.AutoNear or not v839.Parent or (v839.Humanoid.Health <= 0) or not game.Workspace.Enemies:FindFirstChild(v839.Name)
-
-bringmob = false;
-
-end
-
-end
-
-end
-
-end
-
-end);
-
-end
-
-end
-
-end);
+						AutoFarmNearestMagnet = false
+						Fastattack = false
+					end
+				end
+			end
+		end
+	end
+end)
 
 v75:Toggle("Auto Awakener", _G.Awakener, function(v565)
 
