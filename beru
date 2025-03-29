@@ -21925,17 +21925,20 @@ end);
 v75:Toggle("Auto Next Island", _G.Dungeon, function(v563)
 	_G.Dungeon = v563;
 	StopTween(_G.Dungeon);
-end);
+end)
 
 spawn(function()
 	while wait(0.1) do
 		pcall(function()
 			if _G.Dungeon and game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible then
-				for i = 5, 1, -1 do -- Loop from Island 5 to Island 1
+				for i = 1, 5 do -- Loop from Island 1 to Island 5
 					local island = game:GetService("Workspace")["_WorldOrigin"].Locations:FindFirstChild("Island " .. i)
 					if island then
-						topos(island.CFrame * RaidPos) -- Teleport to the island
-						break -- Stop the loop once an island is found
+						-- Tween smoothly to the island
+						TweenService, TweenInfo = game:GetService("TweenService"), TweenInfo.new(2, Enum.EasingStyle.Linear)
+						local tween = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, TweenInfo, {CFrame = island.CFrame * RaidPos})
+						tween:Play()
+						break -- Stop the loop after finding the island
 					end
 				end
 			end
@@ -21943,55 +21946,51 @@ spawn(function()
 	end
 end)
 
-Type = 1
-
+-- Positioning around the island
+RaidPos = CFrame.new(0, 25, 0)
 spawn(function()
-	while wait(0.1) do
-		if Type == 1 then
-			RaidPos = CFrame.new(0, 25, 0)
-		elseif Type == 2 then
-			RaidPos = CFrame.new(0, 25, -40)
-		elseif Type == 3 then
-			RaidPos = CFrame.new(40, 25, 0)
-		elseif Type == 4 then
-			RaidPos = CFrame.new(0, 25, 40)
-		elseif Type == 5 then
-			RaidPos = CFrame.new(-40, 25, 0)
-		end
-	end
-end)
-
-spawn(function()
-	while wait(0.9) do
-		for i = 1, 5 do
-			Type = i
+	while wait(1) do
+		local positions = {
+			CFrame.new(0, 25, 0),
+			CFrame.new(0, 25, -40),
+			CFrame.new(40, 25, 0),
+			CFrame.new(0, 25, 40),
+			CFrame.new(-40, 25, 0),
+		}
+		for _, pos in ipairs(positions) do
+			RaidPos = pos
 			wait(0.9)
 		end
 	end
 end)
 
-v75:Toggle("Kill Aura", nil, function(v564)
-    _G.Kill_Aura = v564;
-end);
+v75:Toggle("Auto Raid Mobs", nil, function(v564)
+    _G.AutoRaidMobs = v564
+end)
 
 spawn(function()
     while wait() do
-        if _G.Kill_Aura then
-            pcall(function()
-                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        repeat
-                            wait()
-                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
-                            enemy.Humanoid.Health = 0
-                            enemy.HumanoidRootPart.CanCollide = false
-                        until not _G.Kill_Aura or not enemy.Parent or enemy.Humanoid.Health <= 0
-                    end
+        if _G.AutoRaidMobs then
+            for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                    repeat
+                        wait()
+                        EquipWeapon(_G.SelectWeapon) -- Equip selected weapon
+                        if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso") -- Auto Haki
+                        end
+                        topos(enemy.HumanoidRootPart.CFrame * Pos) -- Move to enemy
+                        enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60) -- Increase hitbox
+                        enemy.HumanoidRootPart.CanCollide = false
+                        Fastattack = true
+                        PosMon = enemy.HumanoidRootPart.CFrame -- Save enemy position
+                    until not _G.AutoRaidMobs or not enemy.Parent or enemy.Humanoid.Health <= 0
+                    Fastattack = false
                 end
-            end)
+            end
         end
     end
-end);
+end)
 
 v75:Toggle("Auto Awakener", _G.Awakener, function(v565)
 
