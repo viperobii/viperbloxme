@@ -156,6 +156,12 @@ Title = "Sea Events"
 
 }),
 
+Best = v15:AddTab({
+
+Title = "Other Sea Mobs"
+
+}),
+
 ITM = v15:AddTab({
 
 Title = "Get Items"
@@ -4977,6 +4983,8 @@ end
 end
 
 end);
+
+local v48 = v16.Main:AddDropdown("DropdownSelectWeapon", {
 
 Title = "Select Weapons",
 
@@ -18483,8 +18491,171 @@ ToggleSpectate:OnChanged(function(state)
     end
 end)
 
+local vInfo = v16.Best:AddParagraph({
+
+Title = "Information !",
+
+Content = "This Area Is Beta Which Means Sometimes Works And Sometimes Bug So Please Test It So I Can Improve It And Fix The Bugs To Make It Work, Where To Report It? Go Join The Discord Server Tab Information"
+
+});
 
 
+
+local AutoKillLeviathanToggle = v16.Best:AddToggle("AutoKillLeviathanToggle", {
+    Title = "Auto Kill Leviathan",
+    Description = "Don't Use Fixing And Testing",
+    Default = false
+});
+
+AutoKillLeviathanToggle:OnChanged(function(value)
+    _G.Auto_Kill_Leviathan = value;
+end);
+
+AutoKillLeviathanToggle:SetValue(false);
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Kill_Leviathan then
+            pcall(function()
+                local seaBeasts = game:GetService("Workspace").SeaBeasts
+                local leviathan = seaBeasts:FindFirstChild("Leviathan")
+
+                if leviathan and leviathan:FindFirstChild("Humanoid") and leviathan:FindFirstChild("HumanoidRootPart") and leviathan.Humanoid.Health > 0 then
+                    repeat
+                        wait(0.2)  -- Prevents excessive CPU usage
+                        AttackNoCoolDown()
+                        AutoHaki()
+
+                        -- Equip Sword
+                        for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                            if tool.ToolTip == "Sword" then
+                                EquipTool(tool.Name)
+                                break
+                            end
+                        end
+
+                        -- Attack with Z and X skills
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+                        wait(0.5)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+
+                        -- Equip Gun
+                        for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                            if tool.ToolTip == "Gun" then
+                                EquipTool(tool.Name)
+                                break
+                            end
+                        end
+
+                        -- Attack with Z and X skills
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+                        wait(0.5)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+
+                        -- Equip Melee
+                        for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                            if tool.ToolTip == "Melee" then
+                                EquipTool(tool.Name)
+                                break
+                            end
+                        end
+
+                        -- Attack with multiple skills
+                        for _, key in ipairs({"Z", "X", "C"}) do
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+                            wait(0.5)
+                        end
+
+                        -- Equip Blox Fruit
+                        for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                            if tool.ToolTip == "Blox Fruit" then
+                                EquipTool(tool.Name)
+                                break
+                            end
+                        end
+
+                        -- Attack with Blox Fruit skills
+                        for _, key in ipairs({"Z", "X", "C", "V", "F"}) do
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+                            wait(0.5)
+                        end
+
+                    until not _G.Auto_Kill_Leviathan or not leviathan.Parent or leviathan.Humanoid.Health <= 0
+
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Leviathan") then
+                    -- Wait until Leviathan spawns before attempting to teleport
+                    repeat wait(0.5) until game:GetService("Workspace").SeaBeasts:FindFirstChild("Leviathan")
+                    Tween(game:GetService("Workspace").SeaBeasts:FindFirstChild("Leviathan").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                end
+            end)
+        end
+    end
+end)
+
+local AutoKillSeaKingToggle = v16.Best:AddToggle("AutoKillSeaKingToggle", {
+    Title = "Auto Kill Sea Beast",
+    Description = "Don't Use Fixing",
+    Default = false
+})
+
+AutoKillSeaKingToggle:OnChanged(function(value)
+    _G.Auto_Kill_Sea_King = value
+end)
+
+AutoKillSeaKingToggle:SetValue(false)
+
+spawn(function()
+    while task.wait() do
+        if not _G.Auto_Kill_Sea_King then continue end
+
+        pcall(function()
+            local seaBeast = workspace.SeaBeasts:FindFirstChild("SeaBeast1")
+            if seaBeast and seaBeast:FindFirstChild("HumanoidRootPart") and seaBeast:FindFirstChild("Humanoid") and seaBeast.Humanoid.Health > 0 then
+                -- Move above the Sea Beast's neck and aim at it
+                local targetPosition = seaBeast.HumanoidRootPart.Position + Vector3.new(0, 15, 0)
+                Tween(CFrame.new(targetPosition, seaBeast.HumanoidRootPart.Position))
+
+                local player = game.Players.LocalPlayer
+                local backpack = player.Backpack
+                local character = player.Character or player.CharacterAdded:Wait()
+                local vim = game:GetService("VirtualInputManager")
+
+                local function equipToolByType(toolType)
+                    for _, tool in pairs(backpack:GetChildren()) do
+                        if tool.ToolTip == toolType then
+                            player.Character.Humanoid:EquipTool(tool)
+                            task.wait(0.3) -- Small delay to ensure equipping
+                            return true
+                        end
+                    end
+                    return false
+                end
+
+                local function attackWithSkills()
+                    for _, key in ipairs({"Z", "X", "C", "V", "F"}) do
+                        if not _G.Auto_Kill_Sea_King then return end -- Stop if toggle is off
+                        vim:SendKeyEvent(true, key, false, game)
+                        task.wait(0.1)
+                        vim:SendKeyEvent(false, key, false, game)
+                        task.wait(0.4) -- Adjust delay to improve efficiency
+                    end
+                end
+
+                -- Equip and attack in order
+                if equipToolByType("Sword") then attackWithSkills() end
+                if equipToolByType("Blox Fruit") then attackWithSkills() end
+                if equipToolByType("Melee") then attackWithSkills() end
+                if equipToolByType("Gun") then attackWithSkills() end
+            end
+        end)
+    end
+end)
 
 
 
