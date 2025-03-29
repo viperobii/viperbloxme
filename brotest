@@ -18495,21 +18495,19 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlaceId = game.PlaceId
 
--- Low server
-local ServerHopToggle = v16.Misc:AddToggle("ServerHopToggle", {
+-- Add button instead of toggle
+v16.Player:AddButton({
     Title = "Hop to Lowest Server",
-    Default = false
-})
-
-ServerHopToggle:OnChanged(function(state)
-    if state then
+    Description = "",
+    Callback = function()
         HopToLowestServer()
     end
-end)
+})
 
 function HopToLowestServer()
     local servers = {}
     local cursor = ""
+    local foundServer = false
 
     repeat
         local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
@@ -18518,7 +18516,7 @@ function HopToLowestServer()
         end
 
         local success, response = pcall(function()
-            return HttpService:GetAsync(url)
+            return HttpService:GetAsync(url, true)
         end)
 
         if success then
@@ -18526,7 +18524,9 @@ function HopToLowestServer()
             if data and data.data then
                 for _, server in ipairs(data.data) do
                     if server.playing and server.maxPlayers and server.playing < server.maxPlayers and server.id ~= game.JobId then
-                        table.insert(servers, server.id)
+                        foundServer = true
+                        TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LocalPlayer)
+                        return
                     end
                 end
                 cursor = data.nextPageCursor or ""
@@ -18534,12 +18534,10 @@ function HopToLowestServer()
         else
             warn("Failed to fetch server list!")
         end
-        task.wait(0.2)
-    until cursor == "" or #servers > 0
+        task.wait(1) -- Added delay to avoid rate limiting
+    until cursor == "" or foundServer
 
-    if #servers > 0 then
-        TeleportService:TeleportToPlaceInstance(PlaceId, servers[1], LocalPlayer)
-    else
+    if not foundServer then
         warn("No suitable server found!")
     end
 end
