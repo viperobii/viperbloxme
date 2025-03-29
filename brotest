@@ -18372,7 +18372,7 @@ local player = game.Players.LocalPlayer
 -- Create Toggle for Fast Attack
 local FastAttackToggle = v16.Hunt:AddToggle("FastAttackToggle", {
     Title = "Fast Attack",
-    Default = false
+    Default = true
 })
 
 -- Function to Handle Fast Attack
