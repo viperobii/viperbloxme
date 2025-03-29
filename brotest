@@ -18666,15 +18666,18 @@ local ToggleWalkSpeed = v16.Hunt:AddToggle("ToggleWalkSpeed", {
 ToggleWalkSpeed:OnChanged(function(enabled)
     local player = game:GetService("Players").LocalPlayer
 
-    if enabled then
-        task.spawn(function()
-            while ToggleWalkSpeed.Value do
-                if player.Character and player.Character:FindFirstChild("Humanoid") then
-                    player.Character.Humanoid.WalkSpeed = 300
-                end
-                wait()
+    -- Function to constantly enforce WalkSpeed
+    local function applyWalkSpeed()
+        while ToggleWalkSpeed.Value do
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid.WalkSpeed = 300
             end
-        end)
+            wait(0.1) -- Check more frequently to prevent game resets
+        end
+    end
+
+    if enabled then
+        task.spawn(applyWalkSpeed)
     else
         -- Reset WalkSpeed to default (16)
         if player.Character and player.Character:FindFirstChild("Humanoid") then
@@ -18682,10 +18685,15 @@ ToggleWalkSpeed:OnChanged(function(enabled)
         end
     end
 
-    -- Ensure WalkSpeed remains after respawn
+    -- Ensure WalkSpeed is applied after respawn
     player.CharacterAdded:Connect(function(char)
         local humanoid = char:WaitForChild("Humanoid")
-        humanoid.WalkSpeed = enabled and 300 or 16
+        if ToggleWalkSpeed.Value then
+            humanoid.WalkSpeed = 300
+            task.spawn(applyWalkSpeed) -- Reapply speed after respawn
+        else
+            humanoid.WalkSpeed = 16
+        end
     end)
 end)
 
