@@ -21972,44 +21972,32 @@ end)
 
 _G.Kill_Aura = false
 
-v75:Toggle("Kill Aura", _G.Kill_Aura, function(v564)
-	_G.Kill_Aura = v564
-end)
+v75:Toggle("Kill Aura", nil, function(v564)
+    _G.Kill_Aura = v564;
+end);
 
 spawn(function()
-	while wait() do
-		if _G.Kill_Aura then
-			pcall(function()
-				for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-					if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-						repeat
-							wait()
-							if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
-								game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
-							end
-
-							-- Move towards enemy
-							topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
-							
-							-- Ensure proper hitbox
-							enemy.HumanoidRootPart.CanCollide = false
-							enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-
-							-- Attack
-							Fastattack = true
-							AutoFarmNearestMagnet = true
-
-						until not _G.Kill_Aura or not enemy.Parent or enemy.Humanoid.Health <= 0
-
-						-- Reset states
-						AutoFarmNearestMagnet = false
-						Fastattack = false
-					end
-				end
-			end)
-		end
-	end
-end)
+    while wait() do
+        if _G.Kill_Aura then
+            pcall(function()
+                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible then
+                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            pcall(function()
+                                repeat
+                                    wait()
+                                    sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                                    enemy.Humanoid.Health = 0
+                                    enemy.HumanoidRootPart.CanCollide = false
+                                until not _G.Kill_Aura or not enemy.Parent or enemy.Humanoid.Health <= 0
+                            end)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end);
 
 v75:Toggle("Auto Awakener", _G.Awakener, function(v565)
 
