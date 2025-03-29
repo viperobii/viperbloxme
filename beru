@@ -18551,40 +18551,32 @@ if World3 then
 	end);
 
 	v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
+    _G.SeaBest = v1512
 
-		_G.SeaBest = v1512;
+    StopTween(_G.SeaBest)
 
-		StopTween(_G.SeaBest);
+    if not _G.SeaBest then
+        _G.SeaSkill = false
+        Skillaimbot = false
+    end
+end)
 
-		if  not _G.SeaBest then
+function CheckSeaBeast()
+    local seaBeasts = game:GetService("Workspace"):FindFirstChild("SeaBeasts")
+    
+    if seaBeasts then
+        for _, beast in pairs(seaBeasts:GetChildren()) do
+            local humanoid = beast:FindFirstChild("Humanoid")
+            local rootPart = beast:FindFirstChild("HumanoidRootPart")
 
-			_G.SeaSkill = false;
+            if humanoid and humanoid.Health > 0 and rootPart then
+                return true
+            end
+        end
+    end
 
-			Skillaimbot = false;
-
-		end
-
-	end);
-
-	function CheckSeaBeast()
-
-		if game:GetService("Workspace"):FindFirstChild("SeaBeasts") then
-
-			for v1831, v1832 in pairs(game:GetService("Workspace").SeaBeasts:GetChildren()) do
-
-				if (v1832:FindFirstChild("Humanoid") or v1832:FindFirstChild("HumanoidRootPart") or (v1832.Humanoid.Health < 0)) then
-
-					return true;
-
-				end
-
-			end
-
-		end
-
-		return false;
-
-	end
+    return false
+end
 
 	v72:Seperator("Setting Sea Event");
 
@@ -21966,28 +21958,40 @@ end)
 
 v75:Toggle("Auto Raid Mobs", nil, function(v564)
     _G.AutoRaidMobs = v564
-end)
+
+    if not _G.AutoRaidMobs then
+        wait()
+        Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+        wait()
+    end
+end
 
 spawn(function()
     while wait() do
         if _G.AutoRaidMobs then
-            for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                    repeat
-                        wait()
-                        EquipWeapon(_G.SelectWeapon) -- Equip selected weapon
-                        if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso") -- Auto Haki
+            pcall(function()
+                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude <= 5000 then
+                            repeat
+                                wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                bringmob = true
+                                AutoHaki()
+                                EquipWeapon(_G.SelectWeapon)
+                                Tween(enemy.HumanoidRootPart.CFrame * Pos)
+                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                enemy.HumanoidRootPart.Transparency = 1
+                                enemy.Humanoid.JumpPower = 0
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.HumanoidRootPart.CanCollide = false
+                                PosMon = enemy.HumanoidRootPart.CFrame
+                            until not _G.AutoRaidMobs or not enemy.Parent or enemy.Humanoid.Health <= 0
+                            bringmob = false
                         end
-                        topos(enemy.HumanoidRootPart.CFrame * Pos) -- Move to enemy
-                        enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60) -- Increase hitbox
-                        enemy.HumanoidRootPart.CanCollide = false
-                        Fastattack = true
-                        PosMon = enemy.HumanoidRootPart.CFrame -- Save enemy position
-                    until not _G.AutoRaidMobs or not enemy.Parent or enemy.Humanoid.Health <= 0
-                    Fastattack = false
+                    end
                 end
-            end
+            end)
         end
     end
 end)
