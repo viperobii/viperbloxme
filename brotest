@@ -18657,7 +18657,37 @@ spawn(function()
     end
 end)
 
+local ToggleWalkSpeed = v16.Hunt:AddToggle("ToggleWalkSpeed", {
+    Title = "WalkSpeed",
+    Description = "Makes You Run Faster",
+    Default = false
+})
 
+ToggleWalkSpeed:OnChanged(function(enabled)
+    local player = game:GetService("Players").LocalPlayer
+
+    if enabled then
+        task.spawn(function()
+            while ToggleWalkSpeed.Value do
+                if player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid.WalkSpeed = 300
+                end
+                wait()
+            end
+        end)
+    else
+        -- Reset WalkSpeed to default (16)
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = 16
+        end
+    end
+
+    -- Ensure WalkSpeed remains after respawn
+    player.CharacterAdded:Connect(function(char)
+        local humanoid = char:WaitForChild("Humanoid")
+        humanoid.WalkSpeed = enabled and 300 or 16
+    end)
+end)
 
 
 v14:Notify({
