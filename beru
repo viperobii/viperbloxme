@@ -21970,8 +21970,6 @@ spawn(function()
 	end
 end)
 
-_G.Kill_Aura = false
-
 v75:Toggle("Kill Aura", nil, function(v564)
     _G.Kill_Aura = v564;
 end);
@@ -21980,18 +21978,14 @@ spawn(function()
     while wait() do
         if _G.Kill_Aura then
             pcall(function()
-                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Timer.Visible then
-                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            pcall(function()
-                                repeat
-                                    wait()
-                                    sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
-                                    enemy.Humanoid.Health = 0
-                                    enemy.HumanoidRootPart.CanCollide = false
-                                until not _G.Kill_Aura or not enemy.Parent or enemy.Humanoid.Health <= 0
-                            end)
-                        end
+                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        repeat
+                            wait()
+                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                            enemy.Humanoid.Health = 0
+                            enemy.HumanoidRootPart.CanCollide = false
+                        until not _G.Kill_Aura or not enemy.Parent or enemy.Humanoid.Health <= 0
                     end
                 end
             end)
