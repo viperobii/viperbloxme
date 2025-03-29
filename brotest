@@ -5200,7 +5200,7 @@ AutoHaki();
 
 EquipTool(SelectWeapon);
 
-Tween(v839.HumanoidRootPart.CFrame * Pos);
+Tween(CFrame.new(v839.HumanoidRootPart.Position + Vector3.new(0, 20, 0)));
 
 v839.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
 
@@ -5832,7 +5832,7 @@ bringmob = true;
 
 EquipTool(SelectWeapon);
 
-Tween(v1662.HumanoidRootPart.CFrame * Pos);
+Tween(CFrame.new(v839.HumanoidRootPart.Position + Vector3.new(0, 20, 0)));
 
 v1662.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
 
@@ -16204,7 +16204,9 @@ if (game.Players.LocalPlayer.Character.RaceTransformed.Value == true) then
 
 _G.AutoBoneNoQuest = false;
 
-Tween(CFrame.new(- 9698.4736328125, 445.09442138671875, 6545.8525390625));
+if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - Vector3.new(-9698.473, 445.094, 6545.852)).Magnitude > 5 then  
+    Tween(CFrame.new(-9698.473, 445.094, 6545.852));  
+end
 
 elseif (game.Players.LocalPlayer.Character.RaceTransformed.Value == false) then
 
