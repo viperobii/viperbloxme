@@ -21970,39 +21970,40 @@ spawn(function()
 	end
 end)
 
-_G.FarmNearest = false
+_G.Kill_Aura = false
 
-v75:Toggle("Auto Farm Nearest", _G.FarmNearest, function(v238)
-	_G.FarmNearest = v238
-	StopTween(_G.FarmNearest)
+v75:Toggle("Kill Aura", _G.Kill_Aura, function(v564)
+	_G.Kill_Aura = v564
 end)
 
 spawn(function()
 	while wait() do
-		if _G.FarmNearest then
+		if _G.Kill_Aura then
 			pcall(function()
-				for _, v839 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-					if v839:FindFirstChild("Humanoid") and v839:FindFirstChild("HumanoidRootPart") and v839.Humanoid.Health > 0 then
-						if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v839.HumanoidRootPart.Position).Magnitude <= 5000 then
-							repeat
-								wait()
-								EquipWeapon(_G.SelectWeapon)
+				for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+					if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+						repeat
+							wait()
+							if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+								game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+							end
 
-								if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
-									game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
-								end
+							-- Move towards enemy
+							topos(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
+							
+							-- Ensure proper hitbox
+							enemy.HumanoidRootPart.CanCollide = false
+							enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
 
-								topos(v839.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5)) -- Move near enemy
-								v839.HumanoidRootPart.CanCollide = false
-								Fastattack = true
-								v839.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-								AutoFarmNearestMagnet = true
-								PosMon = v839.HumanoidRootPart.CFrame
-							until not _G.FarmNearest or not v839.Parent or v839.Humanoid.Health <= 0
+							-- Attack
+							Fastattack = true
+							AutoFarmNearestMagnet = true
 
-							AutoFarmNearestMagnet = false
-							Fastattack = false
-						end
+						until not _G.Kill_Aura or not enemy.Parent or enemy.Humanoid.Health <= 0
+
+						-- Reset states
+						AutoFarmNearestMagnet = false
+						Fastattack = false
 					end
 				end
 			end)
