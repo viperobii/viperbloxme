@@ -18599,36 +18599,46 @@ local AutoKillSeabeast = v16.Misc:AddToggle("ToggleAutoKillSeabeast", {
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
         spawn(function() 
+            local lastPosition = nil  -- Store last valid position above water
+            
             while AutoKillSeabeast.Value do 
                 local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+
                 if seaBeast then
-                    local part = seaBeast:FindFirstChild("HumanoidRootPart")
-                    if part then
-                        local seaBeastY = part.Position.Y  -- Get Sea Beast height
-                        
-                        -- Only follow if Sea Beast is above water (adjust the Y limit if needed)
-                        if seaBeastY > 10 then  
-                            Tween(part.CFrame * CFrame.new(0, 140, 0))  -- Stay 140 studs above it
-                        end
-                        
-                        local player = game.Players.LocalPlayer
-                        local backpack = player.Backpack
+                    for _, part in pairs(seaBeast:GetDescendants()) do
+                        if part.Name == "HumanoidRootPart" then
+                            
+                            -- Check if Sea Beast is under water (assuming water is at Y = 0)
+                            if part.Position.Y > 0 then
+                                lastPosition = part.CFrame * CFrame.new(0, 400, 0)  -- Update last valid position
+                                Tween(lastPosition)  -- Move player above Sea Beast
+                            else
+                                if lastPosition then
+                                    Tween(lastPosition)  -- Stay at last known position above water
+                                end
+                            end
 
-                        for _, tool in pairs(backpack:GetChildren()) do
-                            if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                                player.Character.Humanoid:EquipTool(tool)
+                            local player = game.Players.LocalPlayer
+                            local backpack = player.Backpack
 
-                                local virtualInput = game:GetService("VirtualInputManager")
-                                virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
-                                virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                                wait(0.2)
+                            for _, tool in pairs(backpack:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
+                                        player.Character.Humanoid:EquipTool(tool)
 
-                                virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
-                                virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                                wait(0.2)
+                                        local virtualInput = game:GetService("VirtualInputManager")
+                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
 
-                                virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
-                                virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                    end
+                                end
                             end
                         end
                     end
