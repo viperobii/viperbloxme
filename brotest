@@ -18596,7 +18596,7 @@ AutoKillSeabeast:OnChanged(function(state)
                 if seaBeast then
                     for _, part in pairs(seaBeast:GetDescendants()) do
                         if part.Name == "HumanoidRootPart" then
-    Tween(part.CFrame * CFrame.new(0, 150, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+    Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
                             
                             local player = game.Players.LocalPlayer
                             local backpack = player.Backpack
