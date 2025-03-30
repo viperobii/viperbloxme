@@ -18926,40 +18926,29 @@ AutoKillSeabeast:OnChanged(function(state)
     end 
 end)
 
-local AutoRemoveRock = v16.Misc:AddToggle("ToggleAutoRemoveRock", { 
+local AutoRemoveRock = v16.Event:AddToggle("ToggleAutoRemoveRock", { 
     Title = "Auto Remove Sea Rocks", 
     Description = "Automatically removes rocks in the sea", 
     Default = false 
 })
 
--- Connect the toggle to functionality
 AutoRemoveRock:OnChanged(function()
     local enabled = AutoRemoveRock.Value
     
     if enabled then
-        -- Code to run when toggle is enabled
         print("Auto Remove Sea Rocks enabled")
-        -- Implementation for rock removal functionality
         task.spawn(function()
             while AutoRemoveRock.Value do
-                -- Find sea rocks in the game world
-                local seaRocks = workspace:FindFirstChild("SeaRocks")
-                if seaRocks then
-                    for _, rock in pairs(seaRocks:GetChildren()) do
-                        if rock:IsA("BasePart") or rock:IsA("Model") then
-                            rock:Destroy()
-                        end
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and obj.Name:lower():find("rock") then
+                        obj:Destroy()
                     end
                 end
-                
-                -- Wait before next check
-                task.wait(1)
+                task.wait(1) -- Adjust delay as needed
             end
         end)
     else
-        -- Code to run when toggle is disabled
         print("Auto Remove Sea Rocks disabled")
-        -- Any cleanup code needed when feature is turned off
     end
 end)
 
