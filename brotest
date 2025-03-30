@@ -156,6 +156,12 @@ Title = "Sea Events"
 
 }),
 
+Event = v15:AddTab({
+
+Title = "Sea Mobs"
+
+}),
+
 ITM = v15:AddTab({
 
 Title = "Get Items"
@@ -7885,7 +7891,7 @@ end
 
 });
 
-local v522 = v16.Sea:AddToggle("ToggleTerrorshark", {
+local v522 = v16.Event:AddToggle("ToggleTerrorshark", {
 
 Title = "Auto Kill Terror Shark",
 
@@ -7940,7 +7946,7 @@ spawn(function()
     end
 end);
 
-local v523 = v16.Sea:AddToggle("TogglePiranha", {
+local v523 = v16.Event:AddToggle("TogglePiranha", {
 
 Title = "Auto Kill Piranha",
 
@@ -8016,7 +8022,7 @@ end
 
 end);
 
-local v524 = v16.Sea:AddToggle("ToggleShark", {
+local v524 = v16.Event:AddToggle("ToggleShark", {
 
 Title = "Auto Kill Shark",
 
@@ -8100,7 +8106,7 @@ end
 
 end);
 
-local v525 = v16.Sea:AddToggle("ToggleFishCrew", {
+local v525 = v16.Event:AddToggle("ToggleFishCrew", {
 
 Title = "Auto Kill Fish Crew",
 
@@ -8184,7 +8190,7 @@ end
 
 end);
 
-local v526 = v16.Sea:AddToggle("ToggleShip", {
+local v526 = v16.Event:AddToggle("ToggleShip", {
 
 Title = "Auto Kill Pirate Ship",
 
@@ -8270,7 +8276,7 @@ end
 
 end);
 
-local v527 = v16.Sea:AddToggle("ToggleGhostShip", {
+local v527 = v16.Event:AddToggle("ToggleGhostShip", {
 
 Title = "Auto Kill Ghost Ship",
 
@@ -18582,7 +18588,7 @@ function ShowCamLockGUI()
 end
 
 -- Seabeast
-local AutoKillSeabeast = v16.Misc:AddToggle("ToggleAutoKillSeabeast", { 
+local AutoKillSeabeast = v16.Event:AddToggle("ToggleAutoKillSeabeast", { 
     Title = "Auto Kill Sea Beast", 
     Description = "", 
     Default = false 
