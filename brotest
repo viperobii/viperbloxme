@@ -156,12 +156,6 @@ Title = "Sea Events"
 
 }),
 
-Lol = v15:AddTab({
-
-Title = "Sea Mobs Farm"
-
-}),
-
 ITM = v15:AddTab({
 
 Title = "Get Items"
@@ -7891,14 +7885,14 @@ end
 
 });
 
-local AutoKillSeabeast = v16.Lol:AddToggle("ToggleAutoKillSeabeast", { 
+local AutoKillSeabeast = v16.Sea:AddToggle("ToggleAutoKillSeabeast", { 
     Title = "Auto Kill Sea Beast", 
     Description = "", 
     Default = false 
 })
 
 
-local v522 = v16.Lol:AddToggle("ToggleTerrorshark", {
+local v522 = v16.Sea:AddToggle("ToggleTerrorshark", {
 
 Title = "Auto Kill Terror Shark",
 
@@ -7953,7 +7947,7 @@ spawn(function()
     end
 end);
 
-local v523 = v16.Lol:AddToggle("TogglePiranha", {
+local v523 = v16.Sea:AddToggle("TogglePiranha", {
 
 Title = "Auto Kill Piranha",
 
@@ -8029,7 +8023,7 @@ end
 
 end);
 
-local v524 = v16.Lol:AddToggle("ToggleShark", {
+local v524 = v16.Sea:AddToggle("ToggleShark", {
 
 Title = "Auto Kill Shark",
 
@@ -8113,7 +8107,7 @@ end
 
 end);
 
-local v525 = v16.Lol:AddToggle("ToggleFishCrew", {
+local v525 = v16.Sea:AddToggle("ToggleFishCrew", {
 
 Title = "Auto Kill Fish Crew",
 
@@ -8197,7 +8191,7 @@ end
 
 end);
 
-local v526 = v16.Lol:AddToggle("ToggleShip", {
+local v526 = v16.Sea:AddToggle("ToggleShip", {
 
 Title = "Auto Kill Pirate Ship",
 
@@ -8283,7 +8277,7 @@ end
 
 end);
 
-local v527 = v16.Lol:AddToggle("ToggleGhostShip", {
+local v527 = v16.Sea:AddToggle("ToggleGhostShip", {
 
 Title = "Auto Kill Ghost Ship",
 
@@ -17048,7 +17042,7 @@ Content = "After You Turn On Anti Reset Account Please Make Sure You Won't Last 
 
 local v153 = v16.Banned:AddToggle("ToggleAntiBand", {
 
-Title = "Safe Mode Anti Reset Account",
+Title = "Anti Reset Account",
 
 Description = "Safe For Bounty Hunt",
 
