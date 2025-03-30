@@ -7921,6 +7921,32 @@ end
 
 end);
 
+local AutoRemoveRock = v16.Sea:AddToggle("ToggleAutoRemoveRock", { 
+    Title = "Auto Remove Sea Rocks", 
+    Description = "Best For Driving Boat No Disturbing Rocks", 
+    Default = false 
+})
+
+AutoRemoveRock:OnChanged(function()
+    local enabled = AutoRemoveRock.Value
+    
+    if enabled then
+        print("Auto Remove Sea Rocks enabled")
+        task.spawn(function()
+            while AutoRemoveRock.Value do
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and obj.Name:lower():find("rock") then
+                        obj:Destroy()
+                    end
+                end
+                task.wait(1) -- Adjust delay as needed
+            end
+        end)
+    else
+        print("Auto Remove Sea Rocks disabled")
+    end
+end)
+
 v16.Sea:AddButton({
 
 Title = "Fly To BoatDealer Tiki Outpost",
@@ -18926,31 +18952,7 @@ AutoKillSeabeast:OnChanged(function(state)
     end 
 end)
 
-local AutoRemoveRock = v16.Event:AddToggle("ToggleAutoRemoveRock", { 
-    Title = "Auto Remove Sea Rocks", 
-    Description = "Automatically removes rocks in the sea", 
-    Default = false 
-})
 
-AutoRemoveRock:OnChanged(function()
-    local enabled = AutoRemoveRock.Value
-    
-    if enabled then
-        print("Auto Remove Sea Rocks enabled")
-        task.spawn(function()
-            while AutoRemoveRock.Value do
-                for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj:IsA("BasePart") and obj.Name:lower():find("rock") then
-                        obj:Destroy()
-                    end
-                end
-                task.wait(1) -- Adjust delay as needed
-            end
-        end)
-    else
-        print("Auto Remove Sea Rocks disabled")
-    end
-end)
 
 
 v14:Notify({
