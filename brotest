@@ -18589,6 +18589,12 @@ function ShowCamLockGUI()
 end
 
 -- Seabeast
+local AutoKillSeabeast = v16.Misc:AddToggle("ToggleAutoKillSeabeast", {
+    Title = "Auto Kill Sea Beast",
+    Description = "",
+    Default = false
+})
+
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
         spawn(function() 
