@@ -18897,45 +18897,183 @@ end
 -- Seabeast
 local AutoKillSeabeast = v16.Event:AddToggle("ToggleAutoKillSeabeast", { 
     Title = "Auto Kill Sea Beast", 
-    Description = "", 
+    Description = "Automatically attacks sea beasts when they appear", 
     Default = false 
 })
 
+-- Skill cooldown tracking
+local skillCooldowns = {
+    [122] = 0, -- Z
+    [120] = 0, -- X
+    [99] = 0,  -- C
+    [118] = 0  -- V
+}
+
+-- Cooldown times in seconds (adjust these based on your abilities)
+local cooldownTimes = {
+    [122] = 4, -- Z cooldown
+    [120] = 6, -- X cooldown
+    [99] = 8,  -- C cooldown
+    [118] = 10 -- V cooldown
+}
+
+-- Safe tween function with error handling
+local function SafeTween(instance, targetCFrame, duration)
+    if not instance then return nil end
+    
+    local tweenInfo = TweenInfo.new(duration or 1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    
+    local success, tween = pcall(function()
+        return game:GetService("TweenService"):Create(instance, tweenInfo, {CFrame = targetCFrame})
+    end)
+    
+    if success and tween then
+        tween:Play()
+        return tween
+    else
+        warn("Tween creation failed:", tween)
+        return nil
+    end
+end
+
+-- Safe wait for tween completion
+local function WaitForTween(tween)
+    if not tween then return false end
+    
+    local success, error = pcall(function()
+        tween.Completed:Wait()
+    end)
+    
+    if not success then
+        warn("Tween wait failed:", error)
+        return false
+    end
+    
+    return true
+end
+
+-- Find water level safely
+local function GetWaterLevel()
+    local waterLevel = 0
+    
+    -- Try different possible water references
+    local waterPaths = {
+        game.Workspace.FoliageUnderwater.Water,
+        game.Workspace.Water,
+        game.Workspace:FindFirstChild("Water"),
+        game.Workspace:FindFirstChild("Ocean")
+    }
+    
+    for _, path in pairs(waterPaths) do
+        if path and path:IsA("BasePart") then
+            waterLevel = path.Position.Y
+            break
+        end
+    end
+    
+    -- Fallback to a reasonable default if no water found
+    if waterLevel == 0 then
+        waterLevel = 0 -- Sea level
+    end
+    
+    return waterLevel
+end
+
+-- Equip best tool
+local function EquipBestTool(humanoid, backpack)
+    if not humanoid or not backpack then return false end
+    
+    -- Priority order: Blox Fruit, Melee, Sword, Gun
+    local toolTypes = {"Blox Fruit", "Melee", "Sword", "Gun"}
+    
+    for _, toolType in ipairs(toolTypes) do
+        for _, tool in pairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool.ToolTip == toolType then
+                humanoid:EquipTool(tool)
+                return true
+            end
+        end
+    end
+    
+    -- If no preferred tool found, try to equip any tool
+    for _, tool in pairs(backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            humanoid:EquipTool(tool)
+            return true
+        end
+    end
+    
+    return false
+end
+
+-- Use skill safely with cooldown check
+local function UseSkill(key, virtualInput, game)
+    local currentTime = tick()
+    
+    -- Check if skill is off cooldown
+    if currentTime - skillCooldowns[key] >= cooldownTimes[key] then
+        -- Send key events
+        virtualInput:SendKeyEvent(true, key, false, game)
+        task.wait(0.1) -- Press duration
+        virtualInput:SendKeyEvent(false, key, false, game)
+        
+        -- Update cooldown time
+        skillCooldowns[key] = currentTime
+        return true
+    end
+    
+    return false
+end
+
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
-        spawn(function() 
+        task.spawn(function() 
             while AutoKillSeabeast.Value do 
-                local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+                -- Find sea beast with error handling
+                local seaBeast = nil
+                local success, error = pcall(function()
+                    seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+                end)
+                
+                if not success then
+                    warn("Error finding sea beast:", error)
+                    seaBeast = nil
+                end
+                
+                -- Get player references safely
                 local player = game.Players.LocalPlayer
-                local character = player.Character
+                local character = player and player.Character
                 local humanoid = character and character:FindFirstChild("Humanoid")
                 local rootPart = character and character:FindFirstChild("HumanoidRootPart")
                 
-                if seaBeast and humanoid and rootPart then
+                if seaBeast and humanoid and rootPart and humanoid.Health > 0 then
                     local targetPart = nil
                     
                     -- Find the HumanoidRootPart of the seabeast
                     for _, part in pairs(seaBeast:GetDescendants()) do
-                        if part.Name == "HumanoidRootPart" then
+                        if part.Name == "HumanoidRootPart" or part.Name == "Head" or part.Name:find("Body") then
                             targetPart = part
                             break
                         end
                     end
                     
                     if targetPart then
+                        -- Get water level safely
+                        local waterLevel = GetWaterLevel()
+                        
                         -- Check if the seabeast is underwater
-                        local isUnderwater = targetPart.Position.Y < game.Workspace.FoliageUnderwater.Water.Position.Y
+                        local isUnderwater = targetPart.Position.Y < waterLevel
                         
                         if isUnderwater then
                             -- Just hover above water, waiting for seabeast to resurface
-                            local waterY = game.Workspace.FoliageUnderwater.Water.Position.Y
-                            local hoverPosition = Vector3.new(targetPart.Position.X, waterY + 30, targetPart.Position.Z)
-                            local hoverCFrame = CFrame.new(hoverPosition)
+                            local hoverPosition = Vector3.new(targetPart.Position.X, waterLevel + 30, targetPart.Position.Z)
+                            local hoverCFrame = CFrame.new(hoverPosition, targetPart.Position)
                             
-                            -- Smooth tween to hover position
-                            local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                            local tween = game:GetService("TweenService"):Create(rootPart, tweenInfo, {CFrame = hoverCFrame})
-                            tween:Play()
+                            -- Smooth tween to hover position with error handling
+                            local tween = SafeTween(rootPart, hoverCFrame, 1)
+                            
+                            -- No need to wait for tween completion when hovering
+                            task.wait(1.5) -- Give time to move before next check
                         else
                             -- Position above seabeast with optimal attack distance
                             local idealOffset = Vector3.new(0, 20, 0)  -- Reduced vertical distance
@@ -18944,46 +19082,37 @@ AutoKillSeabeast:OnChanged(function(state)
                             -- Create a CFrame that looks directly at the seabeast for accurate aiming
                             local lookCFrame = CFrame.new(targetPosition, targetPart.Position)
                             
-                            -- Smooth tween to position
-                            local tweenInfo = TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-                            local tween = game:GetService("TweenService"):Create(rootPart, tweenInfo, {CFrame = lookCFrame})
-                            tween:Play()
-                            tween.Completed:Wait()
+                            -- Smooth tween to position with error handling
+                            local tween = SafeTween(rootPart, lookCFrame, 0.8)
+                            WaitForTween(tween)
                             
                             -- Use tools for attacking
                             local backpack = player.Backpack
-                            local equipped = false
+                            local equipped = EquipBestTool(humanoid, backpack)
                             
-                            for _, tool in pairs(backpack:GetChildren()) do
-                                if tool:IsA("Tool") and not equipped then
-                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
-                                        humanoid:EquipTool(tool)
-                                        equipped = true
-                                        
-                                        -- Aim toward seabeast before using skills
-                                        rootPart.CFrame = CFrame.new(rootPart.Position, targetPart.Position)
-                                        
-                                        local virtualInput = game:GetService("VirtualInputManager")
-                                        
-                                        -- Use skills with proper aiming and timing
-                                        local skills = {
-                                            {key = 122, delay = 0.3}, -- Z
-                                            {key = 120, delay = 0.3}, -- X
-                                            {key = 99, delay = 0.3},  -- C
-                                            {key = 118, delay = 0.3}  -- V
-                                        }
-                                        
-                                        for _, skill in ipairs(skills) do
-                                            -- Re-aim before each skill for maximum accuracy
-                                            rootPart.CFrame = CFrame.lookAt(rootPart.Position, targetPart.Position)
-                                            
-                                            -- Send key events
-                                            virtualInput:SendKeyEvent(true, skill.key, false, game)
-                                            wait(0.1) -- Press duration
-                                            virtualInput:SendKeyEvent(false, skill.key, false, game)
-                                            
-                                            wait(skill.delay)
-                                        end
+                            if equipped then
+                                -- Aim toward seabeast before using skills
+                                rootPart.CFrame = CFrame.lookAt(rootPart.Position, targetPart.Position)
+                                
+                                local virtualInput = game:GetService("VirtualInputManager")
+                                
+                                -- Use skills with proper aiming and timing
+                                local skills = {
+                                    {key = 122, delay = 0.3}, -- Z
+                                    {key = 120, delay = 0.3}, -- X
+                                    {key = 99, delay = 0.3},  -- C
+                                    {key = 118, delay = 0.3}  -- V
+                                }
+                                
+                                for _, skill in ipairs(skills) do
+                                    -- Re-aim before each skill for maximum accuracy
+                                    rootPart.CFrame = CFrame.lookAt(rootPart.Position, targetPart.Position)
+                                    
+                                    -- Use skill with cooldown check
+                                    local used = UseSkill(skill.key, virtualInput, game)
+                                    
+                                    if used then
+                                        task.wait(skill.delay)
                                     end
                                 end
                             end
@@ -18991,27 +19120,12 @@ AutoKillSeabeast:OnChanged(function(state)
                     end
                 end
                 
-                -- Reduced wait time for better responsiveness
-                wait(0.5)
+                -- More responsive wait time
+                task.wait(0.5)
             end
         end) 
     end 
 end)
-
--- Make sure you have the Tween function defined somewhere in your script
--- If not, here's a sample implementation:
-function Tween(targetCFrame)
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-    
-    if humanoidRootPart then
-        local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-        local tween = game:GetService("TweenService"):Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
-        tween:Play()
-        return tween
-    end
-end
 
 
 
