@@ -18958,50 +18958,43 @@ local WalkSpeedToggle = v16.Hunt:AddToggle("ToggleWalkSpeed", {
     Default = false
 })
 
--- Variable to store original walkspeed
+-- Variable to store original WalkSpeed
 local OriginalWalkSpeed = nil
+
+local function SetWalkSpeed(Character)
+    local Humanoid = Character:FindFirstChild("Humanoid")
+    if Humanoid then
+        if WalkSpeedToggle.Value then
+            -- Store original walkspeed only if it's not stored yet
+            if not OriginalWalkSpeed then
+                OriginalWalkSpeed = Humanoid.WalkSpeed
+            end
+            Humanoid.WalkSpeed = 300
+        else
+            -- Restore original walkspeed when toggled off
+            Humanoid.WalkSpeed = OriginalWalkSpeed or 16
+            OriginalWalkSpeed = nil -- Reset original WalkSpeed
+        end
+    end
+end
 
 WalkSpeedToggle:OnChanged(function()
     local Player = game.Players.LocalPlayer
     local Character = Player.Character or Player.CharacterAdded:Wait()
-    local Humanoid = Character:WaitForChild("Humanoid")
-    
-    if WalkSpeedToggle.Value then
-        -- Store original walkspeed before changing
-        OriginalWalkSpeed = Humanoid.WalkSpeed
-        
-        -- Set walkspeed to 300
-        Humanoid.WalkSpeed = 300
-        
-        -- Notify player
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "WalkSpeed Enabled",
-            Text = "Your walkspeed has been set to 300",
-            Duration = 3
-        })
-    else
-        -- Restore original walkspeed when toggle is turned off
-        if OriginalWalkSpeed then
-            Humanoid.WalkSpeed = OriginalWalkSpeed
-        else
-            Humanoid.WalkSpeed = 16 -- Default walkspeed if original isn't available
-        end
-        
-        -- Notify player
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "WalkSpeed Disabled",
-            Text = "Your walkspeed has been reset to normal",
-            Duration = 3
-        })
-    end
+    SetWalkSpeed(Character)
+
+    -- Notify player
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = WalkSpeedToggle.Value and "WalkSpeed Enabled" or "WalkSpeed Disabled",
+        Text = WalkSpeedToggle.Value and "Your walkspeed has been set to 300" or "Your walkspeed has been reset to normal",
+        Duration = 3
+    })
 end)
 
--- Handle character respawning
-game.Players.LocalPlayer.CharacterAdded:Connect(function(NewCharacter)
-    if WalkSpeedToggle.Value then
-        local Humanoid = NewCharacter:WaitForChild("Humanoid")
-        Humanoid.WalkSpeed = 300
-    end
+-- Ensure WalkSpeed is set properly when the character respawns
+game.Players.LocalPlayer.CharacterAdded:Connect(function(Character)
+    Character:WaitForChild("Humanoid") -- Ensure Humanoid is loaded
+    SetWalkSpeed(Character)
 end)
 
 
