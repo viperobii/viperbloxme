@@ -7891,6 +7891,56 @@ local AutoKillSeabeast = v16.Sea:AddToggle("ToggleAutoKillSeabeast", {
     Default = false 
 })
 
+AutoKillSeabeast:OnChanged(function(state) 
+    if state then 
+        spawn(function() 
+            while AutoKillSeabeast.Value do 
+                local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+                if seaBeast then
+                    for _, part in pairs(seaBeast:GetDescendants()) do
+                        if part.Name == "HumanoidRootPart" then
+                            Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+                            
+                            local player = game.Players.LocalPlayer
+                            local backpack = player.Backpack
+
+                            for _, tool in pairs(backpack:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
+                                        player.Character.Humanoid:EquipTool(tool)
+
+                                        local virtualInput = game:GetService("VirtualInputManager")
+
+                                        -- Z Skill
+                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- X Skill
+                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- C Skill
+                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- V Skill (Newly Added)
+                                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                wait()
+            end
+        end) 
+    end 
+end)
 
 local v522 = v16.Sea:AddToggle("ToggleTerrorshark", {
 
@@ -18588,57 +18638,6 @@ function ShowCamLockGUI()
     end)
 end
 
--- Seabeast
-AutoKillSeabeast:OnChanged(function(state) 
-    if state then 
-        spawn(function() 
-            while AutoKillSeabeast.Value do 
-                local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-                if seaBeast then
-                    for _, part in pairs(seaBeast:GetDescendants()) do
-                        if part.Name == "HumanoidRootPart" then
-                            Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
-                            
-                            local player = game.Players.LocalPlayer
-                            local backpack = player.Backpack
-
-                            for _, tool in pairs(backpack:GetChildren()) do
-                                if tool:IsA("Tool") then
-                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
-                                        player.Character.Humanoid:EquipTool(tool)
-
-                                        local virtualInput = game:GetService("VirtualInputManager")
-
-                                        -- Z Skill
-                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- X Skill
-                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- C Skill
-                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- V Skill (Newly Added)
-                                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                wait()
-            end
-        end) 
-    end 
-end)
 
 
 
