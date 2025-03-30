@@ -7896,69 +7896,48 @@ Default = false
 });
 
 v522:OnChanged(function(v630)
-
-_G.AutoTerrorshark = v630;
-
+    _G.AutoTerrorshark = v630;
 end);
 
 v17.ToggleTerrorshark:SetValue(false);
 
 spawn(function()
+    while wait() do
+        if _G.AutoTerrorshark then
+            pcall(function()
+                if game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark") then
+                    for _, v1445 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if v1445.Name == "Terrorshark" and v1445:FindFirstChild("Humanoid") and v1445:FindFirstChild("HumanoidRootPart") and v1445.Humanoid.Health > 0 then
+                            repeat
+                                wait(_G.Fast_Delay);
 
-while wait() do
+                                -- Force Equip Weapon
+                                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Sword" or tool.ToolTip == "Blox Fruit") then
+                                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+                                        break
+                                    end
+                                end
 
-if _G.AutoTerrorshark then
+                                -- Attack Terror Shark
+                                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Z, false, game)
+                                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Z, false, game)
 
-pcall(function()
+                                -- Ensure Proper Positioning
+                                v1445.HumanoidRootPart.CanCollide = false;
+                                v1445.Humanoid.WalkSpeed = 0;
+                                v1445.HumanoidRootPart.Size = Vector3.new(100, 100, 100);  -- Enlarged hitbox
+                                Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0));  -- Moves above shark
 
-if game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark") then
-
-for v1444, v1445 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-
-if (v1445.Name == "Terrorshark") then
-
-if (v1445:FindFirstChild("Humanoid") and v1445:FindFirstChild("HumanoidRootPart") and (v1445.Humanoid.Health > 0)) then
-
-repeat
-
-wait(_G.Fast_Delay);
-
-AttackNoCoolDown();
-
-AutoHaki();
-
-EquipTool(SelectWeapon);
-
-v1445.HumanoidRootPart.CanCollide = false;
-
-v1445.Humanoid.WalkSpeed = 0;
-
-v1445.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-
-Tween(v1445.HumanoidRootPart.CFrame * Pos);
-
-until not _G.AutoTerrorshark or not v1445.Parent or (v1445.Humanoid.Health <= 0)
-
-end
-
-end
-
-end
-
-elseif game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark") then
-
-Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2));
-
-else
-
-end
-
-end);
-
-end
-
-end
-
+                            until not _G.AutoTerrorshark or not v1445.Parent or v1445.Humanoid.Health <= 0
+                        end
+                    end
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark") then
+                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2));
+                end
+            end);
+        end
+    end
 end);
 
 local v523 = v16.Sea:AddToggle("TogglePiranha", {
@@ -18617,7 +18596,7 @@ AutoKillSeabeast:OnChanged(function(state)
                 if seaBeast then
                     for _, part in pairs(seaBeast:GetDescendants()) do
                         if part.Name == "HumanoidRootPart" then
-                            Tween(part.CFrame * CFrame.new(0, 50, 0))  -- Moves player 50 studs above the Sea Beast
+    Tween(part.CFrame * CFrame.new(0, 150, 0) * CFrame.Angles(math.rad(-90), 0, 0))
                             
                             local player = game.Players.LocalPlayer
                             local backpack = player.Backpack
