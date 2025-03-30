@@ -7905,48 +7905,47 @@ spawn(function()
     while wait() do
         if _G.AutoTerrorshark then
             pcall(function()
-                if game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark") then
-                    for _, v1445 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if v1445.Name == "Terrorshark" and v1445:FindFirstChild("Humanoid") and v1445:FindFirstChild("HumanoidRootPart") and v1445.Humanoid.Health > 0 then
-                            repeat
-                                wait(_G.Fast_Delay);
+                local terrorShark = game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark")
 
-                                -- Ensure Proper Positioning (Increased Height)
-                                v1445.HumanoidRootPart.CanCollide = false;
-                                v1445.Humanoid.WalkSpeed = 0;
-                                v1445.HumanoidRootPart.Size = Vector3.new(100, 100, 100);  -- Enlarged hitbox
-                                Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 100, 0));  -- Moves 100 studs above shark
+                if terrorShark and terrorShark:FindFirstChild("Humanoid") and terrorShark:FindFirstChild("HumanoidRootPart") and terrorShark.Humanoid.Health > 0 then
+                    repeat
+                        wait(_G.Fast_Delay)
 
-                                -- Force Equip Weapon (Added Delay to Allow Skill Use)
-                                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Sword" or tool.ToolTip == "Blox Fruit") then
-                                        game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-                                        wait(0.5) -- Small delay before switching again
-                                    end
-                                end
+                        -- Ensure Proper Positioning (Float Above Terrorshark)
+                        local targetPosition = terrorShark.HumanoidRootPart.Position + Vector3.new(0, 100, 0)
+                        Tween(CFrame.new(targetPosition, terrorShark.HumanoidRootPart.Position)) -- Look at Terrorshark
 
-                                -- Attack Terror Shark
-                                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Z, false, game)
-                                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Z, false, game)
-                                wait(0.3) -- Wait to let skill register
-
-                                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.X, false, game)
-                                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.X, false, game)
-                                wait(0.3)
-
-                                game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.C, false, game)
-                                game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.C, false, game)
-
-                            until not _G.AutoTerrorshark or not v1445.Parent or v1445.Humanoid.Health <= 0
+                        -- Force Equip Weapon (Added Delay for Smooth Execution)
+                        for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                            if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Sword" or tool.ToolTip == "Blox Fruit") then
+                                game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+                                wait(0.5) -- Small delay before using skills
+                            end
                         end
-                    end
+
+                        -- Attack Terror Shark (Aimbot to its HumanoidRootPart)
+                        local sharkCFrame = terrorShark.HumanoidRootPart.CFrame
+
+                        local function useSkill(key)
+                            game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, game)
+                            Tween(sharkCFrame) -- Aim at Terror Shark
+                            game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, game)
+                            wait(0.3)
+                        end
+
+                        useSkill(Enum.KeyCode.Z)
+                        useSkill(Enum.KeyCode.X)
+                        useSkill(Enum.KeyCode.C)
+                        useSkill(Enum.KeyCode.V)
+
+                    until not _G.AutoTerrorshark or not terrorShark.Parent or terrorShark.Humanoid.Health <= 0
                 elseif game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark") then
-                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2));
+                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
                 end
-            end);
+            end)
         end
     end
-end);
+end)
 
 local v523 = v16.Sea:AddToggle("TogglePiranha", {
 
@@ -18590,49 +18589,36 @@ function ShowCamLockGUI()
 end
 
 -- Seabeast
-local AutoKillSeabeast = v16.Misc:AddToggle("ToggleAutoKillSeabeast", { 
-    Title = "Auto Kill Sea Beast", 
-    Description = "", 
-    Default = false 
-})
-
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
         spawn(function() 
-            local lastSafePosition = nil  -- Stores the last safe position above water
-            
             while AutoKillSeabeast.Value do 
                 local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-                if seaBeast then
-                    for _, part in pairs(seaBeast:GetDescendants()) do
-                        if part.Name == "HumanoidRootPart" then
-                            if part.Position.Y > 0 then  -- Check if the Sea Beast is above water
-                                lastSafePosition = part.CFrame * CFrame.new(0, 400, 0)  -- Store last safe position
-                                Tween(lastSafePosition * CFrame.Angles(math.rad(-90), 0, 0))  -- Move above & face downward
-                                wait(0.2)  
-                            elseif lastSafePosition then
-                                Tween(lastSafePosition)  -- Stay at last safe position if Sea Beast goes underwater
-                            end
+                if seaBeast then 
+                    for _, part in pairs(seaBeast:GetDescendants()) do 
+                        if part.Name == "HumanoidRootPart" then 
+                            Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
 
-                            -- Equip Weapon & Attack
                             local player = game.Players.LocalPlayer
                             local backpack = player.Backpack
 
                             for _, tool in pairs(backpack:GetChildren()) do
-                                if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                                    player.Character.Humanoid:EquipTool(tool)
+                                if tool:IsA("Tool") then
+                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
+                                        player.Character.Humanoid:EquipTool(tool)
 
-                                    local virtualInput = game:GetService("VirtualInputManager")
-                                    virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
-                                    virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                                    wait(0.2)
+                                        local virtualInput = game:GetService("VirtualInputManager")
+                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
 
-                                    virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
-                                    virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                                    wait(0.2)
+                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
 
-                                    virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
-                                    virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                    end
                                 end
                             end
                         end
@@ -18641,7 +18627,7 @@ AutoKillSeabeast:OnChanged(function(state)
                 wait()
             end
         end) 
-    end 
+    end
 end)
 
 
