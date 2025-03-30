@@ -8099,41 +8099,133 @@ spawn(function()
     while wait() do
         if _G.AutoTerrorshark then
             pcall(function()
+                -- Check player health
+                local player = game.Players.LocalPlayer
+                local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+                local lowHealth = false
+                local healthRecoveryStartTime = 0
+                
+                if humanoid then
+                    -- Consider low health if below 30% of max health
+                    if humanoid.Health < (humanoid.MaxHealth * 0.3) then
+                        lowHealth = true
+                        healthRecoveryStartTime = tick()
+                    end
+                end
+                
                 if game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark") then
                     for _, v1445 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                         if v1445.Name == "Terrorshark" and v1445:FindFirstChild("Humanoid") and v1445:FindFirstChild("HumanoidRootPart") and v1445.Humanoid.Health > 0 then
-                            -- Auto equip melee only
-                            for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                                if tool:IsA("Tool") and tool.ToolTip == "Melee" then
-                                    game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-                                    break
+                            local flyingUp = false
+                            local lastMoveTime = 0
+                            local attackDetected = false
+                            local normalHeight = 50 -- Normal positioning at 50 studs
+                            
+                            -- Function to detect Terrorshark attacks (by animation or other indicators)
+                            local function isTerrosharkAttacking()
+                                -- Check if Terrorshark is playing attack animation
+                                if v1445:FindFirstChild("Humanoid") and v1445.Humanoid:FindFirstChild("Animator") then
+                                    local animator = v1445.Humanoid.Animator
+                                    local playingTracks = animator:GetPlayingAnimationTracks()
+                                    
+                                    for _, track in pairs(playingTracks) do
+                                        local animName = track.Animation.Name:lower()
+                                        if animName:find("attack") or animName:find("skill") or animName:find("special") then
+                                            return true
+                                        end
+                                    end
                                 end
+                                
+                                -- Additionally check for projectiles or special parts that might indicate attacks
+                                for _, child in pairs(workspace:GetChildren()) do
+                                    if child.Name:find("TerrorsharkProjectile") or child.Name:find("TerrorsharkAttack") then
+                                        return true
+                                    end
+                                end
+                                
+                                return false
                             end
                             
-                            -- Position at 70 studs
-                            v1445.HumanoidRootPart.CanCollide = false;
-                            v1445.Humanoid.WalkSpeed = 0;
-                            v1445.HumanoidRootPart.Size = Vector3.new(100, 100, 100);  -- Enlarged hitbox
-                            Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 70, 0));  -- 70 studs above shark
-                            
-                            -- Fly 160 studs every 3 seconds
-                            wait(3)
-                            if _G.AutoTerrorshark and v1445 and v1445:FindFirstChild("HumanoidRootPart") and v1445.Humanoid.Health > 0 then
-                                Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 160, 0)); -- Fly up 160 studs
-                                wait(0.5) -- Small delay before returning
-                                if _G.AutoTerrorshark and v1445 and v1445:FindFirstChild("HumanoidRootPart") and v1445.Humanoid.Health > 0 then
-                                    Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 70, 0)); -- Return to 70 studs
+                            repeat
+                                wait(_G.Fast_Delay or 0.1)
+                                
+                                -- Check player health status
+                                if humanoid then
+                                    if lowHealth then
+                                        -- Check if player has recovered enough health (5000 health in Blox Fruit)
+                                        if humanoid.Health >= 5000 or (tick() - healthRecoveryStartTime > 15) then
+                                            lowHealth = false
+                                        else
+                                            -- Stay at safe height until health recovers
+                                            if v1445 and v1445:FindFirstChild("HumanoidRootPart") then
+                                                Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 180, 0))
+                                            end
+                                            wait(1)
+                                            continue -- Skip the rest of the loop
+                                        end
+                                    elseif humanoid.Health < (humanoid.MaxHealth * 0.3) then
+                                        lowHealth = true
+                                        healthRecoveryStartTime = tick()
+                                    end
                                 end
-                            end
+                                
+                                -- Auto equip melee only (continuously check to ensure weapon is equipped)
+                                if not player.Character:FindFirstChildOfClass("Tool") then
+                                    for _, tool in pairs(player.Backpack:GetChildren()) do
+                                        if tool:IsA("Tool") and tool.ToolTip == "Melee" then
+                                            player.Character.Humanoid:EquipTool(tool)
+                                            break
+                                        end
+                                    end
+                                end
+                                
+                                -- Ensure Terrorshark properties are set correctly
+                                if v1445 and v1445:FindFirstChild("HumanoidRootPart") and v1445:FindFirstChild("Humanoid") then
+                                    v1445.HumanoidRootPart.CanCollide = false
+                                    v1445.Humanoid.WalkSpeed = 0
+                                    v1445.HumanoidRootPart.Size = Vector3.new(100, 100, 100)
+                                    
+                                    -- Detect if Terrorshark is attacking to dodge
+                                    attackDetected = isTerrosharkAttacking()
+                                    
+                                    -- Handle movement logic
+                                    local currentTime = tick()
+                                    
+                                    -- Dodge logic (takes priority)
+                                    if attackDetected and not flyingUp then
+                                        flyingUp = true
+                                        Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 170, 0)) -- Dodge to 170 studs
+                                        wait(1) -- Stay up for 1 second to avoid attack
+                                        flyingUp = false
+                                        attackDetected = false
+                                        
+                                        if v1445 and v1445:FindFirstChild("HumanoidRootPart") then
+                                            Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, normalHeight, 0)) -- Return to normal height
+                                        end
+                                    -- Regular movement pattern (every 3 seconds)
+                                    elseif currentTime - lastMoveTime >= 3 and not flyingUp and not attackDetected then
+                                        flyingUp = true
+                                        Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 160, 0))
+                                        wait(0.5)
+                                        flyingUp = false
+                                        lastMoveTime = currentTime
+                                        if v1445 and v1445:FindFirstChild("HumanoidRootPart") then
+                                            Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, normalHeight, 0))
+                                        end
+                                    elseif not flyingUp and not attackDetected then
+                                        Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, normalHeight, 0))
+                                    end
+                                end
+                            until not _G.AutoTerrorshark or not v1445 or not v1445.Parent or not v1445:FindFirstChild("Humanoid") or v1445.Humanoid.Health <= 0
                         end
                     end
                 elseif game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark") then
-                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark").HumanoidRootPart.CFrame * CFrame.new(0, 70, 0));
+                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Terrorshark").HumanoidRootPart.CFrame * CFrame.new(0, 50, 0))
                 end
-            end);
+            end)
         end
     end
-end);
+end)
 
 local v523 = v16.Event:AddToggle("TogglePiranha", {
 
@@ -18228,9 +18320,9 @@ end);
 
 local v175 = v16.Sea:AddToggle("ToggleKillAura", {
 
-Title = "Kill Aura Golem",
+Title = "Auto Instant Kill Golem",
 
-Description = "",
+Description = "Golem Instant Dead When It's Spawn",
 
 Default = false
 
@@ -18834,7 +18926,42 @@ AutoKillSeabeast:OnChanged(function(state)
     end 
 end)
 
+local AutoRemoveRock = v16.Misc:AddToggle("ToggleAutoRemoveRock", { 
+    Title = "Auto Remove Sea Rocks", 
+    Description = "Automatically removes rocks in the sea", 
+    Default = false 
+})
 
+-- Connect the toggle to functionality
+AutoRemoveRock:OnChanged(function()
+    local enabled = AutoRemoveRock.Value
+    
+    if enabled then
+        -- Code to run when toggle is enabled
+        print("Auto Remove Sea Rocks enabled")
+        -- Implementation for rock removal functionality
+        task.spawn(function()
+            while AutoRemoveRock.Value do
+                -- Find sea rocks in the game world
+                local seaRocks = workspace:FindFirstChild("SeaRocks")
+                if seaRocks then
+                    for _, rock in pairs(seaRocks:GetChildren()) do
+                        if rock:IsA("BasePart") or rock:IsA("Model") then
+                            rock:Destroy()
+                        end
+                    end
+                end
+                
+                -- Wait before next check
+                task.wait(1)
+            end
+        end)
+    else
+        -- Code to run when toggle is disabled
+        print("Auto Remove Sea Rocks disabled")
+        -- Any cleanup code needed when feature is turned off
+    end
+end)
 
 
 v14:Notify({
