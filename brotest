@@ -7885,6 +7885,13 @@ end
 
 });
 
+local AutoKillSeabeast = v16.Sea:AddToggle("ToggleAutoKillSeabeast", { 
+    Title = "Auto Kill Sea Beast", 
+    Description = "", 
+    Default = false 
+})
+
+
 local v522 = v16.Sea:AddToggle("ToggleTerrorshark", {
 
 Title = "Auto Kill Terror Shark",
@@ -18582,12 +18589,6 @@ function ShowCamLockGUI()
 end
 
 -- Seabeast
-local AutoKillSeabeast = v16.Misc:AddToggle("ToggleAutoKillSeabeast", { 
-    Title = "Auto Kill Sea Beast", 
-    Description = "", 
-    Default = false 
-})
-
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
         spawn(function() 
