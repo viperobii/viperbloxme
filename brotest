@@ -13187,27 +13187,11 @@ v16.Player:AddButton({
     Title = "Reload Players",
     Description = "",
     Callback = function()
-        -- Clear the existing player list
-        table.clear(v112)
-        
-        -- Get all current players and add them to the list
+        table.clear(v112) -- Clears the player list
         for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
             table.insert(v112, player.Name)
         end
-        
-        -- Debug output to verify the list updated
-        print("Players refreshed:", table.concat(v112, ", "))
-        
-        -- If you have a dropdown that needs updating, update it here
-        -- This is a critical step that was missing in your original code
-        -- Replace "YourPlayerDropdown" with the actual variable name of your dropdown
-        if YourPlayerDropdown then
-            YourPlayerDropdown:Refresh(v112)
-            -- or it might be one of these methods instead:
-            -- YourPlayerDropdown:SetValues(v112)
-            -- YourPlayerDropdown:Update(v112)
-            -- YourPlayerDropdown:UpdateOptions(v112)
-        end
+        print("Players refreshed:", table.concat(v112, ", ")) -- Debug output
     end
 })
 
