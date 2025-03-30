@@ -13183,17 +13183,65 @@ _G.SelectPly = v310;
 
 end);
 
-v16.Player:AddButton({
+-- Button to reload players
+local ReloadPlayersButton = v16.Player:AddButton({
     Title = "Reload Players",
-    Description = "",
-    Callback = function()
-        table.clear(v112) -- Clears the player list
-        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-            table.insert(v112, player.Name)
-        end
-        print("Players refreshed:", table.concat(v112, ", ")) -- Debug output
-    end
+    Description = "Refresh the list of players in the server"
 })
+
+ReloadPlayersButton:OnClick(function()
+    -- Clear the existing player list
+    table.clear(v112)
+    
+    -- Get all current players and add them to the list
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        table.insert(v112, player.Name)
+    end
+    
+    -- Debug output to verify the list updated
+    print("Players refreshed:", table.concat(v112, ", "))
+    
+    -- If you have a dropdown that displays the players, refresh it
+    -- This is often necessary to update UI elements
+    if v16.PlayerDropdown then
+        v16.PlayerDropdown:SetValues(v112)
+    end
+    
+    -- Notify the user that the reload was successful
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Players Reloaded",
+        Text = #v112 .. " players found in server",
+        Duration = 3
+    })
+end)
+
+-- Optional: Auto-update when players join or leave
+game:GetService("Players").PlayerAdded:Connect(function(player)
+    -- Add the new player to the list
+    table.insert(v112, player.Name)
+    print("Player added:", player.Name)
+    
+    -- Update dropdown if it exists
+    if v16.PlayerDropdown then
+        v16.PlayerDropdown:SetValues(v112)
+    end
+end)
+
+game:GetService("Players").PlayerRemoving:Connect(function(player)
+    -- Find and remove the player from the list
+    for i, name in ipairs(v112) do
+        if name == player.Name then
+            table.remove(v112, i)
+            print("Player removed:", player.Name)
+            break
+        end
+    end
+    
+    -- Update dropdown if it exists
+    if v16.PlayerDropdown then
+        v16.PlayerDropdown:SetValues(v112)
+    end
+end)
 
 -- Create Toggle
 local ToggleSpectate = v16.Player:AddToggle("ToggleSpectate", {
@@ -18952,53 +19000,7 @@ AutoKillSeabeast:OnChanged(function(state)
     end 
 end)
 
-local WalkSpeedEnabled = false
-local WalkSpeedValue = 200 -- Changed default to match slider default
 
--- Create the slider first
-local WalkSpeedSlider = v16.Hunt:AddSlider("WalkSpeedSlider", {
-    Title = "WalkSpeed",
-    Description = "Adjust your character's movement speed",
-    Default = 200,
-    Min = 10,
-    Max = 300,
-    Rounding = 5
-})
-
--- Then handle the slider's value changes
-WalkSpeedSlider:OnChanged(function(Value)
-    WalkSpeedValue = Value
-    if WalkSpeedEnabled then
-        local Player = game.Players.LocalPlayer
-        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            Player.Character.Humanoid.WalkSpeed = Value
-        end
-    end
-end)
-
--- Create the toggle
-local WalkSpeedToggle = v16.Hunt:AddToggle("WalkSpeedToggle", {
-    Title = "Enable WalkSpeed",
-    Description = "Toggle to enable or disable WalkSpeed",
-    Default = false
-})
-
--- Handle the toggle's state changes
-WalkSpeedToggle:OnChanged(function(State)
-    WalkSpeedEnabled = State
-    local Player = game.Players.LocalPlayer
-    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.WalkSpeed = State and WalkSpeedValue or 16 -- Reset to default if disabled
-    end
-end)
-
--- Ensure WalkSpeed is applied after respawn if enabled
-game.Players.LocalPlayer.CharacterAdded:Connect(function(Character)
-    local Humanoid = Character:WaitForChild("Humanoid") -- Ensure Humanoid is loaded
-    if WalkSpeedEnabled then
-        Humanoid.WalkSpeed = WalkSpeedValue
-    end
-end)
 
 
 v14:Notify({
