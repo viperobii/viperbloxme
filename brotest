@@ -18525,7 +18525,7 @@ local CamLockEnabled = false
 local CamLockTarget = nil
 
 -- Create the Aimbot Camera Button
-v16.Misc:AddButton({
+v16.Player:AddButton({
     Title = "Aimbot Camera",
     Description = "",
     Callback = function()
@@ -18596,7 +18596,7 @@ AutoKillSeabeast:OnChanged(function(state)
                 if seaBeast then
                     for _, part in pairs(seaBeast:GetDescendants()) do
                         if part.Name == "HumanoidRootPart" then
-    Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+                            Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
                             
                             local player = game.Players.LocalPlayer
                             local backpack = player.Backpack
@@ -18607,16 +18607,26 @@ AutoKillSeabeast:OnChanged(function(state)
                                         player.Character.Humanoid:EquipTool(tool)
 
                                         local virtualInput = game:GetService("VirtualInputManager")
+
+                                        -- Z Skill
                                         virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
                                         virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
                                         wait(0.2)
 
+                                        -- X Skill
                                         virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
                                         virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
                                         wait(0.2)
 
+                                        -- C Skill
                                         virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
                                         virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- V Skill (Newly Added)
+                                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
                                     end
                                 end
                             end
