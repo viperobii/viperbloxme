@@ -7895,8 +7895,8 @@ Default = false
 
 });
 
-v522:OnChanged(function(v630) 
-    _G.AutoTerrorshark = v630; 
+v522:OnChanged(function(v630)
+    _G.AutoTerrorshark = v630;
 end);
 
 v17.ToggleTerrorshark:SetValue(false);
@@ -7911,15 +7911,11 @@ spawn(function()
                             repeat
                                 wait(_G.Fast_Delay);
 
-                                -- Ensure Proper Positioning (80 Studs Above)
+                                -- Ensure Proper Positioning (Increased Height)
                                 v1445.HumanoidRootPart.CanCollide = false;
                                 v1445.Humanoid.WalkSpeed = 0;
                                 v1445.HumanoidRootPart.Size = Vector3.new(100, 100, 100);  -- Enlarged hitbox
-                                
-                                -- Move Above & Face the Shark (Aimbot)
-                                local targetPos = v1445.HumanoidRootPart.Position + Vector3.new(0, 80, 0)
-                                local lookAtCFrame = CFrame.new(targetPos, v1445.HumanoidRootPart.Position) -- Makes the player face the Terrorshark
-                                Tween(lookAtCFrame)
+                                Tween(v1445.HumanoidRootPart.CFrame * CFrame.new(0, 100, 0));  -- Moves 100 studs above shark
 
                                 -- Force Equip Weapon (Added Delay to Allow Skill Use)
                                 for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
@@ -18603,41 +18599,42 @@ local AutoKillSeabeast = v16.Misc:AddToggle("ToggleAutoKillSeabeast", {
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
         spawn(function() 
-            local lastPosition = nil  -- Store last valid position above water
+            local lastSafePosition = nil  -- Stores the last safe position above water
             
             while AutoKillSeabeast.Value do 
                 local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+                if seaBeast then
+                    for _, part in pairs(seaBeast:GetDescendants()) do
+                        if part.Name == "HumanoidRootPart" then
+                            if part.Position.Y > 0 then  -- Check if the Sea Beast is above water (Y > 0 is a general sea level)
+                                lastSafePosition = part.CFrame * CFrame.new(0, 140, 0) * CFrame.Angles(math.rad(-90), 0, 0)
+                                Tween(lastSafePosition)  -- Move to and track the Sea Beast
+                            elseif lastSafePosition then
+                                Tween(lastSafePosition)  -- Stay at the last safe position
+                            end
+                            
+                            local player = game.Players.LocalPlayer
+                            local backpack = player.Backpack
 
-                if seaBeast and seaBeast:FindFirstChild("HumanoidRootPart") then
-                    local part = seaBeast.HumanoidRootPart
-                    if part.Position.Y > 0 then
-                        lastPosition = part.CFrame * CFrame.new(0, 400, 0)  -- Move 400 studs above Sea Beast
-                        Tween(lastPosition * CFrame.Angles(math.rad(-90), 0, 0)) -- Aimbot (faces the Sea Beast)
-                    else
-                        if lastPosition then
-                            Tween(lastPosition)  -- Stay at last known position above water
-                        end
-                    end
+                            for _, tool in pairs(backpack:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
+                                        player.Character.Humanoid:EquipTool(tool)
 
-                    -- Attack Logic
-                    local player = game.Players.LocalPlayer
-                    local backpack = player.Backpack
+                                        local virtualInput = game:GetService("VirtualInputManager")
+                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
 
-                    for _, tool in pairs(backpack:GetChildren()) do
-                        if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                            player.Character.Humanoid:EquipTool(tool)
+                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
 
-                            local virtualInput = game:GetService("VirtualInputManager")
-                            virtualInput:SendKeyEvent(true, 122, false, game)
-                            virtualInput:SendKeyEvent(false, 122, false, game)
-                            wait(0.2)
-
-                            virtualInput:SendKeyEvent(true, 120, false, game)
-                            virtualInput:SendKeyEvent(false, 120, false, game)
-                            wait(0.2)
-
-                            virtualInput:SendKeyEvent(true, 99, false, game)
-                            virtualInput:SendKeyEvent(false, 99, false, game)
+                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                    end
+                                end
+                            end
                         end
                     end
                 end
@@ -18646,6 +18643,8 @@ AutoKillSeabeast:OnChanged(function(state)
         end) 
     end 
 end)
+
+
 
 
 
