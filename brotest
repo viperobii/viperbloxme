@@ -17048,25 +17048,9 @@ Content = "After You Turn On Anti Reset Account Please Make Sure You Won't Last 
 
 local v153 = v16.Banned:AddToggle("ToggleAntiBand", {
 
-Title = "Anti Reset Account",
+Title = "Safe Mode Anti Reset Account",
 
 Description = "Safe For Bounty Hunt",
-
-Default = true
-
-});
-
-v153:OnChanged(function(v384)
-
-_G.AntiBand = v384;
-
-end);
-
-local vSafeMode = v16.Banned:AddToggle("ToggleSafeMode", {
-
-Title = "Safe Mode",
-
-Description = "For Safety Main",
 
 Default = true
 
