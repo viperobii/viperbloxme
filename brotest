@@ -18953,44 +18953,50 @@ AutoKillSeabeast:OnChanged(function(state)
 end)
 
 local WalkSpeedEnabled = false
-local WalkSpeedValue = 50 -- Default value
+local WalkSpeedValue = 200 -- Changed default to match slider default
 
+-- Create the slider first
 local WalkSpeedSlider = v16.Hunt:AddSlider("WalkSpeedSlider", {
     Title = "WalkSpeed",
-    Description = "",
+    Description = "Adjust your character's movement speed",
     Default = 200,
     Min = 10,
     Max = 300,
-    Rounding = 5,
-    Callback = function(Value)
-        WalkSpeedValue = Value
-        if WalkSpeedEnabled then
-            local Player = game.Players.LocalPlayer
-            if Player.Character then
-                Player.Character.Humanoid.WalkSpeed = Value
-            end
-        end
-    end
+    Rounding = 5
 })
 
+-- Then handle the slider's value changes
+WalkSpeedSlider:OnChanged(function(Value)
+    WalkSpeedValue = Value
+    if WalkSpeedEnabled then
+        local Player = game.Players.LocalPlayer
+        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+            Player.Character.Humanoid.WalkSpeed = Value
+        end
+    end
+end)
+
+-- Create the toggle
 local WalkSpeedToggle = v16.Hunt:AddToggle("WalkSpeedToggle", {
     Title = "Enable WalkSpeed",
     Description = "Toggle to enable or disable WalkSpeed",
-    Default = false,
-    Callback = function(State)
-        WalkSpeedEnabled = State
-        local Player = game.Players.LocalPlayer
-        if Player.Character then
-            Player.Character.Humanoid.WalkSpeed = State and WalkSpeedValue or 16 -- Reset to default if disabled
-        end
-    end
+    Default = false
 })
+
+-- Handle the toggle's state changes
+WalkSpeedToggle:OnChanged(function(State)
+    WalkSpeedEnabled = State
+    local Player = game.Players.LocalPlayer
+    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+        Player.Character.Humanoid.WalkSpeed = State and WalkSpeedValue or 16 -- Reset to default if disabled
+    end
+end)
 
 -- Ensure WalkSpeed is applied after respawn if enabled
 game.Players.LocalPlayer.CharacterAdded:Connect(function(Character)
-    Character:WaitForChild("Humanoid") -- Ensure Humanoid is loaded
+    local Humanoid = Character:WaitForChild("Humanoid") -- Ensure Humanoid is loaded
     if WalkSpeedEnabled then
-        Character.Humanoid.WalkSpeed = WalkSpeedValue
+        Humanoid.WalkSpeed = WalkSpeedValue
     end
 end)
 
