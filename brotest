@@ -13183,65 +13183,33 @@ _G.SelectPly = v310;
 
 end);
 
--- Button to reload players
-local ReloadPlayersButton = v16.Player:AddButton({
+v16.Player:AddButton({
     Title = "Reload Players",
-    Description = "Refresh the list of players in the server"
-})
-
-ReloadPlayersButton:OnClick(function()
-    -- Clear the existing player list
-    table.clear(v112)
-    
-    -- Get all current players and add them to the list
-    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
-        table.insert(v112, player.Name)
-    end
-    
-    -- Debug output to verify the list updated
-    print("Players refreshed:", table.concat(v112, ", "))
-    
-    -- If you have a dropdown that displays the players, refresh it
-    -- This is often necessary to update UI elements
-    if v16.PlayerDropdown then
-        v16.PlayerDropdown:SetValues(v112)
-    end
-    
-    -- Notify the user that the reload was successful
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Players Reloaded",
-        Text = #v112 .. " players found in server",
-        Duration = 3
-    })
-end)
-
--- Optional: Auto-update when players join or leave
-game:GetService("Players").PlayerAdded:Connect(function(player)
-    -- Add the new player to the list
-    table.insert(v112, player.Name)
-    print("Player added:", player.Name)
-    
-    -- Update dropdown if it exists
-    if v16.PlayerDropdown then
-        v16.PlayerDropdown:SetValues(v112)
-    end
-end)
-
-game:GetService("Players").PlayerRemoving:Connect(function(player)
-    -- Find and remove the player from the list
-    for i, name in ipairs(v112) do
-        if name == player.Name then
-            table.remove(v112, i)
-            print("Player removed:", player.Name)
-            break
+    Description = "",
+    Callback = function()
+        -- Clear the existing player list
+        table.clear(v112)
+        
+        -- Get all current players and add them to the list
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            table.insert(v112, player.Name)
+        end
+        
+        -- Debug output to verify the list updated
+        print("Players refreshed:", table.concat(v112, ", "))
+        
+        -- If you have a dropdown that needs updating, update it here
+        -- This is a critical step that was missing in your original code
+        -- Replace "YourPlayerDropdown" with the actual variable name of your dropdown
+        if YourPlayerDropdown then
+            YourPlayerDropdown:Refresh(v112)
+            -- or it might be one of these methods instead:
+            -- YourPlayerDropdown:SetValues(v112)
+            -- YourPlayerDropdown:Update(v112)
+            -- YourPlayerDropdown:UpdateOptions(v112)
         end
     end
-    
-    -- Update dropdown if it exists
-    if v16.PlayerDropdown then
-        v16.PlayerDropdown:SetValues(v112)
-    end
-end)
+})
 
 -- Create Toggle
 local ToggleSpectate = v16.Player:AddToggle("ToggleSpectate", {
