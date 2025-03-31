@@ -18952,45 +18952,6 @@ AutoKillSeabeast:OnChanged(function(state)
     end 
 end)
 
-local SkillSection = v16.Event:AddSection("Use Skill Terror Shark");
-
--- Skill Z toggle
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-
-local SkillZ = v16.Event:AddToggle("ToggleSkillZ", {
-    Title = "Use Skill Z",
-    Description = "Automatically uses Z skill",
-    Default = true
-})
-
-local SkillX = v16.Event:AddToggle("ToggleSkillX", {
-    Title = "Use Skill X",
-    Description = "Automatically uses X skill",
-    Default = true
-})
-
-local SkillC = v16.Event:AddToggle("ToggleSkillC", {
-    Title = "Use Skill C",
-    Description = "Automatically uses C skill",
-    Default = true
-})
-
-RunService.RenderStepped:Connect(function()
-    if SkillZ.Value then
-        UserInputService:SendKeyEvent(true, Enum.KeyCode.Z, false, nil)
-        task.wait(1) -- Adjust cooldown based on skill usage delay
-    end
-    if SkillX.Value then
-        UserInputService:SendKeyEvent(true, Enum.KeyCode.X, false, nil)
-        task.wait(1)
-    end
-    if SkillC.Value then
-        UserInputService:SendKeyEvent(true, Enum.KeyCode.C, false, nil)
-        task.wait(1)
-    end
-end)
-
 
 local SkillSection = v16.Event:AddSection("Leviathan Mobs");
 
