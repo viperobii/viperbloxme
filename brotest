@@ -16334,9 +16334,9 @@ end
 
 end);
 
-local AutoKillTrialFruit = FluentUI.Race:AddToggle("ToggleKillTrialFruit", {
+local AutoKillTrialFruit = v16.Race:AddToggle("ToggleKillTrialFruit", {
     Title = "Auto Kill Players In Trial (Fruit)",
-    Description = "",
+    Description = "Automatically",
     Default = false
 });
 
