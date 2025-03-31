@@ -18955,48 +18955,105 @@ end)
 local SkillSection = v16.Event:AddSection("Use Skill Terror Shark");
 
 -- Skill Z toggle
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
 local SkillZ = v16.Event:AddToggle("ToggleSkillZ", {
     Title = "Use Skill Z",
     Description = "Automatically uses Z skill",
     Default = true
-});
+})
 
--- Skill X toggle
 local SkillX = v16.Event:AddToggle("ToggleSkillX", {
     Title = "Use Skill X",
     Description = "Automatically uses X skill",
     Default = true
-});
+})
 
--- Skill C toggle
 local SkillC = v16.Event:AddToggle("ToggleSkillC", {
     Title = "Use Skill C",
     Description = "Automatically uses C skill",
     Default = true
-});
+})
 
--- Example of how to check if a skill toggle is enabled
-SkillZ:OnChanged(function()
-    if SkillZ.Value then  -- Changed from v523.Value to SkillZ.Value
-        print("Skill Z has been enabled")
-    else
-        print("Skill Z has been disabled")
+RunService.RenderStepped:Connect(function()
+    if SkillZ.Value then
+        UserInputService:SendKeyEvent(true, Enum.KeyCode.Z, false, nil)
+        task.wait(1) -- Adjust cooldown based on skill usage delay
+    end
+    if SkillX.Value then
+        UserInputService:SendKeyEvent(true, Enum.KeyCode.X, false, nil)
+        task.wait(1)
+    end
+    if SkillC.Value then
+        UserInputService:SendKeyEvent(true, Enum.KeyCode.C, false, nil)
+        task.wait(1)
     end
 end)
 
-SkillX:OnChanged(function()
-    if SkillX.Value then  -- Changed from v524.Value to SkillX.Value
-        print("Skill X has been enabled")
-    else
-        print("Skill X has been disabled")
-    end
-end)
+-- FM MOON
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local PlaceID = game.PlaceId
 
-SkillC:OnChanged(function()
-    if SkillC.Value then  -- Changed from v525.Value to SkillC.Value
-        print("Skill C has been enabled")
-    else
-        print("Skill C has been disabled")
+-- Function to get a new server
+local function Hop()
+    local servers = {}
+    local url = "https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"
+    
+    local success, result = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(url))
+    end)
+
+    if success and result and result.data then
+        for _, server in ipairs(result.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(PlaceID, server.id, game.Players.LocalPlayer)
+                return
+            end
+        end
+    end
+end
+
+-- Toggle UI
+local MoonToggle = v16.Status:AddToggle("Auto Full Moon Hop", {
+    Title = "Auto Full Moon Hop",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFindMoon = Value
+    end
+})
+
+-- Moon Detection & Auto Hop
+spawn(function()
+    while wait(3) do -- Prevents crashes & unnecessary checks
+        if _G.AutoFindMoon then
+            local moonTexture = game:GetService("Lighting").Sky.MoonTextureId
+
+            -- If Full Moon is found, stop hopping
+            if moonTexture == "http://www.roblox.com/asset/?id=9709149052" or 
+               moonTexture == "http://www.roblox.com/asset/?id=9709149431" then
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "Full Moon Found!",
+                    Text = "You have found a Full Moon!",
+                    Icon = "http://www.roblox.com/asset/?id=95800489232564",
+                    Duration = 3
+                })
+                _G.AutoFindMoon = false -- Stop the loop when Full Moon is found
+
+            else
+                -- If not a Full Moon, hop servers
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "Not Full Moon",
+                    Text = "Switching to a new server...",
+                    Icon = "http://www.roblox.com/asset/?id=95800489232564",
+                    Duration = 2
+                })
+                wait(1)
+                Hop() -- Switch server
+            end
+        end
     end
 end)
 
