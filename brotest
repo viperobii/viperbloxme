@@ -13162,68 +13162,33 @@ table.insert(v112, v309.Name);
 end
 
 local v113 = v16.Player:AddDropdown("SelectedPly", {
-
-Title = "Select Players",
-
-Description = "",
-
-Values = v112,
-
-Multi = false,
-
-Default = 1
-
+    Title = "Select Players",
+    Description = "",
+    Values = v112,
+    Multi = false,
+    Default = 1
 });
 
 v113:SetValue(_G.SelectPly);
 
 v113:OnChanged(function(v310)
-
-_G.SelectPly = v310;
-
+    _G.SelectPly = v310;
 end);
 
 v16.Player:AddButton({
     Title = "Reload Players",
     Description = "",
     Callback = function()
-        -- Clear the existing player list
-        table.clear(v112)
-        
-        -- Get all current players and add them to the list
+        table.clear(v112) -- Clears the player list
         for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
             table.insert(v112, player.Name)
         end
+        print("Players refreshed:", table.concat(v112, ", ")) -- Debug output
         
-        -- Debug output
-        print("Players refreshed:", table.concat(v112, ", "))
-        
-        -- This is important: update the UI dropdown or whatever component 
-        -- is displaying the player list to the user
-        v16.Player:UpdateDropdown("PlayerList", v112) -- Assuming there's a dropdown named "PlayerList"
-        -- If you're using a different component or name, replace "PlayerList" with the correct identifier
+        -- Update the dropdown with the new player list
+        v113:SetValues(v112)
     end
 })
-
--- Additionally, you might want to set up a PlayerAdded event to automatically update when players join
-game:GetService("Players").PlayerAdded:Connect(function(player)
-    table.insert(v112, player.Name)
-    print("Player joined:", player.Name)
-    v16.Player:UpdateDropdown("PlayerList", v112) -- Update the UI
-end)
-
--- You can also handle when players leave
-game:GetService("Players").PlayerRemoving:Connect(function(player)
-    -- Find and remove the player from the list
-    for i, name in ipairs(v112) do
-        if name == player.Name then
-            table.remove(v112, i)
-            break
-        end
-    end
-    print("Player left:", player.Name)
-    v16.Player:UpdateDropdown("PlayerList", v112) -- Update the UI
-end)
 
 -- Create Toggle
 local ToggleSpectate = v16.Player:AddToggle("ToggleSpectate", {
@@ -13993,15 +13958,13 @@ elseif (_G.SelectIsland == "Floating Turtle") then
 
 Tween2(CFrame.new(- 13274.528320313, 531.82073974609, - 7579.22265625));
 
-if _G.SelectIsland == "Mansion" then
-    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-12468.538, 375.009, -7554.625))
+elseif (_G.SelectIsland == "Mansion") then
 
-elseif _G.SelectIsland == "Castle On The Sea" then
-    task.spawn(function()
-        task.wait(0.1) -- Small delay to improve reliability
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.509, 314.515, -3150.022))
-    end)
-end
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(- 12468.5380859375, 375.0094299316406, - 7554.62548828125));
+
+elseif (_G.SelectIsland == "Castle On The Sea") then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(- 5075.50927734375, 314.5155029296875, - 3150.0224609375));
 
 elseif (_G.SelectIsland == "Haunted Castle") then
 
