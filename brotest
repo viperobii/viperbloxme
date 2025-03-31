@@ -12486,45 +12486,91 @@ Description = "Bring The Mobs",
 });
 
 v90:OnChanged(function(v277)
-    _G.BringMob = v277;
+
+_G.BringMob = v277;
+
 end);
 
 v17.ToggleBringMob:SetValue(false);
 
 spawn(function()
-    while wait(0.1) do
-        if _G.BringMob then
-            pcall(function()
-                local mobCount = 0
-                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetDescendants()) do
-                    if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
-                        if enemy.Humanoid.Health > 0 and enemy.Name == MonFarm then
-                            if FarmPos and mobCount < 3 then
-                                enemy.HumanoidRootPart.CFrame = FarmPos * CFrame.new(math.random(-3,3), 0, math.random(-3,3)); -- Slight offset to avoid overlap
-                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-                                enemy.HumanoidRootPart.Transparency = 1;
-                                enemy.Humanoid.JumpPower = 0;
-                                enemy.Humanoid.WalkSpeed = 0;
 
-                                if enemy.Humanoid:FindFirstChild("Animator") then
-                                    enemy.Humanoid.Animator:Destroy();
-                                end
+while wait() do
 
-                                enemy.HumanoidRootPart.CanCollide = false;
-                                enemy.Head.CanCollide = false;
-                                enemy.Humanoid:ChangeState(11);
-                                enemy.Humanoid:ChangeState(14);
+pcall(function()
 
-                                sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge);
-                                
-                                mobCount = mobCount + 1
-                            end
-                        end
-                    end
-                end
-            end);
-        end
-    end
+for v733, v734 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (_G.BringMob and bringmob) then
+
+if ((v734.Name == MonFarm) and v734:FindFirstChild("Humanoid") and (v734.Humanoid.Health > 0)) then
+
+if (v734.Name == "Factory Staff") then
+
+if ((v734.HumanoidRootPart.Position - FarmPos.Position).Magnitude <= 1000000000) then
+
+v734.Head.CanCollide = false;
+
+v734.HumanoidRootPart.CanCollide = false;
+
+v734.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v734.HumanoidRootPart.CFrame = FarmPos;
+
+if v734.Humanoid:FindFirstChild("Animator") then
+
+v734.Humanoid.Animator:Destroy();
+
+end
+
+sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge);
+
+end
+
+elseif (v734.Name == MonFarm) then
+
+if ((v734.HumanoidRootPart.Position - FarmPos.Position).Magnitude <= 1000000000) then
+
+v734.HumanoidRootPart.CFrame = FarmPos;
+
+v734.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v734.HumanoidRootPart.Transparency = 1;
+
+v734.Humanoid.JumpPower = 0;
+
+v734.Humanoid.WalkSpeed = 0;
+
+if v734.Humanoid:FindFirstChild("Animator") then
+
+v734.Humanoid.Animator:Destroy();
+
+end
+
+v734.HumanoidRootPart.CanCollide = false;
+
+v734.Head.CanCollide = false;
+
+v734.Humanoid:ChangeState(11);
+
+v734.Humanoid:ChangeState(14);
+
+sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge);
+
+end
+
+end
+
+end
+
+end
+
+end
+
+end);
+
+end
+
 end);
 
 local v91 = v16.Setting:AddToggle("ToggleRemoveNotify", {
@@ -18906,7 +18952,53 @@ AutoKillSeabeast:OnChanged(function(state)
     end 
 end)
 
+local SkillSection = v16.Event:AddSection("Use Skill Terror Shark");
 
+-- Skill Z toggle
+local SkillZ = v16.Event:AddToggle("ToggleSkillZ", {
+    Title = "Use Skill Z",
+    Description = "Automatically uses Z skill",
+    Default = true
+});
+
+-- Skill X toggle
+local SkillX = v16.Event:AddToggle("ToggleSkillX", {
+    Title = "Use Skill X",
+    Description = "Automatically uses X skill",
+    Default = true
+});
+
+-- Skill C toggle
+local SkillC = v16.Event:AddToggle("ToggleSkillC", {
+    Title = "Use Skill C",
+    Description = "Automatically uses C skill",
+    Default = true
+});
+
+-- Example of how to check if a skill toggle is enabled
+SkillZ:OnChanged(function()
+    if SkillZ.Value then  -- Changed from v523.Value to SkillZ.Value
+        print("Skill Z has been enabled")
+    else
+        print("Skill Z has been disabled")
+    end
+end)
+
+SkillX:OnChanged(function()
+    if SkillX.Value then  -- Changed from v524.Value to SkillX.Value
+        print("Skill X has been enabled")
+    else
+        print("Skill X has been disabled")
+    end
+end)
+
+SkillC:OnChanged(function()
+    if SkillC.Value then  -- Changed from v525.Value to SkillC.Value
+        print("Skill C has been enabled")
+    else
+        print("Skill C has been disabled")
+    end
+end)
 
 
 v14:Notify({
