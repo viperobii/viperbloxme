@@ -18991,70 +18991,93 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- FM MOON
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
-local PlaceID = game.PlaceId
 
--- Function to get a new server
-local function Hop()
-    local servers = {}
-    local url = "https://games.roblox.com/v1/games/" .. PlaceID .. "/servers/Public?sortOrder=Asc&limit=100"
-    
-    local success, result = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet(url))
-    end)
+local ToggleFullMoon = v16.Status:AddToggle("Auto Full Moon Hop", {
 
-    if success and result and result.data then
-        for _, server in ipairs(result.data) do
-            if server.id ~= game.JobId and server.playing < server.maxPlayers then
-                TeleportService:TeleportToPlaceInstance(PlaceID, server.id, game.Players.LocalPlayer)
-                return
-            end
-        end
-    end
-end
+	Title = "Auto Full Moon Hop",
 
--- Toggle UI
-local MoonToggle = v16.Status:AddToggle("Auto Full Moon Hop", {
-    Title = "Auto Full Moon Hop",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoFindMoon = Value
-    end
+	Description = "",
+
+	Default = false,
+
+	Callback = function(Value)
+
+		_G.AutoFindMoon = Value
+
+		StopTween(_G.AutoFindMoon)
+
+	end
+
 })
 
--- Moon Detection & Auto Hop
 spawn(function()
-    while wait(3) do -- Prevents crashes & unnecessary checks
-        if _G.AutoFindMoon then
-            local moonTexture = game:GetService("Lighting").Sky.MoonTextureId
 
-            -- If Full Moon is found, stop hopping
-            if moonTexture == "http://www.roblox.com/asset/?id=9709149052" or 
-               moonTexture == "http://www.roblox.com/asset/?id=9709149431" then
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Full Moon Found!",
-                    Text = "You have found a Full Moon!",
-                    Icon = "http://www.roblox.com/asset/?id=95800489232564",
-                    Duration = 3
-                })
-                _G.AutoFindMoon = false -- Stop the loop when Full Moon is found
+	while wait() do
 
-            else
-                -- If not a Full Moon, hop servers
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "Not Full Moon",
-                    Text = "Switching to a new server...",
-                    Icon = "http://www.roblox.com/asset/?id=95800489232564",
-                    Duration = 2
-                })
-                wait(1)
-                Hop() -- Switch server
-            end
-        end
-    end
+		if _G.AutoFindMoon then
+
+			if game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149052" or game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149431" then
+
+				wait(2.0)
+
+			elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709143733" then
+
+				Hop()
+
+				game.StarterGui:SetCore("SendNotification", {
+
+					Title = "Notification",
+
+					Text = "Not Find FullMoon Let’s Hop" ,
+
+					Icon = "http://www.roblox.com/asset/?id=95800489232564",
+
+					Duration = 2.5
+
+				})
+
+			elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709150401" then
+
+				Hop()
+
+				game.StarterGui:SetCore("SendNotification", {
+
+					Title = "Notification",
+
+					Text = "Not Find FullMoon Let’s Hop" ,
+
+					Icon = "http://www.roblox.com/asset/?id=95800489232564",
+
+					Duration = 2.5
+
+				})
+
+			elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149680" then
+
+				Hop()
+
+				game.StarterGui:SetCore("SendNotification", {
+
+					Title = "Notification",
+
+					Text = "Not Find FullMoon Let’s Hop" ,
+
+					Icon = "http://www.roblox.com/asset/?id=95800489232564",
+
+					Duration = 2.5
+
+				})
+
+			else
+
+				Hop()
+
+			end
+
+		end
+
+	end
+
 end)
 
 
