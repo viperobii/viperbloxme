@@ -16334,6 +16334,105 @@ end
 
 end);
 
+local AutoKillTrialFruit = FluentUI.Race:AddToggle("ToggleKillTrialFruit", {
+    Title = "Auto Kill Players In Trial (Fruit)",
+    Description = "",
+    Default = false
+});
+
+AutoKillTrialFruit:OnChanged(function(value)
+    _G.AutoKillTrialFruit = value;
+end);
+
+MainSection.ToggleKillTrialFruit:SetValue(false);
+
+spawn(function()
+    while wait() do
+        pcall(function()
+            if _G.AutoKillTrialFruit then
+                for _, player in pairs(game:GetService("Players"):GetChildren()) do
+                    if (player.Name and (player.Name ~= game.Players.LocalPlayer.Name) and 
+                        player.Character and player.Character:FindFirstChild("HumanoidRootPart") and
+                        ((player.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100)) then
+                        
+                        if (player.Character.Humanoid.Health > 0) then
+                            repeat
+                                wait(_G.Fast_Delay);
+                                
+                                -- Equip fruit instead of melee weapon
+                                EquipFruit(); -- You'll need to implement this function
+                                
+                                AutoHaki();
+                                
+                                -- Position yourself near the target
+                                Tween(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)); -- Positioned above for better fruit attacks
+                                
+                                player.Character.HumanoidRootPart.CanCollide = false;
+                                player.Character.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+                                
+                                -- Use fruit attacks
+                                UseFruitAttack(); -- You'll need to implement this function
+                                
+                            until not _G.AutoKillTrialFruit or not player.Parent or (player.Character.Humanoid.Health <= 0)
+                        end
+                    end
+                end
+            end
+        end);
+    end
+end);
+
+-- Function to equip the fruit
+function EquipFruit()
+    local backpack = game.Players.LocalPlayer.Backpack
+    local character = game.Players.LocalPlayer.Character
+    
+    -- Find any fruit tool in backpack or character
+    local fruitTool = nil
+    
+    -- Check character first
+    for _, tool in pairs(character:GetChildren()) do
+        if tool:IsA("Tool") and tool.ToolTip == "Blox Fruit" then
+            fruitTool = tool
+            break
+        end
+    end
+    
+    -- Check backpack if not found in character
+    if not fruitTool then
+        for _, tool in pairs(backpack:GetChildren()) do
+            if tool:IsA("Tool") and tool.ToolTip == "Blox Fruit" then
+                fruitTool = tool
+                character.Humanoid:EquipTool(tool)
+                break
+            end
+        end
+    end
+end
+
+-- Function to use fruit attacks
+function UseFruitAttack()
+    -- Press Z, X, C, V, F keys to use fruit abilities
+    -- You can customize this based on which fruit abilities you want to use
+    
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game)
+    wait(0.1)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "Z", false, game)
+    
+    wait(0.5)
+    
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game)
+    wait(0.1)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "X", false, game)
+    
+    wait(0.5)
+    
+    game:GetService("VirtualInputManager"):SendKeyEvent(true, "C", false, game)
+    wait(0.1)
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "C", false, game)
+end
+
+
 local v56 = v16.Race:AddSection("Training");
 
 local v147 = v16.Race:AddToggle("ToggleFarmRace", {
