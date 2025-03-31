@@ -18953,11 +18953,11 @@ AutoKillSeabeast:OnChanged(function(state)
 end)
 
 
-local SkillSection = v16.Event:AddSection("Leviathan Mobs");
+local SkillSection = v16.Event:AddSection("Leviathan Mobs (Beta)");
 
 local AutoKillLeviathan = v16.Event:AddToggle("ToggleAutoKillLeviathan", { 
     Title = "Auto Kill Leviathan", 
-    Description = "Automatically attacks Leviathan using all skills", 
+    Description = "", 
     Default = false 
 })
 
@@ -18971,6 +18971,14 @@ AutoKillLeviathan:OnChanged(function(state)
                     if humanoidRootPart then
                         -- Move to Leviathan (adjusted height to prevent getting hit)
                         Tween(humanoidRootPart.CFrame * CFrame.new(0, 460, 0))
+
+                        -- **AIM at Leviathan**
+                        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(
+                            CFrame.lookAt(
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.Position, 
+                                humanoidRootPart.Position
+                            )
+                        )
 
                         local player = game.Players.LocalPlayer
                         local backpack = player.Backpack
@@ -19017,7 +19025,7 @@ end)
 
 local AutoAttackSegments = v16.Event:AddToggle("ToggleAutoAttackSegments", { 
     Title = "Auto Attack Leviathan Segments", 
-    Description = "Automatically attacks Leviathan's segments using all skills", 
+    Description = "Attacks The Segments Of Leviathan", 
     Default = false 
 })
 
