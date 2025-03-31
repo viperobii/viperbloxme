@@ -18992,92 +18992,138 @@ RunService.RenderStepped:Connect(function()
 end)
 
 
-local ToggleFullMoon = v16.Status:AddToggle("Auto Full Moon Hop", {
+local SkillSection = v16.Event:AddSection("Leviathan Mobs");
 
-	Title = "Auto Full Moon Hop",
-
-	Description = "",
-
-	Default = false,
-
-	Callback = function(Value)
-
-		_G.AutoFindMoon = Value
-
-		StopTween(_G.AutoFindMoon)
-
-	end
-
+local AutoKillLeviathan = v16.Event:AddToggle("ToggleAutoKillLeviathan", { 
+    Title = "Auto Kill Leviathan", 
+    Description = "Automatically attacks Leviathan using all skills", 
+    Default = false 
 })
 
-spawn(function()
+AutoKillLeviathan:OnChanged(function(state) 
+    if state then 
+        spawn(function() 
+            while AutoKillLeviathan.Value do 
+                local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("Leviathan")
+                if seaBeast then
+                    local humanoidRootPart = seaBeast:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        -- Move to Leviathan (adjusted height to prevent getting hit)
+                        Tween(humanoidRootPart.CFrame * CFrame.new(0, 460, 0))
 
-	while wait() do
+                        local player = game.Players.LocalPlayer
+                        local backpack = player.Backpack
+                        local virtualInput = game:GetService("VirtualInputManager")
 
-		if _G.AutoFindMoon then
+                        -- Equip weapons and use skills
+                        for _, tool in pairs(backpack:GetChildren()) do
+                            if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
+                                player.Character.Humanoid:EquipTool(tool)
 
-			if game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149052" or game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149431" then
+                                -- Z Skill
+                                virtualInput:SendKeyEvent(true, "Z", false, game)
+                                virtualInput:SendKeyEvent(false, "Z", false, game)
+                                wait(0.2)
 
-				wait(2.0)
+                                -- X Skill
+                                virtualInput:SendKeyEvent(true, "X", false, game)
+                                virtualInput:SendKeyEvent(false, "X", false, game)
+                                wait(0.2)
 
-			elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709143733" then
+                                -- C Skill
+                                virtualInput:SendKeyEvent(true, "C", false, game)
+                                virtualInput:SendKeyEvent(false, "C", false, game)
+                                wait(0.2)
 
-				Hop()
+                                -- V Skill
+                                virtualInput:SendKeyEvent(true, "V", false, game)
+                                virtualInput:SendKeyEvent(false, "V", false, game)
+                                wait(0.2)
 
-				game.StarterGui:SetCore("SendNotification", {
+                                -- F Skill (If needed for mobility)
+                                virtualInput:SendKeyEvent(true, "F", false, game)
+                                virtualInput:SendKeyEvent(false, "F", false, game)
+                                wait(0.2)
+                            end
+                        end
+                    end
+                end
+                wait()
+            end
+        end) 
+    end 
+end)
 
-					Title = "Notification",
+local AutoAttackSegments = v16.Event:AddToggle("ToggleAutoAttackSegments", { 
+    Title = "Auto Attack Leviathan Segments", 
+    Description = "Automatically attacks Leviathan's segments using all skills", 
+    Default = false 
+})
 
-					Text = "Not Find FullMoon Let’s Hop" ,
+AutoAttackSegments:OnChanged(function(state) 
+    if state then 
+        spawn(function() 
+            while AutoAttackSegments.Value do 
+                wait(1) -- Prevents excessive loop cycles
+                
+                local map = game:GetService("Workspace").Map
+                local seaBeasts = game:GetService("Workspace").SeaBeasts
 
-					Icon = "http://www.roblox.com/asset/?id=95800489232564",
+                if not map:FindFirstChild("FrozenHeart") then -- Ensures event hasn't ended
+                    local cachedSegment = Leviathan and Leviathan.Segment
 
-					Duration = 2.5
+                    if cachedSegment and cachedSegment:GetAttribute("HealthEnabled") and IsAlive(cachedSegment) then
+                        AttackLeviathanSegment(cachedSegment)
+                    else
+                        -- Look for available Leviathan segments
+                        for _, segment in ipairs(seaBeasts:GetChildren()) do
+                            if segment:IsA("Model") and segment.Name:find("Leviathan") and segment:GetAttribute("HealthEnabled") and IsAlive(segment) then
+                                Leviathan.Segment = segment
+                                AttackLeviathanSegment(segment)
+                                break -- Stops at the first valid segment
+                            end
+                        end
+                    end
 
-				})
+                    -- Auto Use Skills
+                    local player = game.Players.LocalPlayer
+                    local backpack = player.Backpack
+                    local virtualInput = game:GetService("VirtualInputManager")
 
-			elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709150401" then
+                    for _, tool in pairs(backpack:GetChildren()) do
+                        if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
+                            player.Character.Humanoid:EquipTool(tool)
 
-				Hop()
+                            -- Z Skill
+                            virtualInput:SendKeyEvent(true, "Z", false, game)
+                            virtualInput:SendKeyEvent(false, "Z", false, game)
+                            wait(0.2)
 
-				game.StarterGui:SetCore("SendNotification", {
+                            -- X Skill
+                            virtualInput:SendKeyEvent(true, "X", false, game)
+                            virtualInput:SendKeyEvent(false, "X", false, game)
+                            wait(0.2)
 
-					Title = "Notification",
+                            -- C Skill
+                            virtualInput:SendKeyEvent(true, "C", false, game)
+                            virtualInput:SendKeyEvent(false, "C", false, game)
+                            wait(0.2)
 
-					Text = "Not Find FullMoon Let’s Hop" ,
+                            -- V Skill
+                            virtualInput:SendKeyEvent(true, "V", false, game)
+                            virtualInput:SendKeyEvent(false, "V", false, game)
+                            wait(0.2)
 
-					Icon = "http://www.roblox.com/asset/?id=95800489232564",
-
-					Duration = 2.5
-
-				})
-
-			elseif game:GetService("Lighting").Sky.MoonTextureId == "http://www.roblox.com/asset/?id=9709149680" then
-
-				Hop()
-
-				game.StarterGui:SetCore("SendNotification", {
-
-					Title = "Notification",
-
-					Text = "Not Find FullMoon Let’s Hop" ,
-
-					Icon = "http://www.roblox.com/asset/?id=95800489232564",
-
-					Duration = 2.5
-
-				})
-
-			else
-
-				Hop()
-
-			end
-
-		end
-
-	end
-
+                            -- F Skill (Mobility or final attack)
+                            virtualInput:SendKeyEvent(true, "F", false, game)
+                            virtualInput:SendKeyEvent(false, "F", false, game)
+                            wait(0.2)
+                        end
+                    end
+                end
+            end
+        end) 
+    end 
 end)
 
 
