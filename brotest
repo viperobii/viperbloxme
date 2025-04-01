@@ -17247,9 +17247,9 @@ end
 
 end);
 
-local v56 = v16.Sea:AddSection("Leviathan");
+local v56 = v16.Levi:AddSection("Leviathan");
 
-v16.Sea:AddButton({
+v16.Levi:AddButton({
 
 Title = "Buy Spy Talk Leviathan",
 
@@ -17263,7 +17263,7 @@ end
 
 });
 
-local v155 = v16.Sea:AddToggle("ToggleTPFrozenDimension", {
+local v155 = v16.Levi:AddToggle("ToggleTPFrozenDimension", {
 
 Title = "Fly To Frozen Dimension Island",
 
@@ -17311,7 +17311,7 @@ end);
 
 if Sea3 then
 
-local v561 = v16.Sea:AddParagraph({
+local v561 = v16.Levi:AddParagraph({
 
 Title = "Spy Talk Leviathan Status ",
 
