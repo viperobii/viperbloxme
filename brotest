@@ -180,6 +180,18 @@ Title = "Mirage Island & Moon"
 
 }),
 
+Kitsune = v15:AddTab({
+
+Title = "Tab Kitsune Island"
+
+}),
+
+Draco = v15:AddTab({
+
+Title = "Tab Draco Race"
+
+}),
+
 ITM = v15:AddTab({
 
 Title = "Get Items"
@@ -6755,9 +6767,7 @@ end);
 
 if Sea3 then
 
-local v498 = v16.Sea:AddSection("Kitsune Island");
-
-local v499 = v16.Sea:AddParagraph({
+local v499 = v16.Kitsune:AddParagraph({
 
 Title = "Kitsune Island Status",
 
@@ -6793,7 +6803,7 @@ end);
 
 end);
 
-local v500 = v16.Sea:AddToggle("ToggleEspKitsune", {
+local v500 = v16.Kitsune:AddToggle("ToggleEspKitsune", {
 
 Title = "Kitsune Island ESP",
 
@@ -6881,7 +6891,7 @@ end
 
 end
 
-local v501 = v16.Sea:AddToggle("ToggleTPKitsune", {
+local v501 = v16.Kitsune:AddToggle("ToggleTPKitsune", {
     Title = "Auto Teleport To Kitsune Island",
     Description = "",
     Default = false
@@ -6924,7 +6934,7 @@ spawn(function()
     end
 end)
 
-local v502 = v16.Sea:AddToggle("ToggleCollectAzure", {
+local v502 = v16.Kitsune:AddToggle("ToggleCollectAzure", {
 
 Title = "Auto Collect Azure Ember",
 
@@ -6966,7 +6976,7 @@ end);
 
 end
 
-v16.Sea:AddButton({
+v16.Kitsune:AddButton({
 
 Title = "Auto Exchange Blue Soul",
 
@@ -17360,9 +17370,7 @@ end);
 
 end
 
-local v156 = v16.Sea:AddSection("Draco");
-
-local v157 = v16.Sea:AddToggle("ToggleBlazeEmber", {
+local v157 = v16.Draco:AddToggle("ToggleBlazeEmber", {
 
 Title = "Auto Collect Blaze Ember",
 
@@ -17396,67 +17404,76 @@ end
 
 end);
 
-local v158 = v16.Sea:AddToggle("ToggleReceiveQuest", {
-
-Title = "Accept Red Fire Quest",
-
-Description = "Turn it on once to receive it, then turn it off and on again to receive another.",
-
-Default = false
-
+local v158 = v16.Draco:AddToggle("ToggleReceiveQuest", {
+    Title = "Accept Red Fire Quest",
+    Description = "Turn it on once to receive it, then turn it off and on again to receive another.",
+    Default = false
 });
 
 v158:OnChanged(function(v388)
+    _G.AutoReceiveQuest = v388;
 
-_G.AutoReceiveQuest = v388;
+    if _G.AutoReceiveQuest then
+        -- Move to entrance position for quest
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, -334.9649963378906));
+        Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938));  -- Assuming Tween2 moves the player to the quest location.
 
-if _G.AutoReceiveQuest then
+        -- Handling quest acceptance and check
+        spawn(function()
+            pcall(function()
+                while wait(1) do  -- Wait time adjusted to 1 second for smoother performance.
+                    if _G.AutoReceiveQuest then
+                        -- Request the quest
+                        local requestQuest = {
+                            [1] = {
+                                Context = "RequestQuest"
+                            }
+                        };
+                        game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(requestQuest));
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, - 334.9649963378906));
+                        -- Check if the quest is successfully accepted
+                        local checkQuest = {
+                            [1] = {
+                                Context = "Check"
+                            }
+                        };
+                        local result = game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(checkQuest));
 
-Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938));
+                        -- If quest is accepted, perform necessary actions to complete it
+                        if result then
+                            -- Perform quest completion logic (replace with specific quest actions)
+                            -- For example, interact with certain objects, defeat enemies, etc.
 
-spawn(function()
+                            -- Example: Assuming the quest requires interacting with an NPC
+                            -- If your quest requires actions like defeating enemies, use additional logic to perform those actions.
 
-pcall(function()
-
-while wait() do
-
-local v874 = {
-
-[1] = {
-
-Context = "RequestQuest"
-
-}
-
-};
-
-game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(v874));
-
-local v875 = {
-
-[1] = {
-
-Context = "Check"
-
-}
-
-};
-
-local v876 = game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(v875));
-
-end
-
+                            -- Here is an example of completing an NPC interaction:
+                            local interactNpc = {
+                                [1] = {
+                                    Context = "InteractNPC"
+                                }
+                            };
+                            game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(interactNpc));
+                            
+                            -- Or if it’s about defeating enemies or specific actions, do it here
+                            -- Assuming you have a method to defeat the enemies (this is an example, modify it accordingly)
+                            -- local defeatEnemies = {
+                            --     [1] = {
+                            --         Context = "DefeatEnemies"
+                            --     }
+                            -- };
+                            -- game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(defeatEnemies));
+                        end
+                    else
+                        break  -- Stop the loop if the toggle is turned off
+                    end
+                end
+            end);
+        end);
+    end
 end);
 
-end);
-
-end
-
-end);
-
-local v159 = v16.Sea:AddParagraph({
+local v159 = v16.Draco:AddParagraph({
 
 Title = "Red Fire Quest Status",
 
@@ -17514,7 +17531,7 @@ end);
 
 end);
 
-local v160 = v16.Sea:AddToggle("ToggleHydraTree", {
+local v160 = v16.Draco:AddToggle("ToggleHydraTree", {
 
 Title = "Chop Tree On Hydra Island",
 
@@ -17646,7 +17663,7 @@ end
 
 end);
 
-v156:AddButton({
+v16.Draco:AddButton({
 
 Title = "Teleport / Fly To Dragon Dojo",
 
@@ -17662,7 +17679,7 @@ end
 
 });
 
-v156:AddButton({
+v16.Draco:AddButton({
 
 Title = "Auto Craft Volcanic Magnet",
 
@@ -17686,7 +17703,7 @@ end
 
 });
 
-local v164 = v16.Sea:AddToggle("ToggleCollectFireFlowers", {
+local v164 = v16.Draco:AddToggle("ToggleCollectFireFlowers", {
 
 Title = "Auto Collect Fire Flowers",
 
@@ -17748,7 +17765,7 @@ end
 
 end);
 
-local v165 = v16.Sea:AddToggle("ToggleWhiteBelt", {
+local v165 = v16.Draco:AddToggle("ToggleWhiteBelt", {
 
 Title = "Grind Whitebelt",
 
@@ -17806,7 +17823,7 @@ end
 
 end);
 
-local v166 = v16.Sea:AddParagraph({
+local v166 = v16.Draco:AddParagraph({
 
 Title = "Complete Draco Trial Coming Soon",
 
@@ -17814,7 +17831,7 @@ Content = ""
 
 });
 
-local v167 = v16.Sea:AddToggle("ToggleTrialTeleport", {
+local v167 = v16.Draco:AddToggle("ToggleTrialTeleport", {
 
 Title = "Teleport To Draco Trial Door",
 
