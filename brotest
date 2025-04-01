@@ -18923,52 +18923,35 @@ AutoAttackSegments:OnChanged(function(state)
     end 
 end)
 
-
-local moonStatusSection = v16.Home:AddSection("Moon Status");
-
--- New paragraph for the Full Moon Countdown
 local fullMoonParagraph = v16.Home:AddParagraph({
-    Title = "Full Moon Countdown",
-    Content = "" -- This will be updated with the countdown
+    Title = "Full Moon Status",
+    Content = "Full Moon: Checking..."
 });
-
--- Function to format the time in minutes
-local function formatTime(seconds)
-    local minutes = math.floor(seconds / 60)
-    return string.format("Full Moon: In %d minutes", minutes)
-end
 
 task.spawn(function()
     while task.wait() do
         pcall(function()
-            local moonTexture = game:GetService("Lighting").Sky.MoonTextureId
+            local moonTexture = game:GetService("Lighting").Sky.MoonTextureId;
 
-            -- Determine the time remaining for the Full Moon based on the moon texture ID
-            if moonTexture == "http://www.roblox.com/asset/?id=9709149431" then
-                -- Full Moon (100%)
-                FullMoonStatus = "Full Moon: Now"
-            elseif moonTexture == "http://www.roblox.com/asset/?id=9709149052" then
-                -- 75% Moon (Time remaining to Full Moon)
-                FullMoonStatus = formatTime(180) -- 3 minutes remaining
-            elseif moonTexture == "http://www.roblox.com/asset/?id=9709143733" then
-                -- 50% Moon (Time remaining to Full Moon)
-                FullMoonStatus = formatTime(240) -- 4 minutes remaining
-            elseif moonTexture == "http://www.roblox.com/asset/?id=9709150401" then
-                -- 25% Moon (Time remaining to Full Moon)
-                FullMoonStatus = formatTime(300) -- 5 minutes remaining
-            elseif moonTexture == "http://www.roblox.com/asset/?id=9709149680" then
-                -- 15% Moon (Time remaining to Full Moon)
-                FullMoonStatus = formatTime(360) -- 6 minutes remaining
+            if (moonTexture == "http://www.roblox.com/asset/?id=9709149431") then
+                FullMoonStatus = "Full Moon: Now";
+            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149052") then
+                FullMoonStatus = "Full Moon in 3 minutes";
+            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709143733") then
+                FullMoonStatus = "Full Moon in 4 minutes";
+            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709150401") then
+                FullMoonStatus = "Full Moon in 5 minutes";
+            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149680") then
+                FullMoonStatus = "Full Moon in 6 minutes";
             else
-                -- No full moon in cycle
-                FullMoonStatus = "Full Moon: Not in cycle"
+                FullMoonStatus = "No full moon in cycle";
             end
+        end);
 
-            -- Update the UI paragraph content with the Full Moon status
-            fullMoonParagraph.Content = FullMoonStatus
-        end)
+        fullMoonParagraph:SetDesc("Full Moon Status: " .. FullMoonStatus);
     end
-end)
+end);
+
 
 
 v14:Notify({
