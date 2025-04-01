@@ -18928,21 +18928,32 @@ local fullMoonParagraph = v16.Home:AddParagraph({
     Content = "Full Moon: Checking..."
 });
 
+local function formatTime(seconds)
+    local minutes = math.floor(seconds / 60)
+    local remainingSeconds = seconds % 60
+    return string.format("%02d:%02d", minutes, remainingSeconds)
+end
+
 task.spawn(function()
-    while task.wait() do
+    while task.wait(1) do
         pcall(function()
             local moonTexture = game:GetService("Lighting").Sky.MoonTextureId;
+            local remainingTime = 0
 
             if (moonTexture == "http://www.roblox.com/asset/?id=9709149431") then
                 FullMoonStatus = "Full Moon: Now";
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149052") then
-                FullMoonStatus = "Full Moon in 3 minutes";
+                remainingTime = 180 -- 3 minutes remaining
+                FullMoonStatus = "Full Moon in " .. formatTime(remainingTime);
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709143733") then
-                FullMoonStatus = "Full Moon in 4 minutes";
+                remainingTime = 240 -- 4 minutes remaining
+                FullMoonStatus = "Full Moon in " .. formatTime(remainingTime);
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709150401") then
-                FullMoonStatus = "Full Moon in 5 minutes";
+                remainingTime = 300 -- 5 minutes remaining
+                FullMoonStatus = "Full Moon in " .. formatTime(remainingTime);
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149680") then
-                FullMoonStatus = "Full Moon in 6 minutes";
+                remainingTime = 360 -- 6 minutes remaining
+                FullMoonStatus = "Full Moon in " .. formatTime(remainingTime);
             else
                 FullMoonStatus = "No full moon in cycle";
             end
