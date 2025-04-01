@@ -18923,57 +18923,48 @@ AutoAttackSegments:OnChanged(function(state)
     end 
 end)
 
-local v531 = v16.Sea:AddSection("Moon Status");
 
-local v532 = v16.Sea:AddParagraph({
-    Title = "FullMoon Status",
+local v531 = v16.Home:AddSection("Moon Status");
+
+local v532 = v16.Home:AddParagraph({
+    Title = "Full Moon Countdown",
     Content = ""
 });
 
--- Constants for moon cycle and full moon duration
-local moonCycleDuration = 10 * 60 -- Example: Full moon cycle is 10 minutes (in seconds)
-local fullMoonDuration = 3 * 60  -- Full moon duration lasts for 3 minutes (in seconds)
-
--- Function to format time in MM:SS
+-- Function to format the time in minutes
 local function formatTime(seconds)
     local minutes = math.floor(seconds / 60)
-    local remainingSeconds = seconds % 60
-    return string.format("%02d:%02d", minutes, remainingSeconds)
+    return string.format("Full Moon: In %d minutes", minutes)
 end
 
 task.spawn(function()
-    while task.wait(1) do
+    while task.wait() do
         pcall(function()
-            local currentTextureId = game:GetService("Lighting").Sky.MoonTextureId
-            local fullMoonStatus = ""
-            local remainingTime = 0
-            
-            -- Check the current moon phase and calculate the remaining time to Full Moon
-            if currentTextureId == "http://www.roblox.com/asset/?id=9709149431" then
+            local v793 = game:GetService("Lighting").Sky.MoonTextureId
+
+            -- Determine the time remaining for the Full Moon based on the moon texture ID
+            if v793 == "http://www.roblox.com/asset/?id=9709149431" then
                 -- Full Moon (100%)
-                fullMoonStatus = "Full Moon: Now"
-            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709149052" then
-                -- 75% Moon (Time left for Full Moon)
-                remainingTime = (moonCycleDuration * 0.25) -- Time remaining to Full Moon
-                fullMoonStatus = "Full Moon: In " .. formatTime(remainingTime)
-            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709143733" then
-                -- 50% Moon (Time left for Full Moon)
-                remainingTime = (moonCycleDuration * 0.5) -- Time remaining to Full Moon
-                fullMoonStatus = "Full Moon: In " .. formatTime(remainingTime)
-            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709150401" then
-                -- 25% Moon (Time left for Full Moon)
-                remainingTime = (moonCycleDuration * 0.75) -- Time remaining to Full Moon
-                fullMoonStatus = "Full Moon: In " .. formatTime(remainingTime)
-            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709149680" then
-                -- 15% Moon (Time left for Full Moon)
-                remainingTime = (moonCycleDuration * 0.85) -- Time remaining to Full Moon
-                fullMoonStatus = "Full Moon: In " .. formatTime(remainingTime)
+                FullMoonStatus = "Full Moon: Now"
+            elseif v793 == "http://www.roblox.com/asset/?id=9709149052" then
+                -- 75% Moon (Time remaining to Full Moon)
+                FullMoonStatus = formatTime(180) -- 3 minutes remaining
+            elseif v793 == "http://www.roblox.com/asset/?id=9709143733" then
+                -- 50% Moon (Time remaining to Full Moon)
+                FullMoonStatus = formatTime(240) -- 4 minutes remaining
+            elseif v793 == "http://www.roblox.com/asset/?id=9709150401" then
+                -- 25% Moon (Time remaining to Full Moon)
+                FullMoonStatus = formatTime(300) -- 5 minutes remaining
+            elseif v793 == "http://www.roblox.com/asset/?id=9709149680" then
+                -- 15% Moon (Time remaining to Full Moon)
+                FullMoonStatus = formatTime(360) -- 6 minutes remaining
             else
-                fullMoonStatus = "Full Moon: Not in cycle"
+                -- No full moon in cycle
+                FullMoonStatus = "Full Moon: Not in cycle"
             end
 
-            -- Update the status with the countdown time
-            v532.Content = fullMoonStatus
+            -- Update the UI paragraph content with the Full Moon status
+            v532.Content = FullMoonStatus
         end)
     end
 end)
