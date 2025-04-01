@@ -18959,10 +18959,6 @@ task.spawn(function()
             end
         end);
 
-        fullMoonParagraph:SetDesc("Full Moon Status: " .. FullMoonStatus);
-    end
-end);
-
 
 
 v14:Notify({
