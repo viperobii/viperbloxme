@@ -18925,7 +18925,7 @@ end)
 
 local fullMoonParagraph = v16.Home:AddParagraph({
     Title = "Full Moon Status",
-    Content = "Full Moon: Checking..."
+    Content = "Checking..."
 });
 
 local function formatTime(seconds)
@@ -18941,23 +18941,27 @@ task.spawn(function()
             local remainingTime = 0
 
             if (moonTexture == "http://www.roblox.com/asset/?id=9709149431") then
-                FullMoonStatus = "FullMoon";
+                FullMoonStatus = "Now";
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149052") then
                 remainingTime = 180 -- 3 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
+                FullMoonStatus = formatTime(remainingTime);
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709143733") then
                 remainingTime = 240 -- 4 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
+                FullMoonStatus = formatTime(remainingTime);
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709150401") then
                 remainingTime = 300 -- 5 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
+                FullMoonStatus = formatTime(remainingTime);
             elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149680") then
                 remainingTime = 360 -- 6 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
+                FullMoonStatus = formatTime(remainingTime);
             else
-                FullMoonStatus = "No FullMoon";
+                FullMoonStatus = "No full moon in cycle";
             end
         end);
+
+        fullMoonParagraph:SetDesc(FullMoonStatus);
+    end
+end);
 
 
 
