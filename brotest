@@ -174,6 +174,12 @@ Title = "Tab Prehistoric Island"
 
 }),
 
+Mirage = v15:AddTab({
+
+Title = "Mirage Island & Moon"
+
+}),
+
 ITM = v15:AddTab({
 
 Title = "Get Items"
@@ -7388,7 +7394,7 @@ end
 
 end);
 
-local v514 = v16.Sea:AddToggle("AutoFindMirage", {
+local v514 = v16.Mirage:AddToggle("AutoFindMirage", {
 
 Title = "Auto Find Mirage Island",
 
@@ -8971,9 +8977,9 @@ end
 
 if Sea3 then
 
-local v531 = v16.Sea:AddSection("Mysterious Island");
+local v531 = v16.Mirage:AddSection("Mysterious Island");
 
-local v532 = v16.Sea:AddParagraph({
+local v532 = v16.Mirage:AddParagraph({
 
 Title = "Mirage Island Status",
 
@@ -9057,7 +9063,7 @@ end);
 
 end);
 
-v16.Sea:AddButton({
+v16.Mirage:AddButton({
 
 Title = "Auto Teleport To Highest Point",
 
@@ -9109,7 +9115,7 @@ end
 
 end
 
-local v66 = v16.Sea:AddToggle("ToggleTpAdvanced", {
+local v66 = v16.Mirage:AddToggle("ToggleTpAdvanced", {
 
 Title = "Auto Teleport Advance Fruit Dealer",
 
@@ -9151,7 +9157,7 @@ end
 
 end);
 
-local v67 = v16.Sea:AddToggle("ToggleTweenGear", {
+local v67 = v16.Mirage:AddToggle("ToggleTweenGear", {
 
 Title = "Auto Get Blue Gear",
 
@@ -9203,7 +9209,7 @@ end);
 
 end);
 
-local v68 = v16.Sea:AddToggle("Togglelockmoon", {
+local v68 = v16.Mirage:AddToggle("Togglelockmoon", {
 
 Title = "Auto Lock Moon",
 
@@ -17861,7 +17867,7 @@ spawn(function()
     end);
 end);
 
-local v170 = v16.Sea:AddToggle("ToggleTPVolcano", {
+local v170 = v16.Volcano:AddToggle("ToggleTPVolcano", {
 
 Title = "Teleport To Prehistoric Island",
 
