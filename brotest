@@ -18924,11 +18924,12 @@ AutoAttackSegments:OnChanged(function(state)
 end)
 
 
-local v531 = v16.Home:AddSection("Moon Status");
+local moonStatusSection = v16.Home:AddSection("Moon Status");
 
-local v532 = v16.Home:AddParagraph({
+-- New paragraph for the Full Moon Countdown
+local fullMoonParagraph = v16.Home:AddParagraph({
     Title = "Full Moon Countdown",
-    Content = ""
+    Content = "" -- This will be updated with the countdown
 });
 
 -- Function to format the time in minutes
@@ -18940,22 +18941,22 @@ end
 task.spawn(function()
     while task.wait() do
         pcall(function()
-            local v793 = game:GetService("Lighting").Sky.MoonTextureId
+            local moonTexture = game:GetService("Lighting").Sky.MoonTextureId
 
             -- Determine the time remaining for the Full Moon based on the moon texture ID
-            if v793 == "http://www.roblox.com/asset/?id=9709149431" then
+            if moonTexture == "http://www.roblox.com/asset/?id=9709149431" then
                 -- Full Moon (100%)
                 FullMoonStatus = "Full Moon: Now"
-            elseif v793 == "http://www.roblox.com/asset/?id=9709149052" then
+            elseif moonTexture == "http://www.roblox.com/asset/?id=9709149052" then
                 -- 75% Moon (Time remaining to Full Moon)
                 FullMoonStatus = formatTime(180) -- 3 minutes remaining
-            elseif v793 == "http://www.roblox.com/asset/?id=9709143733" then
+            elseif moonTexture == "http://www.roblox.com/asset/?id=9709143733" then
                 -- 50% Moon (Time remaining to Full Moon)
                 FullMoonStatus = formatTime(240) -- 4 minutes remaining
-            elseif v793 == "http://www.roblox.com/asset/?id=9709150401" then
+            elseif moonTexture == "http://www.roblox.com/asset/?id=9709150401" then
                 -- 25% Moon (Time remaining to Full Moon)
                 FullMoonStatus = formatTime(300) -- 5 minutes remaining
-            elseif v793 == "http://www.roblox.com/asset/?id=9709149680" then
+            elseif moonTexture == "http://www.roblox.com/asset/?id=9709149680" then
                 -- 15% Moon (Time remaining to Full Moon)
                 FullMoonStatus = formatTime(360) -- 6 minutes remaining
             else
@@ -18964,7 +18965,7 @@ task.spawn(function()
             end
 
             -- Update the UI paragraph content with the Full Moon status
-            v532.Content = FullMoonStatus
+            fullMoonParagraph.Content = FullMoonStatus
         end)
     end
 end)
