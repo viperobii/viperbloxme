@@ -18904,7 +18904,7 @@ AutoKillSeabeast:OnChanged(function(state)
                 if seaBeast then
                     for _, part in pairs(seaBeast:GetDescendants()) do
                         if part.Name == "HumanoidRootPart" then
-                            Tween(part.CFrame * CFrame.new(0, 450, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+                            Tween(part.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0))
                             
                             local player = game.Players.LocalPlayer
                             local backpack = player.Backpack
@@ -18949,6 +18949,64 @@ end)
 
 
 local SkillSection = v16.Event:AddSection("Leviathan Mobs (Beta)");
+
+local AutoKillLeviathan = v16.Event:AddToggle("ToggleAutoKillLeviathan", {
+    Title = "Auto Kill Leviathan",
+    Description = "",
+    Default = false
+})
+
+AutoKillLeviathan:OnChanged(function(state) 
+    if state then 
+        spawn(function() 
+            while AutoKillLeviathan.Value do 
+                local leviathan = game:GetService("Workspace").SeaBeasts:FindFirstChild("Leviathan")
+                if leviathan then
+                    for _, part in pairs(leviathan:GetDescendants()) do
+                        if part.Name == "HumanoidRootPart" then
+                            Tween(part.CFrame * CFrame.new(0, 480, 0) * CFrame.Angles(math.rad(-90), 0, 0))
+                            
+                            local player = game.Players.LocalPlayer
+                            local backpack = player.Backpack
+
+                            for _, tool in pairs(backpack:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
+                                        player.Character.Humanoid:EquipTool(tool)
+
+                                        local virtualInput = game:GetService("VirtualInputManager")
+
+                                        -- Z Skill
+                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- X Skill
+                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- C Skill
+                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+
+                                        -- V Skill
+                                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart)
+                                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
+                                        wait(0.2)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                wait()
+            end
+        end) 
+    end 
+end)
+
 
 local AutoAttackSegments = v16.Event:AddToggle("ToggleAutoAttackSegments", {
     Title = "Auto Attack Leviathan Segments",
@@ -19014,8 +19072,6 @@ AutoAttackSegments:OnChanged(function(state)
         end) 
     end 
 end)
-
-
 
 
 
