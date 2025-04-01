@@ -168,6 +168,12 @@ Title = "Tab Leviathan"
 
 }),
 
+Volcano = v15:AddTab({
+
+Title = "Tab Prehistoric Island"
+
+}),
+
 ITM = v15:AddTab({
 
 Title = "Get Items"
@@ -7194,7 +7200,7 @@ end
 
 end);
 
-local v510 = v16.Sea:AddToggle("AutoFindPrehistoric", {
+local v510 = v16.Volcano:AddToggle("AutoFindPrehistoric", {
 
 Title = "Auto Find Prehistoric Island",
 
@@ -17838,36 +17844,21 @@ end
 
 end);
 
-local v168 = v16.Sea:AddSection("Prehistoric Island");
-
-local v169 = v16.Sea:AddParagraph({
-
-Title = "Prehistoric Island Status",
-
-Content = ""
-
+local v169 = v16.Volcano:AddParagraph({
+    Title = "Prehistoric Island Status",
+    Content = "Checking..."
 });
 
 spawn(function()
-
-pcall(function()
-
-while wait() do
-
-if ggame:GetService("Workspace").Map:FindFirstChild("PrehistoricIsland") then
-
-v169:SetDesc("Prehistoric Island: ✅️");
-
-else
-
-v169:SetDesc("Prehistoric Island: ❌️");
-
-end
-
-end
-
-end);
-
+    pcall(function()
+        while wait(1) do
+            if game:GetService("Workspace").Map:FindFirstChild("PrehistoricIsland") then
+                v169:SetDesc("Prehistoric Island: ✅️");
+            else
+                v169:SetDesc("Prehistoric Island: ❌️");
+            end
+        end
+    end);
 end);
 
 local v170 = v16.Sea:AddToggle("ToggleTPVolcano", {
@@ -17928,7 +17919,7 @@ end
 
 end);
 
-local v171 = v16.Sea:AddToggle("ToggleDefendVolcano", {
+local v171 = v16.Volcano:AddToggle("ToggleDefendVolcano", {
 
 Title = "Auto Event Prehistoric Volcano",
 
@@ -17944,7 +17935,7 @@ _G.AutoDefendVolcano = v401;
 
 end);
 
-local v107 = v16.Sea:AddToggle("ToggleMelee", {
+local v107 = v16.Volcano:AddToggle("ToggleMelee", {
 
 Title = "Use Melee",
 
@@ -17960,7 +17951,7 @@ _G.UseMelee = v402;
 
 end);
 
-local v109 = v16.Sea:AddToggle("ToggleSword", {
+local v109 = v16.Volcano:AddToggle("ToggleSword", {
 
 Title = "Use Sword",
 
@@ -17976,7 +17967,7 @@ _G.UseSword = v403;
 
 end);
 
-local v110 = v16.Sea:AddToggle("ToggleGun", {
+local v110 = v16.Volcano:AddToggle("ToggleGun", {
 
 Title = "Use Gun",
 
@@ -18196,7 +18187,7 @@ end
 
 end);
 
-local v175 = v16.Sea:AddToggle("ToggleKillAura", {
+local v175 = v16.Volcano:AddToggle("ToggleKillAura", {
 
 Title = "Auto Instant Kill Golem",
 
@@ -18250,7 +18241,7 @@ end
 
 end);
 
-local v176 = v16.Sea:AddToggle("ToggleCollectBone", {
+local v176 = v16.Volcano:AddToggle("ToggleCollectBone", {
 
 Title = "Auto Collect Bones Volcano",
 
@@ -18288,7 +18279,7 @@ end
 
 end);
 
-local v177 = v16.Sea:AddToggle("ToggleCollectEgg", {
+local v177 = v16.Volcano:AddToggle("ToggleCollectEgg", {
 
 Title = "Auto Collect Eggs",
 
