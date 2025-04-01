@@ -134,7 +134,7 @@ local v16 = {
 
 Home = v15:AddTab({
 
-Title = "Tab Updates Info"
+Title = "Tab Info"
 
 }),
 
@@ -159,6 +159,12 @@ Title = "Sea Events"
 Event = v15:AddTab({
 
 Title = "Sea Mobs"
+
+}),
+
+Levi = v15:AddTab({
+
+Title = "Tab Leviathan"
 
 }),
 
@@ -7564,7 +7570,7 @@ end
 
 end);
 
-local v515 = v16.Sea:AddToggle("AutoFindFrozen", {
+local v515 = v16.Levi:AddToggle("AutoFindFrozen", {
 
 Title = "Auto Find Frozen Dimension",
 
@@ -7753,7 +7759,7 @@ end
 end);
 
 
-local v516 = v16.Sea:AddToggle("AutoComeTiki", {
+local v516 = v16.Levi:AddToggle("AutoComeTiki", {
 
 Title = "Auto Teleport To Tiki Outpost",
 
@@ -7837,7 +7843,7 @@ end
 
 end);
 
-local v517 = v16.Sea:AddToggle("AutoComeHydra", {
+local v517 = v16.Levi:AddToggle("AutoComeHydra", {
 
 Title = "Auto Teleport To Hydra Island",
 
@@ -18800,9 +18806,9 @@ AutoKillSeabeast:OnChanged(function(state)
 end)
 
 
-local SkillSection = v16.Event:AddSection("Leviathan Mobs (Beta)");
+local SkillSection = v16.Levi:AddSection("Leviathan Mobs (Beta)");
 
-local AutoKillLeviathan = v16.Event:AddToggle("ToggleAutoKillLeviathan", {
+local AutoKillLeviathan = v16.Levi:AddToggle("ToggleAutoKillLeviathan", {
     Title = "Auto Kill Leviathan",
     Description = "",
     Default = false
@@ -18860,7 +18866,7 @@ AutoKillLeviathan:OnChanged(function(state)
 end)
 
 
-local AutoAttackSegments = v16.Event:AddToggle("ToggleAutoAttackSegments", {
+local AutoAttackSegments = v16.Levi:AddToggle("ToggleAutoAttackSegments", {
     Title = "Auto Attack Leviathan Segments",
     Description = "",
     Default = false
@@ -18922,46 +18928,6 @@ AutoAttackSegments:OnChanged(function(state)
         end) 
     end 
 end)
-
-local fullMoonParagraph = v16.Home:AddParagraph({
-    Title = "Full Moon Server",
-    Content = "Full Moon: Checking..."
-});
-
-local function formatTime(seconds)
-    local minutes = math.floor(seconds / 60)
-    local remainingSeconds = seconds % 60
-    return string.format("%02d:%02d", minutes, remainingSeconds)
-end
-
-task.spawn(function()
-    while task.wait(1) do
-        pcall(function()
-            local moonTexture = game:GetService("Lighting").Sky.MoonTextureId;
-            local remainingTime = 0
-
-            if (moonTexture == "http://www.roblox.com/asset/?id=9709149431") then
-                FullMoonStatus = "FullMoon";
-            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149052") then
-                remainingTime = 180 -- 3 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
-            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709143733") then
-                remainingTime = 240 -- 4 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
-            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709150401") then
-                remainingTime = 300 -- 5 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
-            elseif (moonTexture == "http://www.roblox.com/asset/?id=9709149680") then
-                remainingTime = 360 -- 6 minutes remaining
-                FullMoonStatus = "" .. formatTime(remainingTime);
-            else
-                FullMoonStatus = "No FullMoon";
-            end
-        end);
-
-        fullMoonParagraph:SetDesc("Status " .. FullMoonStatus);
-    end
-end);
 
 
 
