@@ -19020,28 +19020,18 @@ function Fly(enabled)
                     local moveDirection = (rightVector * touchDirection.X) + (lookVector * -touchDirection.Y)
                     moveDirection = Vector3.new(moveDirection.X, 0, moveDirection.Z).Unit * flySpeed
                     
-                    -- Add up/down control (using UI buttons or another method)
-                    -- This part assumes you have a way to detect vertical movement intent
-                    local verticalDirection = 0
-                    if _G.FlyUp then verticalDirection = 1 end
-                    if _G.FlyDown then verticalDirection = -1 end
-                    
-                    -- Apply vertical movement
-                    moveDirection = moveDirection + Vector3.new(0, verticalDirection * flySpeed/2, 0)
-                    
                     -- Apply movement
                     humanoidRootPart.Velocity = moveDirection
-                    
-                    -- Disable gravity effects
-                    humanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
                 end
             end)
         end
         
         -- Set up mobile touch controls
         if not _G.TouchControlsSetup then
+            local UIS = game:GetService("UserInputService")
+            
             -- Touch began
-            game:GetService("UserInputService").TouchStarted:Connect(function(touch, gameProcessed)
+            UIS.TouchStarted:Connect(function(touch, gameProcessed)
                 if flyActive and not gameProcessed then
                     touchStartPosition = Vector2.new(touch.Position.X, touch.Position.Y)
                     touchCurrentPosition = touchStartPosition
@@ -19050,14 +19040,14 @@ function Fly(enabled)
             end)
             
             -- Touch moved
-            game:GetService("UserInputService").TouchMoved:Connect(function(touch, gameProcessed)
+            UIS.TouchMoved:Connect(function(touch, gameProcessed)
                 if flyActive and touchControlActive and not gameProcessed then
                     touchCurrentPosition = Vector2.new(touch.Position.X, touch.Position.Y)
                 end
             end)
             
             -- Touch ended
-            game:GetService("UserInputService").TouchEnded:Connect(function(touch, gameProcessed)
+            UIS.TouchEnded:Connect(function(touch, gameProcessed)
                 if flyActive and touchControlActive and not gameProcessed then
                     touchControlActive = false
                     touchStartPosition = nil
@@ -19067,9 +19057,6 @@ function Fly(enabled)
             
             _G.TouchControlsSetup = true
         end
-        
-        -- Add UI buttons for up/down movement
-        CreateFlyButtons()
         
         -- Disable default character movement
         if humanoid then
@@ -19099,9 +19086,6 @@ function Fly(enabled)
             _G.FlyLoop = nil
         end
         
-        -- Hide fly buttons
-        HideFlyButtons()
-        
         -- Re-enable normal character movement
         if humanoid then
             humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
@@ -19110,78 +19094,6 @@ function Fly(enabled)
         flyActive = false
     end
 end
-
--- Create UI buttons for up/down movement
-function CreateFlyButtons()
-    if not _G.FlyButtonsCreated then
-        -- Create a ScreenGui for the buttons
-        local screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "FlyControlGui"
-        screenGui.ResetOnSpawn = false
-        screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-        
-        -- Up button
-        local upButton = Instance.new("TextButton")
-        upButton.Name = "UpButton"
-        upButton.Text = "↑"
-        upButton.Size = UDim2.new(0, 50, 0, 50)
-        upButton.Position = UDim2.new(0.9, 0, 0.4, 0)
-        upButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-        upButton.TextSize = 24
-        upButton.BorderSizePixel = 2
-        upButton.BorderColor3 = Color3.fromRGB(100, 100, 100)
-        upButton.Parent = screenGui
-        
-        -- Down button
-        local downButton = Instance.new("TextButton")
-        downButton.Name = "DownButton"
-        downButton.Text = "↓"
-        downButton.Size = UDim2.new(0, 50, 0, 50)
-        downButton.Position = UDim2.new(0.9, 0, 0.5, 0)
-        downButton.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-        downButton.TextSize = 24
-        downButton.BorderSizePixel = 2
-        downButton.BorderColor3 = Color3.fromRGB(100, 100, 100)
-        downButton.Parent = screenGui
-        
-        -- Up button events
-        upButton.TouchStarted:Connect(function()
-            _G.FlyUp = true
-        end)
-        
-        upButton.TouchEnded:Connect(function()
-            _G.FlyUp = false
-        end)
-        
-        -- Down button events
-        downButton.TouchStarted:Connect(function()
-            _G.FlyDown = true
-        end)
-        
-        downButton.TouchEnded:Connect(function()
-            _G.FlyDown = false
-        end)
-        
-        _G.FlyButtonsCreated = true
-        _G.FlyControlGui = screenGui
-    else
-        -- Show existing buttons
-        if _G.FlyControlGui then
-            _G.FlyControlGui.Enabled = true
-        end
-    end
-end
-
--- Hide fly buttons
-function HideFlyButtons()
-    if _G.FlyControlGui then
-        _G.FlyControlGui.Enabled = false
-    end
-    
-    -- Reset button states
-    _G.FlyUp = false
-    _G.FlyDown = false
-}
 
 EnableFly.Callback = function(state)
     _G.NoClip = state
