@@ -18774,39 +18774,27 @@ AutoKillSeabeast:OnChanged(function(state)
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-            local function moveToSeaBeast()
-                local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-                if seaBeast then
-                    local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
-                    if rootPart then
-                        -- Fixed position above the Sea Beast (400 studs up)
-                        local targetPosition = rootPart.CFrame * CFrame.new(0, 400, 0)
-                        Tween(targetPosition) -- Move player
-                    end
-                end
-            end
-
-            -- Move to the position initially
-            moveToSeaBeast()
-
-            -- Keep checking if the player moves away
-            while AutoKillSeabeast.Value do
-                if humanoidRootPart then
-                    local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-                    if seaBeast then
-                        local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
-                        if rootPart then
-                            local targetPosition = rootPart.Position + Vector3.new(0, 400, 0)
-                            local distance = (humanoidRootPart.Position - targetPosition).Magnitude
-
-                            -- If player moves 10+ studs away, move back
-                            if distance > 10 then
-                                moveToSeaBeast()
-                            end
+            local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+            if seaBeast and humanoidRootPart then
+                local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    -- Fixed position (400 studs above Sea Beast)
+                    local targetY = rootPart.Position.Y + 400 
+                    local fixedPosition = humanoidRootPart.Position
+                    fixedPosition = Vector3.new(fixedPosition.X, targetY, fixedPosition.Z)
+                    
+                    -- Move the player once
+                    Tween(CFrame.new(fixedPosition))
+                    
+                    -- Keep checking if the player falls down
+                    while AutoKillSeabeast.Value do
+                        local currentY = humanoidRootPart.Position.Y
+                        if currentY < targetY - 5 then -- If falls below 395, re-tween
+                            Tween(CFrame.new(fixedPosition))
                         end
+                        wait(0.5) -- Check every 0.5 seconds
                     end
                 end
-                wait(0.5) -- Check every 0.5 seconds
             end
         end) 
 
