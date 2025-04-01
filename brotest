@@ -18778,19 +18778,24 @@ AutoKillSeabeast:OnChanged(function(state)
             if seaBeast and humanoidRootPart then
                 local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
                 if rootPart then
-                    -- Fixed position (400 studs above Sea Beast)
-                    local targetY = rootPart.Position.Y + 400 
-                    local fixedPosition = humanoidRootPart.Position
-                    fixedPosition = Vector3.new(fixedPosition.X, targetY, fixedPosition.Z)
-                    
-                    -- Move the player once
-                    Tween(CFrame.new(fixedPosition))
-                    
-                    -- Keep checking if the player falls down
+                    -- Set initial target position (400 studs above, but near horizontally)
+                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10) -- Slightly behind the Sea Beast
+
+                    -- Move player to the initial position once
+                    Tween(CFrame.new(initialTargetPosition))
+
+                    -- Keep checking if the player moves away
                     while AutoKillSeabeast.Value do
                         local currentY = humanoidRootPart.Position.Y
-                        if currentY < targetY - 5 then -- If falls below 395, re-tween
-                            Tween(CFrame.new(fixedPosition))
+                        local currentXZ = Vector3.new(humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Z)
+                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z) -- Follow X and Z
+
+                        -- Update target position to stay near but maintain height
+                        local newTargetPosition = Vector3.new(targetXZ.X, initialTargetPosition.Y, targetXZ.Z - 10)
+
+                        -- If the player moves too far from the Sea Beast, re-tween
+                        if (humanoidRootPart.Position - newTargetPosition).Magnitude > 15 or currentY < initialTargetPosition.Y - 5 then
+                            Tween(CFrame.new(newTargetPosition))
                         end
                         wait(0.5) -- Check every 0.5 seconds
                     end
