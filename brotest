@@ -17414,19 +17414,24 @@ v158:OnChanged(function(v388)
     _G.AutoReceiveQuest = v388;
 
     if _G.AutoReceiveQuest then
-        -- Request the quest
-        local requestQuest = {
-            [1] = {
-                Context = "RequestQuest"
-            }
-        };
-        game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(requestQuest));
+        -- Move to entrance position for quest
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, -334.9649963378906));
+        Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938));  -- Assuming Tween2 moves the player to the quest location.
 
+        -- Handling quest acceptance and check
         spawn(function()
             pcall(function()
-                while wait(1) do  -- Check every second
+                while wait(1) do  -- Wait time adjusted to 1 second for smoother performance.
                     if _G.AutoReceiveQuest then
-                        -- Check the quest description
+                        -- Request the quest
+                        local requestQuest = {
+                            [1] = {
+                                Context = "RequestQuest"
+                            }
+                        };
+                        game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(requestQuest));
+
+                        -- Check if the quest is successfully accepted
                         local checkQuest = {
                             [1] = {
                                 Context = "Check"
@@ -17434,69 +17439,39 @@ v158:OnChanged(function(v388)
                         };
                         local result = game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(checkQuest));
 
-                        -- Quest descriptions and related actions
+                        -- If quest is accepted, perform necessary actions to complete it
                         if result then
-                            -- Assuming result returns quest info, we process it accordingly
-                            if result == "Defeat 3 Venomous Assailants on Hydra Island." then
-                                v159:SetDesc("Defeat 3 Venomous Assailants on Hydra Island.");
-                                -- Start auto-farming the Venomous Assailants
-                                autoFarmEnemies("Venomous Assailant", 3); -- Farm 3 Venomous Assailants
-                            elseif result == "Defeat 3 Hydra Enforcers on Hydra Island." then
-                                v159:SetDesc("Defeat 3 Hydra Enforcers on Hydra Island.");
-                                -- Start auto-farming the Hydra Enforcers
-                                autoFarmEnemies("Hydra Enforcer", 3); -- Farm 3 Hydra Enforcers
-                            elseif result == "Destroy 10 trees on Hydra Island." then
-                                v159:SetDesc("Destroy 10 trees on Hydra Island.");
-                                -- Start auto-farming the trees
-                                autoFarmTrees(10); -- Destroy 10 trees
-                            end
+                            -- Perform quest completion logic (replace with specific quest actions)
+                            -- For example, interact with certain objects, defeat enemies, etc.
+
+                            -- Example: Assuming the quest requires interacting with an NPC
+                            -- If your quest requires actions like defeating enemies, use additional logic to perform those actions.
+
+                            -- Here is an example of completing an NPC interaction:
+                            local interactNpc = {
+                                [1] = {
+                                    Context = "InteractNPC"
+                                }
+                            };
+                            game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(interactNpc));
+                            
+                            -- Or if it’s about defeating enemies or specific actions, do it here
+                            -- Assuming you have a method to defeat the enemies (this is an example, modify it accordingly)
+                            -- local defeatEnemies = {
+                            --     [1] = {
+                            --         Context = "DefeatEnemies"
+                            --     }
+                            -- };
+                            -- game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/DragonHunter"):InvokeServer(unpack(defeatEnemies));
                         end
                     else
-                        break  -- Stop if toggle is off
+                        break  -- Stop the loop if the toggle is turned off
                     end
                 end
             end);
         end);
     end
 end);
-
--- Function to auto-farm enemies
-function autoFarmEnemies(enemyName, requiredCount)
-    local enemyCount = 0
-    while enemyCount < requiredCount do
-        -- Locate and attack the enemies
-        local enemies = game:GetService("Workspace"):GetChildren()
-        for _, enemy in pairs(enemies) do
-            if enemy.Name == enemyName then
-                -- Add your logic to move to the enemy and attack
-                -- Example: Move to enemy, then attack (assuming you have attack logic)
-                -- You can use CFrame or other logic to move and interact
-                enemyCount = enemyCount + 1
-                -- Update quest progress UI (if necessary)
-                break
-            end
-        end
-        wait(1)  -- Wait before checking again
-    end
-end
-
--- Function to auto-farm trees (assuming tree destruction is necessary for the quest)
-function autoFarmTrees(requiredCount)
-    local treeCount = 0
-    while treeCount < requiredCount do
-        -- Locate and destroy trees
-        local trees = game:GetService("Workspace"):GetChildren()
-        for _, tree in pairs(trees) do
-            if tree.Name == "Tree" then
-                -- Add your logic to destroy the tree (e.g., using a tool or some in-game action)
-                treeCount = treeCount + 1
-                -- Update quest progress UI (if necessary)
-                break
-            end
-        end
-        wait(1)  -- Wait before checking again
-    end
-end
 
 local v159 = v16.Draco:AddParagraph({
 
