@@ -18923,7 +18923,61 @@ AutoAttackSegments:OnChanged(function(state)
     end 
 end)
 
+local v531 = v16.Sea:AddSection("Full Moon Status");
 
+local v532 = v16.Home:AddParagraph({
+    Title = "Full Moon Time",
+    Content = ""
+});
+
+-- Constants for moon cycle and full moon duration
+local moonCycleDuration = 10 * 60 -- Example: 10 minutes for a full cycle (in seconds)
+local fullMoonDuration = 3 * 60  -- Full moon phase lasts for 3 minutes (in seconds)
+
+-- Function to format time in MM:SS
+local function formatTime(seconds)
+    local minutes = math.floor(seconds / 60)
+    local remainingSeconds = seconds % 60
+    return string.format("%02d:%02d", minutes, remainingSeconds)
+end
+
+task.spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            local currentTextureId = game:GetService("Lighting").Sky.MoonTextureId
+            local fullMoonStatus = ""
+            local remainingTime = 0
+            
+            -- Check the current moon phase
+            if currentTextureId == "http://www.roblox.com/asset/?id=9709149431" then
+                -- Full Moon (100%)
+                fullMoonStatus = "Full Moon now"
+                remainingTime = fullMoonDuration
+            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709149052" then
+                -- 75% Moon
+                remainingTime = (moonCycleDuration * 0.25) -- Time remaining for full moon
+                fullMoonStatus = "Full Moon in " .. formatTime(remainingTime)
+            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709143733" then
+                -- 50% Moon
+                remainingTime = (moonCycleDuration * 0.5) -- Time remaining for full moon
+                fullMoonStatus = "Full Moon in " .. formatTime(remainingTime)
+            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709150401" then
+                -- 25% Moon
+                remainingTime = (moonCycleDuration * 0.75) -- Time remaining for full moon
+                fullMoonStatus = "Full Moon in " .. formatTime(remainingTime)
+            elseif currentTextureId == "http://www.roblox.com/asset/?id=9709149680" then
+                -- 15% Moon
+                remainingTime = (moonCycleDuration * 0.85) -- Time remaining for full moon
+                fullMoonStatus = "Full Moon in " .. formatTime(remainingTime)
+            else
+                fullMoonStatus = "No Full Moon"
+            end
+
+            -- Update content with time remaining for the full moon
+            v532.Content = fullMoonStatus
+        end)
+    end
+end)
 
 
 v14:Notify({
