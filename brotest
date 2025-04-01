@@ -18770,48 +18770,79 @@ local AutoKillSeabeast = v16.Event:AddToggle("ToggleAutoKillSeabeast", {
 AutoKillSeabeast:OnChanged(function(state) 
     if state then 
         spawn(function() 
-            local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-            if seaBeast then
-                local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- Move the player once to a fixed position (e.g., 400 studs above the Sea Beast)
-                    local targetPosition = rootPart.CFrame * CFrame.new(0, 400, 0) * CFrame.Angles(math.rad(-90), 0, 0)
-                    Tween(targetPosition) -- This moves the player ONCE
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-                    local player = game.Players.LocalPlayer
-                    local backpack = player.Backpack
-
-                    -- Loop to keep attacking, but without moving again
-                    while AutoKillSeabeast.Value do
-                        for _, tool in pairs(backpack:GetChildren()) do
-                            if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                                player.Character.Humanoid:EquipTool(tool)
-
-                                local virtualInput = game:GetService("VirtualInputManager")
-
-                                -- Attack using skills
-                                virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart) -- Z
-                                virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                                wait(0.2)
-
-                                virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart) -- X
-                                virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                                wait(0.2)
-
-                                virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart) -- C
-                                virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
-                                wait(0.2)
-
-                                virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart) -- V
-                                virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
-                                wait(0.2)
-                            end
-                        end
-                        wait() -- Small delay to avoid lag
+            local function moveToSeaBeast()
+                local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+                if seaBeast then
+                    local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
+                    if rootPart then
+                        -- Fixed position above the Sea Beast (400 studs up)
+                        local targetPosition = rootPart.CFrame * CFrame.new(0, 400, 0)
+                        Tween(targetPosition) -- Move player
                     end
                 end
             end
+
+            -- Move to the position initially
+            moveToSeaBeast()
+
+            -- Keep checking if the player moves away
+            while AutoKillSeabeast.Value do
+                if humanoidRootPart then
+                    local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+                    if seaBeast then
+                        local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
+                        if rootPart then
+                            local targetPosition = rootPart.Position + Vector3.new(0, 400, 0)
+                            local distance = (humanoidRootPart.Position - targetPosition).Magnitude
+
+                            -- If player moves 10+ studs away, move back
+                            if distance > 10 then
+                                moveToSeaBeast()
+                            end
+                        end
+                    end
+                end
+                wait(0.5) -- Check every 0.5 seconds
+            end
         end) 
+
+        -- Start Auto Attack
+        spawn(function()
+            local player = game.Players.LocalPlayer
+            local backpack = player.Backpack
+
+            while AutoKillSeabeast.Value do
+                for _, tool in pairs(backpack:GetChildren()) do
+                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
+                        player.Character.Humanoid:EquipTool(tool)
+
+                        local virtualInput = game:GetService("VirtualInputManager")
+
+                        -- Attack using skills
+                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart) -- Z
+                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart) -- X
+                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart) -- C
+                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart) -- V
+                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+                    end
+                end
+                wait()
+            end
+        end)
     end 
 end)
 
