@@ -18901,8 +18901,8 @@ end)
 
 
 local AutoAttackSegments = v16.Levi:AddToggle("ToggleAutoAttackSegments", {
-    Title = "Auto Attack Leviathan Segments",
-    Description = "",
+    Title = "Auto Attack Leviathan Segments (Updating)",
+    Description = "Don't Use Updating",
     Default = false
 })
 
@@ -18972,6 +18972,402 @@ v16.Draco:AddButton({
     end
 })
 
+local GuardianBoat = {}
+
+-- Add toggle for Guardian Boat auto-buy and navigation
+local GuardianToggle = v16.Misc:AddToggle("ToggleGuardianBoat", {
+    Title = "Auto Buy & Navigate Guardian Boat",
+    Description = "Automatically buys and navigates Guardian boat in the sea",
+    Default = false
+})
+
+-- Variables
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local BoatPurchased = false
+local BoatActive = false
+local NavigationActive = false
+local BoatESPActive = false
+local CurrentBoat = nil
+local BoatESP = nil
+
+-- Function to check if player has the Guardian boat
+local function HasGuardianBoat()
+    -- Check player's inventory for the boat
+    for _, item in pairs(LocalPlayer.Backpack:GetChildren()) do
+        if item.Name == "Guardian" then
+            return true
+        end
+    end
+    
+    -- Check if boat is already equipped
+    for _, item in pairs(LocalPlayer.Character:GetChildren()) do
+        if item.Name == "Guardian" then
+            return true
+        end
+    end
+    
+    return false
+end
+
+-- Function to buy Guardian boat from Tiki Outpost
+local function BuyGuardianBoat()
+    if HasGuardianBoat() then
+        return true
+    end
+    
+    -- Find boat dealer NPC specifically in Tiki Outpost
+    local BoatDealer = nil
+    for _, npc in pairs(workspace.NPCs:GetChildren()) do
+        if npc.Name == "Boat Dealer" and npc:FindFirstChild("HumanoidRootPart") then
+            -- Check if this is the Tiki Outpost boat dealer
+            local position = npc.HumanoidRootPart.Position
+            -- Approximate Tiki Outpost coordinates (may need adjustment based on game)
+            if position.X > -10000 and position.X < -9000 and position.Z > -3500 and position.Z < -2500 then
+                BoatDealer = npc
+                break
+            end
+        end
+    end
+    
+    -- If Tiki Outpost dealer not found, try to find any boat dealer as fallback
+    if not BoatDealer then
+        for _, npc in pairs(workspace.NPCs:GetChildren()) do
+            if npc.Name == "Boat Dealer" and npc:FindFirstChild("HumanoidRootPart") then
+                BoatDealer = npc
+                break
+            end
+        end
+    end
+    
+    if not BoatDealer then
+        return false
+    end
+    
+    -- Teleport to boat dealer
+    local HRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if HRP then
+        local originalPosition = HRP.CFrame
+        HRP.CFrame = BoatDealer.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+        wait(0.5)
+        
+        -- Buy boat (using remote event)
+        local args = {
+            [1] = "BuyBoat",
+            [2] = "Guardian"
+        }
+        ReplicatedStorage.Remotes.CommF_:InvokeServer(unpack(args))
+        
+        wait(0.5)
+        -- Return to original position
+        HRP.CFrame = originalPosition
+        
+        return HasGuardianBoat()
+    end
+    
+    return false
+end
+
+-- Function to spawn and equip the boat
+local function SpawnBoat()
+    if not HasGuardianBoat() then
+        return false
+    end
+    
+    -- Find boat item in backpack
+    local BoatTool = nil
+    for _, item in pairs(LocalPlayer.Backpack:GetChildren()) do
+        if item.Name == "Guardian" then
+            BoatTool = item
+            break
+        end
+    end
+    
+    -- If boat is already equipped, find it in character
+    if not BoatTool then
+        for _, item in pairs(LocalPlayer.Character:GetChildren()) do
+            if item.Name == "Guardian" then
+                BoatTool = item
+                break
+            end
+        end
+    end
+    
+    if not BoatTool then
+        return false
+    end
+    
+    -- Check if player already has a boat spawned
+    for _, boat in pairs(workspace.Boats:GetChildren()) do
+        if boat:FindFirstChild("Owner") and boat.Owner.Value == LocalPlayer then
+            -- Player already has a boat, use it
+            return boat
+        end
+    end
+    
+    -- Make sure character is on water
+    local HRP = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if HRP then
+        -- Find suitable water position near the player
+        local waterPosition = CFrame.new(HRP.Position.X, 0, HRP.Position.Z)
+        
+        -- Try to find a water area without obstacles within a radius
+        local foundClearWater = false
+        local radius = 100
+        local attempts = 10
+        
+        for i = 1, attempts do
+            local testPos = waterPosition * CFrame.new(math.random(-radius, radius), 0, math.random(-radius, radius))
+            
+            -- Raycast down to check if there's water and no obstacles
+            local rayParams = RaycastParams.new()
+            rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+            rayParams.FilterDescendantsInstances = {LocalPlayer.Character}
+            
+            local ray = workspace:Raycast(testPos.Position + Vector3.new(0, 50, 0), Vector3.new(0, -100, 0), rayParams)
+            
+            -- If no obstacles found or it's very low terrain (likely water)
+            if not ray or ray.Position.Y < 1 then
+                waterPosition = CFrame.new(testPos.Position.X, 0, testPos.Position.Z)
+                foundClearWater = true
+                break
+            end
+        end
+        
+        -- Teleport to the water position
+        HRP.CFrame = waterPosition
+        wait(0.5)
+        
+        -- Equip and use the boat
+        BoatTool.Parent = LocalPlayer.Character
+        wait(0.1)
+        BoatTool:Activate()
+        wait(1.5) -- Wait a bit longer to ensure boat spawns
+        
+        -- Check if boat was spawned
+        for _, boat in pairs(workspace.Boats:GetChildren()) do
+            if boat:FindFirstChild("Owner") and boat.Owner.Value == LocalPlayer then
+                return boat
+            end
+        end
+        
+        -- Try once more with increased wait time if boat didn't spawn
+        wait(2)
+        for _, boat in pairs(workspace.Boats:GetChildren()) do
+            if boat:FindFirstChild("Owner") and boat.Owner.Value == LocalPlayer then
+                return boat
+            end
+        end
+    end
+    
+    return false
+end
+
+-- Function to navigate boat avoiding obstacles
+local function NavigateBoat(boat)
+    if not boat or not boat:FindFirstChild("VehicleSeat") then
+        return
+    end
+    
+    -- Get boat components
+    local BoatSeat = boat:FindFirstChild("VehicleSeat")
+    local BoatHRP = boat:FindFirstChild("HumanoidRootPart") or boat:FindFirstChild("PrimaryPart") or BoatSeat
+    
+    -- Navigation settings
+    local NavigationHeight = 5  -- Height above water
+    local AvoidanceDistance = 20  -- Distance to check for obstacles
+    local MoveSpeed = 100  -- Boat speed
+    
+    -- Obstacle detection function
+    local function DetectObstacle(position, direction, distance)
+        local rayParams = RaycastParams.new()
+        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+        rayParams.FilterDescendantsInstances = {boat, LocalPlayer.Character}
+        
+        local ray = workspace:Raycast(position, direction * distance, rayParams)
+        return ray ~= nil
+    end
+    
+    -- Navigation logic
+    local Connection = RunService.Heartbeat:Connect(function(deltaTime)
+        if not NavigationActive or not boat:IsDescendantOf(workspace) then
+            Connection:Disconnect()
+            return
+        end
+        
+        -- Get current position and forward direction
+        local CurrentPos = BoatHRP.Position
+        local ForwardDir = BoatHRP.CFrame.LookVector
+        local RightDir = BoatHRP.CFrame.RightVector
+        
+        -- Check for obstacles ahead
+        local hasObstacleAhead = DetectObstacle(CurrentPos, ForwardDir, AvoidanceDistance)
+        local hasObstacleRight = DetectObstacle(CurrentPos, RightDir, AvoidanceDistance/2)
+        local hasObstacleLeft = DetectObstacle(CurrentPos, -RightDir, AvoidanceDistance/2)
+        
+        -- Determine navigation direction
+        local targetDir = ForwardDir
+        if hasObstacleAhead then
+            if hasObstacleRight and not hasObstacleLeft then
+                targetDir = -RightDir  -- Turn left
+            elseif hasObstacleLeft and not hasObstacleRight then
+                targetDir = RightDir  -- Turn right
+            else
+                targetDir = -ForwardDir  -- Turn around
+            end
+        end
+        
+        -- Move boat (apply force to vehicle seat)
+        BoatSeat.Throttle = 1
+        BoatSeat.Steer = targetDir:Dot(RightDir) * 0.5  -- Steering based on target direction
+        
+        -- Handle boat if stuck (simple implementation)
+        if (BoatHRP.Velocity.Magnitude < 1) and not hasObstacleAhead then
+            BoatSeat.Throttle = 1
+            BoatSeat.Steer = math.random(-1, 1)
+        end
+        
+        -- Keep boat at navigation height
+        local targetHeight = NavigationHeight
+        local heightDiff = targetHeight - CurrentPos.Y
+        if math.abs(heightDiff) > 0.5 then
+            -- Apply upward or downward force as needed
+            local liftForce = heightDiff * 50
+            BoatHRP:ApplyImpulse(Vector3.new(0, liftForce, 0))
+        end
+    end)
+    
+    return Connection
+end
+
+-- Function to create ESP for boat
+local function CreateBoatESP(boat)
+    if not boat then return end
+    
+    -- Remove existing ESP if there is one
+    if BoatESP and BoatESP.Parent then
+        BoatESP:Destroy()
+    end
+    
+    -- Create new ESP
+    BoatESP = Instance.new("BillboardGui")
+    BoatESP.Name = "BoatESP"
+    BoatESP.AlwaysOnTop = true
+    BoatESP.Size = UDim2.new(0, 200, 0, 50)
+    BoatESP.StudsOffset = Vector3.new(0, 10, 0) -- Position above boat
+    BoatESP.Adornee = boat:FindFirstChild("HumanoidRootPart") or boat:FindFirstChild("VehicleSeat")
+    
+    -- Create text label
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.Text = "Your Boat"
+    TextLabel.TextColor3 = Color3.fromRGB(0, 255, 0) -- Green color
+    TextLabel.TextStrokeTransparency = 0
+    TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+    TextLabel.TextSize = 20
+    TextLabel.Font = Enum.Font.SourceSansBold
+    TextLabel.Parent = BoatESP
+    
+    -- Add ESP to the game
+    BoatESP.Parent = game:GetService("CoreGui")
+    
+    return BoatESP
+end
+
+-- Function to update boat ESP
+local function UpdateBoatESP()
+    if not BoatESPActive or not CurrentBoat or not CurrentBoat:IsDescendantOf(workspace) then
+        if BoatESP and BoatESP.Parent then
+            BoatESP:Destroy()
+            BoatESP = nil
+        end
+        return
+    end
+    
+    if not BoatESP or not BoatESP.Parent then
+        CreateBoatESP(CurrentBoat)
+    else
+        -- Update adornee in case parts changed
+        BoatESP.Adornee = CurrentBoat:FindFirstChild("HumanoidRootPart") or 
+                           CurrentBoat:FindFirstChild("VehicleSeat") or
+                           CurrentBoat:FindFirstChild("PrimaryPart")
+    end
+end
+
+-- Main function to handle toggle
+GuardianToggle:OnChanged(function(value)
+    if value then
+        -- Enable auto boat feature
+        BoatActive = true
+        BoatESPActive = true
+        
+        -- Run auto boat in a separate thread
+        task.spawn(function()
+            while BoatActive do
+                -- Step 1: Make sure we have the boat
+                if not HasGuardianBoat() then
+                    BoatPurchased = BuyGuardianBoat()
+                    if not BoatPurchased then
+                        -- Failed to buy boat, wait and try again
+                        wait(5)
+                        continue
+                    end
+                end
+                
+                -- Step 2: Spawn the boat
+                local boat = SpawnBoat()
+                if not boat then
+                    -- Failed to spawn boat, wait and try again
+                    wait(3)
+                    continue
+                end
+                
+                -- Set current boat for ESP
+                CurrentBoat = boat
+                UpdateBoatESP()
+                
+                -- Step 3: Navigate the boat
+                NavigationActive = true
+                local navConnection = NavigateBoat(boat)
+                
+                -- Wait until navigation should stop
+                while NavigationActive and BoatActive and boat:IsDescendantOf(workspace) do
+                    UpdateBoatESP() -- Update ESP while boat is active
+                    wait(1)
+                end
+                
+                -- Clean up
+                if navConnection then
+                    navConnection:Disconnect()
+                end
+                
+                -- Clean up ESP if boat is gone
+                if not boat:IsDescendantOf(workspace) then
+                    CurrentBoat = nil
+                    UpdateBoatESP()
+                end
+                
+                wait(1)
+            end
+        end)
+    else
+        -- Disable auto boat feature
+        BoatActive = false
+        NavigationActive = false
+        BoatESPActive = false
+        
+        -- Clean up ESP
+        if BoatESP and BoatESP.Parent then
+            BoatESP:Destroy()
+            BoatESP = nil
+        end
+    end
+end)
+
+return GuardianBoat
 
 
 v14:Notify({
