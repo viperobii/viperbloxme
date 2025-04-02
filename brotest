@@ -18774,34 +18774,42 @@ AutoKillSeabeast:OnChanged(function(state)
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
+            -- Auto Equip Weapon function (Melee, Blox Fruit, Sword, Gun)
+            local function autoEquipWeapon()
+                local backpack = player.Backpack
+                for _, tool in pairs(backpack:GetChildren()) do
+                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
+                        player.Character.Humanoid:EquipTool(tool)
+                        break
+                    end
+                end
+            end
+
+            -- Auto Equip Weapon before starting the SeaBeast function
+            autoEquipWeapon()
+
+            -- YOUR ORIGINAL SEABEAST FUNCTION STARTS HERE, NO CHANGES MADE TO IT
             local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
             if seaBeast and humanoidRootPart then
                 local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
                 if rootPart then
-                    -- Set initial target position (400 studs above, but near horizontally)
-                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10) -- Slightly behind the Sea Beast
-
-                    -- Move player to the initial position once
+                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10)
                     Tween(CFrame.new(initialTargetPosition))
 
-                    -- Keep checking if the player moves away
                     while AutoKillSeabeast.Value do
                         local currentY = humanoidRootPart.Position.Y
                         local currentXZ = Vector3.new(humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Z)
-                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z) -- Follow X and Z
-
-                        -- Update target position to stay near but maintain height
+                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z)
                         local newTargetPosition = Vector3.new(targetXZ.X, initialTargetPosition.Y, targetXZ.Z - 10)
 
-                        -- If the player moves too far from the Sea Beast, re-tween
                         if (humanoidRootPart.Position - newTargetPosition).Magnitude > 15 or currentY < initialTargetPosition.Y - 5 then
                             Tween(CFrame.new(newTargetPosition))
                         end
-                        wait(0.5) -- Check every 0.5 seconds
+                        wait(0.5)
                     end
                 end
             end
-        end)
+        end) 
     end 
 end)
 
