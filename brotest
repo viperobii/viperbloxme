@@ -12224,33 +12224,24 @@ Default = false
 });
 
 v86:OnChanged(function(v274)
-
-_G.AutoY = v274;
-
+    _G.AutoY = v274;
 end);
 
 v17.ToggleAutoY:SetValue(false);
 
 spawn(function()
-
-while wait() do
-
-pcall(function()
-
-if _G.AutoY then
-
-game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game);
-
-wait();
-
-game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game);
-
-end
-
-end);
-
-end
-
+    while true do
+        if _G.AutoY then
+            pcall(function()
+                game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game);
+                wait(0.1); -- Short press
+                game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game);
+                wait(0.5); -- Wait between presses to avoid input flooding
+            end);
+        else
+            wait(0.1); -- Reduced CPU usage when not active
+        end
+    end
 end);
 
 local v87 = v16.Setting:AddToggle("ToggleAutoKen", {
@@ -18774,42 +18765,68 @@ AutoKillSeabeast:OnChanged(function(state)
             local character = player.Character or player.CharacterAdded:Wait()
             local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-            -- Auto Equip Weapon function (Melee, Blox Fruit, Sword, Gun)
-            local function autoEquipWeapon()
-                local backpack = player.Backpack
-                for _, tool in pairs(backpack:GetChildren()) do
-                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                        player.Character.Humanoid:EquipTool(tool)
-                        break
-                    end
-                end
-            end
-
-            -- Auto Equip Weapon before starting the SeaBeast function
-            autoEquipWeapon()
-
-            -- YOUR ORIGINAL SEABEAST FUNCTION STARTS HERE, NO CHANGES MADE TO IT
             local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
             if seaBeast and humanoidRootPart then
                 local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
                 if rootPart then
-                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10)
+                    -- Set initial target position (400 studs above, but near horizontally)
+                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10) -- Slightly behind the Sea Beast
+
+                    -- Move player to the initial position once
                     Tween(CFrame.new(initialTargetPosition))
 
+                    -- Keep checking if the player moves away
                     while AutoKillSeabeast.Value do
                         local currentY = humanoidRootPart.Position.Y
                         local currentXZ = Vector3.new(humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Z)
-                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z)
+                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z) -- Follow X and Z
+
+                        -- Update target position to stay near but maintain height
                         local newTargetPosition = Vector3.new(targetXZ.X, initialTargetPosition.Y, targetXZ.Z - 10)
 
+                        -- If the player moves too far from the Sea Beast, re-tween
                         if (humanoidRootPart.Position - newTargetPosition).Magnitude > 15 or currentY < initialTargetPosition.Y - 5 then
                             Tween(CFrame.new(newTargetPosition))
                         end
-                        wait(0.5)
+                        wait(0.5) -- Check every 0.5 seconds
                     end
                 end
             end
         end) 
+
+        -- Start Auto Attack
+        spawn(function()
+            local player = game.Players.LocalPlayer
+            local backpack = player.Backpack
+
+            while AutoKillSeabeast.Value do
+                for _, tool in pairs(backpack:GetChildren()) do
+                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
+                        player.Character.Humanoid:EquipTool(tool)
+
+                        local virtualInput = game:GetService("VirtualInputManager")
+
+                        -- Attack using skills
+                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart) -- Z
+                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart) -- X
+                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart) -- C
+                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart) -- V
+                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+                    end
+                end
+                wait()
+            end
+        end)
     end 
 end)
 
@@ -18947,61 +18964,6 @@ v16.Draco:AddButton({
 })
 
 
-local SkillSection = v16.Event:AddSection("Setting Skills Seabeast");
-
-local AutoSkillZ = v16.Event:AddToggle("ToggleAutoSkillZ", { 
-    Title = "Auto Skill Z", 
-    Description = "", 
-    Default = false 
-})
-
-local AutoSkillX = v16.Event:AddToggle("ToggleAutoSkillX", { 
-    Title = "Auto Skill X", 
-    Description = "", 
-    Default = false 
-})
-
-local AutoSkillC = v16.Event:AddToggle("ToggleAutoSkillC", { 
-    Title = "Auto Skill C", 
-    Description = "", 
-    Default = false 
-})
-
-local AutoSkillV = v16.Event:AddToggle("ToggleAutoSkillV", { 
-    Title = "Auto Skill V", 
-    Description = "", 
-    Default = false 
-})
-
-spawn(function()
-    while true do
-        if AutoSkillZ.Value then
-            game:GetService("VirtualInputManager"):SendKeyEvent(true, 122, false, game)
-            game:GetService("VirtualInputManager"):SendKeyEvent(false, 122, false, game)
-            wait(0.2)
-        end
-
-        if AutoSkillX.Value then
-            game:GetService("VirtualInputManager"):SendKeyEvent(true, 120, false, game)
-            game:GetService("VirtualInputManager"):SendKeyEvent(false, 120, false, game)
-            wait(0.2)
-        end
-
-        if AutoSkillC.Value then
-            game:GetService("VirtualInputManager"):SendKeyEvent(true, 99, false, game)
-            game:GetService("VirtualInputManager"):SendKeyEvent(false, 99, false, game)
-            wait(0.2)
-        end
-
-        if AutoSkillV.Value then
-            game:GetService("VirtualInputManager"):SendKeyEvent(true, 118, false, game)
-            game:GetService("VirtualInputManager"):SendKeyEvent(false, 118, false, game)
-            wait(0.2)
-        end
-
-        wait()
-    end
-end)
 
 
 v14:Notify({
