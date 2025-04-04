@@ -18755,20 +18755,34 @@ end);
 function CheckSeaBeast()
     if not game:GetService("Workspace") then return false end
 
-    local seaBeasts = game:GetService("Workspace"):FindFirstChild("SeaBeasts")
-    if seaBeasts then
-        for _, v1832 in pairs(seaBeasts:GetChildren()) do
-            if v1832 and 
-               v1832:FindFirstChild("HumanoidRootPart") and
-               (not v1832:FindFirstChild("Humanoid") or 
-               (v1832:FindFirstChild("Humanoid") and v1832.Humanoid.Health > 0)) then
-                return v1832; -- Return the beast instance instead of true
-            end
-        end
-    end
+    local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
+            if seaBeast and humanoidRootPart then
+                local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    -- Set initial target position (400 studs above, but near horizontally)
+                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10) -- Slightly behind the Sea Beast
 
-    return false;
-end
+                    -- Move player to the initial position once
+                    Tween(CFrame.new(initialTargetPosition))
+
+                    -- Keep checking if the player moves away
+                    while AutoKillSeabeast.Value do
+                        local currentY = humanoidRootPart.Position.Y
+                        local currentXZ = Vector3.new(humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Z)
+                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z) -- Follow X and Z
+
+                        -- Update target position to stay near but maintain height
+                        local newTargetPosition = Vector3.new(targetXZ.X, initialTargetPosition.Y, targetXZ.Z - 10)
+
+                        -- If the player moves too far from the Sea Beast, re-tween
+                        if (humanoidRootPart.Position - newTargetPosition).Magnitude > 15 or currentY < initialTargetPosition.Y - 5 then
+                            Tween(CFrame.new(newTargetPosition))
+                        end
+                        wait(0.5) -- Check every 0.5 seconds
+                    end
+                end
+            end
+        end) 
 
 	v72:Seperator("Setting Sea Event");
 
