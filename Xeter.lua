@@ -332,7 +332,7 @@ v5.Window = function(v134, v135)
 
 	v170.Size = UDim2.new(0, 263, 0, 325);
 
-	v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
+--v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
 
 	local v178 = Instance.new("UICorner");
 
@@ -18738,11 +18738,6 @@ v72:Toggle("Auto Kill Terror Shark", _G.Terrorshark, function(v1511)
     _G.Terrorshark = v1511;
     StopTween(_G.Terrorshark);
 end);
-
-v72:Toggle("Auto Kill Sea Beast", _G.SeaBest = false
-_G.SeaSkill = true -- Set true if you want skills to be used
-local Skillaimbot = false
-local SkillsCooldown = false
 
 v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
     _G.SeaBest = v1512
