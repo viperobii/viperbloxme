@@ -332,7 +332,7 @@ v5.Window = function(v134, v135)
 
 	v170.Size = UDim2.new(0, 263, 0, 325);
 
-	v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
+	--v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
 
 	local v178 = Instance.new("UICorner");
 
@@ -18739,30 +18739,88 @@ v72:Toggle("Auto Kill Terror Shark", _G.Terrorshark, function(v1511)
     StopTween(_G.Terrorshark);
 end);
 
+v72:Toggle("Auto Kill Sea Beast", _G.SeaBest = false
+_G.SeaSkill = true -- Set true if you want skills to be used
+local Skillaimbot = false
+local SkillsCooldown = false
+
 v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
-    _G.SeaBest = v1512;
-    StopTween(_G.SeaBest);
-    
+    _G.SeaBest = v1512
+    StopTween(_G.SeaBest)
+
     if not _G.SeaBest then
-        _G.SeaSkill = false;
-        Skillaimbot = false;
+        _G.SeaSkill = false
+        Skillaimbot = false
+    else
+        SeaBeastKiller()
     end
-end);
+end)
 
 function CheckSeaBeast()
-    if not game:GetService("Workspace") then return false end
-    
-    if game:GetService("Workspace"):FindFirstChild("SeaBeasts") then
-        for _, v1832 in pairs(game:GetService("Workspace").SeaBeasts:GetChildren()) do
-            if v1832 and 
-               (v1832:FindFirstChild("Humanoid") or v1832:FindFirstChild("HumanoidRootPart")) and
-               ((v1832:FindFirstChild("Humanoid") and v1832.Humanoid.Health > 0) or true) then
-                return true;
+    local seaBeasts = game:GetService("Workspace"):FindFirstChild("SeaBeasts")
+    if seaBeasts then
+        for _, beast in pairs(seaBeasts:GetChildren()) do
+            if beast and beast:FindFirstChild("HumanoidRootPart") and (not beast:FindFirstChild("Humanoid") or beast.Humanoid.Health > 0) then
+                return beast
             end
         end
     end
-    
-    return false;
+    return false
+end
+
+function TweenToPosition(pos)
+    local player = game.Players.LocalPlayer
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local tweenInfo = TweenInfo.new((hrp.Position - pos).Magnitude / 250, Enum.EasingStyle.Linear)
+        local tween = game:GetService("TweenService"):Create(hrp, tweenInfo, {Position = pos})
+        tween:Play()
+        tween.Completed:Wait()
+    end
+end
+
+function UseSkills(target)
+    if SkillsCooldown then return end
+    SkillsCooldown = true
+
+    -- Example Skill Usage (replace with your own skills)
+    pcall(function() game:GetService("VirtualInputManager"):SendKeyEvent(true, "Z", false, game) end)
+    task.wait(0.2)
+    pcall(function() game:GetService("VirtualInputManager"):SendKeyEvent(true, "X", false, game) end)
+    task.wait(0.2)
+    pcall(function() game:GetService("VirtualInputManager"):SendKeyEvent(true, "C", false, game) end)
+
+    -- Cooldown between skill uses
+    task.delay(5, function()
+        SkillsCooldown = false
+        Skillaimbot = false
+    end)
+end
+
+function SeaBeastKiller()
+    spawn(function()
+        while _G.SeaBest do
+            local seaBeast = CheckSeaBeast()
+            if seaBeast and seaBeast.Parent then
+                local beastHRP = seaBeast:FindFirstChild("HumanoidRootPart")
+                if beastHRP then
+                    local playerHRP = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if playerHRP then
+                        local dist = (playerHRP.Position - beastHRP.Position).Magnitude
+                        if dist > 10 then
+                            TweenToPosition(beastHRP.Position + Vector3.new(0, 50, 0)) -- Stay above the beast
+                        end
+
+                        if _G.SeaSkill and not Skillaimbot then
+                            Skillaimbot = true
+                            UseSkills(seaBeast)
+                        end
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
 end
 
 	v72:Seperator("Setting Sea Event");
