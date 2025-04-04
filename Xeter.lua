@@ -18740,49 +18740,40 @@ v72:Toggle("Auto Kill Terror Shark", _G.Terrorshark, function(v1511)
 end);
 
 v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
-    _G.SeaBest = v1512;
-    StopTween(_G.SeaBest);
 
-    if not _G.SeaBest then
-        _G.SeaSkill = false;
-        Skillaimbot = false;
-    else
-        -- You still need to implement SeaBeastKiller function elsewhere
-        SeaBeastKiller();
-    end
-end);
+		_G.SeaBest = v1512;
 
-function CheckSeaBeast()
-    if not game:GetService("Workspace") then return false end
+		StopTween(_G.SeaBest);
 
-    local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-            if seaBeast and humanoidRootPart then
-                local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- Set initial target position (400 studs above, but near horizontally)
-                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10) -- Slightly behind the Sea Beast
+		if  not _G.SeaBest then
 
-                    -- Move player to the initial position once
-                    Tween(CFrame.new(initialTargetPosition))
+			_G.SeaSkill = false;
 
-                    -- Keep checking if the player moves away
-                    while AutoKillSeabeast.Value do
-                        local currentY = humanoidRootPart.Position.Y
-                        local currentXZ = Vector3.new(humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Z)
-                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z) -- Follow X and Z
+			Skillaimbot = false;
 
-                        -- Update target position to stay near but maintain height
-                        local newTargetPosition = Vector3.new(targetXZ.X, initialTargetPosition.Y, targetXZ.Z - 10)
+		end
 
-                        -- If the player moves too far from the Sea Beast, re-tween
-                        if (humanoidRootPart.Position - newTargetPosition).Magnitude > 15 or currentY < initialTargetPosition.Y - 5 then
-                            Tween(CFrame.new(newTargetPosition))
-                        end
-                        wait(0.5) -- Check every 0.5 seconds
-                    end
-                end
-            end
-        end) 
+	end);
+
+	function CheckSeaBeast()
+
+		if game:GetService("Workspace"):FindFirstChild("SeaBeast1") then
+
+			for v1831, v1832 in pairs(game:GetService("Workspace").SeaBeasts:GetChildren()) do
+
+				if (v1832:FindFirstChild("Humanoid") or v1832:FindFirstChild("HumanoidRootPart") or (v1832.Humanoid.Health < 0)) then
+
+					return true;
+
+				end
+
+			end
+
+		end
+
+		return false;
+
+	end
 
 	v72:Seperator("Setting Sea Event");
 
