@@ -332,7 +332,7 @@ v5.Window = function(v134, v135)
 
 	v170.Size = UDim2.new(0, 263, 0, 325);
 
---v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
+ v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
 
 	local v178 = Instance.new("UICorner");
 
