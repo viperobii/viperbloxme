@@ -18610,7 +18610,7 @@ if World3 then
 end)
 
 function CheckSeaBeast()
-    local seaBeastsFolder = game:GetService("Workspace"):FindFirstChild("SeaBeast1")
+    local seaBeastsFolder = game:GetService("Workspace"):FindFirstChild("SeaBeasts")
     if seaBeastsFolder then
         for _, beast in pairs(seaBeastsFolder:GetChildren()) do
             local humanoid = beast:FindFirstChild("Humanoid")
