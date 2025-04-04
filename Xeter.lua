@@ -18601,40 +18601,27 @@ if World3 then
 	end);
 
 	v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
+    _G.SeaBest = v1512
+    StopTween(_G.SeaBest)
+    if not _G.SeaBest then
+        _G.SeaSkill = false
+        Skillaimbot = false
+    end
+end)
 
-		_G.SeaBest = v1512;
-
-		StopTween(_G.SeaBest);
-
-		if  not _G.SeaBest then
-
-			_G.SeaSkill = false;
-
-			Skillaimbot = false;
-
-		end
-
-	end);
-
-	function CheckSeaBeast()
-
-		if game:GetService("Workspace"):FindFirstChild("SeaBeast1") then
-
-			for v1831, v1832 in pairs(game:GetService("Workspace").SeaBeasts:GetChildren()) do
-
-				if (v1832:FindFirstChild("Humanoid") or v1832:FindFirstChild("HumanoidRootPart") or (v1832.Humanoid.Health < 0)) then
-
-					return true;
-
-				end
-
-			end
-
-		end
-
-		return false;
-
-	end
+function CheckSeaBeast()
+    local seaBeastsFolder = game:GetService("Workspace"):FindFirstChild("SeaBeast1")
+    if seaBeastsFolder then
+        for _, beast in pairs(seaBeastsFolder:GetChildren()) do
+            local humanoid = beast:FindFirstChild("Humanoid")
+            local hrp = beast:FindFirstChild("HumanoidRootPart")
+            if humanoid and humanoid.Health > 0 and hrp then
+                return true
+            end
+        end
+    end
+    return false
+end
 
 	v72:Seperator("Setting Sea Event");
 
