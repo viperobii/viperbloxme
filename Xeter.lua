@@ -2,11 +2,11 @@ print("Break");
 
 local v0 = require(game:GetService("ReplicatedStorage").Notification);
 
---v0.new("<Color=Cyan>Welcome to Viper<Color=/>"):Display();
+v0.new("<Color=Cyan>Welcome to Tuấn Anh IOS<Color=/>"):Display();
 
 wait(0.5);
 
---v0.new("<Color=Yellow>Everyone Goes to Discord to Communicate<Color=/>"):Display();
+v0.new("<Color=Yellow>Everyone Goes to Discord to Communicate<Color=/>"):Display();
 
 wait(1);
 
@@ -16,7 +16,7 @@ repeat
 
 until game.Players.LocalPlayer
 
-if  not game:asLoaded() then
+if  not game:IsLoaded() then
 
 	game.Loaded:Wait();
 
@@ -332,7 +332,7 @@ v5.Window = function(v134, v135)
 
 	v170.Size = UDim2.new(0, 263, 0, 325);
 
- v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
+	v170.Image = "http://www.roblox.com/asset/?id="   .. tostring(75774010417827) ;
 
 	local v178 = Instance.new("UICorner");
 
@@ -388,7 +388,7 @@ v5.Window = function(v134, v135)
 
 	v197.Font = Enum.Font.SourceSansBold;
 
-	v197.Text = "Viper Hub [Zeisha]";
+	v197.Text = "Tuấn Anh IOS";
 
 	v197.TextSize = 17;
 
@@ -426,7 +426,7 @@ v5.Window = function(v134, v135)
 
 	v223.Parent = v147;
 
-	v223.BackgroundColor3 = Color3.fromRGB(0, 50, 0);
+	v223.BackgroundColor3 = Color3.fromRGB(0, 0, 0);
 
 	v223.Position = UDim2.new(0, 14, 0, 33);
 
@@ -1976,7 +1976,7 @@ v8.Size = UDim2.new(0, 53.5, 0, 53.5);
 
 v8.BackgroundTransparency = 1;
 
-v8.Image = "rbxassetid://101883839381557";
+v8.Image = "rbxassetid://75774010417827";
 
 v8.Draggable = true;
 
@@ -6123,168 +6123,6 @@ spawn(function()
 	end
 
 end);
-
-function _x1()
-    local _v2 = _v1.Character
-    if not _v2 then return end
-
-    -- Find the equipped weapon/tool
-    local _v3 = nil
-    for _, _v4 in ipairs(_v2:GetChildren()) do
-        if _v4:IsA("Tool") then
-            _v3 = _v4
-            break
-        end
-    end
-
-    -- Auto Equip Melee if no tool is found
-    if not _v3 then
-        for _, _v4 in ipairs(_v1.Backpack:GetChildren()) do
-            if _v4:IsA("Tool") then
-                _v3 = _v4
-                _v1.Character.Humanoid:EquipTool(_v3)
-                task.wait(0.1) -- Small delay to ensure tool is equipped
-                break
-            end
-        end
-    end
-
-    if not _v3 then return end
-
-    local function _x2(_v5)
-        return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
-    end
-
-    local function _x3(_v6)
-        local _v7 = {}
-        local _v9 = _v2:GetPivot().Position
-        
-        -- Try to get enemies through different possible paths
-        local enemiesFolder = workspace:FindFirstChild("Enemies") or workspace:FindFirstChild("Mobs") or workspace:FindFirstChild("NPCs")
-        
-        if enemiesFolder then
-            for _, _v10 in ipairs(enemiesFolder:GetChildren()) do
-                local _v11 = _v10:FindFirstChild("HumanoidRootPart") or _v10:FindFirstChild("Torso") or _v10:FindFirstChild("UpperTorso")
-                if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
-                    table.insert(_v7, _v10)
-                end
-            end
-        end
-
-        -- Check Players (Exclude Yourself)
-        if _G.AttackPlayers then
-            for _, _v10 in ipairs(game:GetService("Players"):GetPlayers()) do
-                if _v10 ~= _v1 and _x2(_v10.Character) then
-                    local _v11 = _v10.Character:FindFirstChild("HumanoidRootPart") or _v10.Character:FindFirstChild("Torso") or _v10.Character:FindFirstChild("UpperTorso")
-                    if _v11 and (_v11.Position - _v9).Magnitude <= _v6 then
-                        table.insert(_v7, _v10.Character)
-                    end
-                end
-            end
-        end
-        
-        return _v7
-    end
-
-    -- Method 1: Tool with LeftClickRemote
-    if _v3:FindFirstChild("LeftClickRemote") then
-        local _v12 = 1
-        local _v13 = _x3(60)
-
-        for _, _v14 in ipairs(_v13) do
-            local rootPart = _v14:FindFirstChild("HumanoidRootPart") or _v14:FindFirstChild("Torso") or _v14:FindFirstChild("UpperTorso")
-            if rootPart then
-                local _v15 = (rootPart.Position - _v2:GetPivot().Position).Unit
-                pcall(function()
-                    _v3.LeftClickRemote:FireServer(_v15, _v12)
-                end)
-                _v12 = _v12 + 1
-                if _v12 > 10000 then _v12 = 1 end
-            end
-        end
-        return -- Return early as we've used method 1
-    end
-
-    -- Method 2: Look for combat remote events
-    local _v16 = {}
-    local _v17 = _x3(60)
-    local _v18 = _v2:GetPivot().Position
-    local _v19 = nil
-
-    for _, _v20 in ipairs(_v17) do
-        if _x2(_v20) then
-            local _v21 = _v20:FindFirstChild("Head") or _v20:FindFirstChild("HumanoidRootPart") or _v20:FindFirstChild("Torso")
-            if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
-                table.insert(_v16, { _v20, _v21 })
-                _v19 = _v21
-            end
-        end
-    end
-
-    if not _v19 then return end
-
-    -- Try different remote paths
-    pcall(function()
-        local _v22 = game:GetService("ReplicatedStorage")
-        
-        -- Method 2a: Standard remote path
-        local _v23 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterAttack")
-        local _v24 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterHit")
-
-        if _v23 and _v24 then
-            _v23:FireServer(0.01) -- Using a slightly more realistic delay
-            task.wait(0.01)
-            _v24:FireServer(_v19, _v16)
-            return -- Return early if this method works
-        end
-        
-        -- Method 2b: Alternative remote structure
-        local combatRemote = _v22:FindFirstChild("Combat") or _v22:FindFirstChild("Remotes") or _v22:FindFirstChild("RemoteEvents")
-        if combatRemote then
-            local attackRemote = combatRemote:FindFirstChild("Attack") or combatRemote:FindFirstChild("AttackEvent") or combatRemote:FindFirstChild("Combat")
-            if attackRemote and attackRemote:IsA("RemoteEvent") then
-                attackRemote:FireServer(_v19)
-                return
-            end
-        end
-        
-        -- Method 2c: Direct tool remotes 
-        local attackRemote = _v3:FindFirstChild("Attack") or _v3:FindFirstChild("AttackEvent") or _v3:FindFirstChild("Combat")
-        if attackRemote and attackRemote:IsA("RemoteEvent") then
-            attackRemote:FireServer(_v19)
-            return
-        end
-        
-        -- Method 2d: Special case for fighting games
-        local hitRemote = _v22:FindFirstChild("Hit") or _v22:FindFirstChild("HitEvent") or _v22:FindFirstChild("DamageRemote")
-        if hitRemote and hitRemote:IsA("RemoteEvent") then
-            hitRemote:FireServer(_v19)
-            return
-        end
-    end)
-end
-
--- Initialize global variables
-if not _G then _G = {} end
-if _G.FastAttack == nil then _G.FastAttack = true end
-if _G.AttackPlayers == nil then _G.AttackPlayers = false end
-
--- Update toggle handler
-if FastAttackToggle then
-    FastAttackToggle:OnChanged(function(state)
-        _G.FastAttack = state
-    end)
-end
-
--- Main script
-spawn(function()
-    while true do
-        if _G.FastAttack then
-            pcall(_x1)
-        end
-        task.wait(0.1)
-    end
-end)
 
 Client1 = v67:Label("Ping");
 
@@ -18693,53 +18531,76 @@ if World3 then
 	end);
 
 	v72:Toggle("Auto Kill Shark", FarmShark, function(v1505)
-    FarmShark = v1505;
-    StopTween(FarmShark);
-end);
 
-v72:Toggle("Auto Kill Piranha", _G.farmpiranya, function(v1506)
-    _G.farmpiranya = v1506;
-    StopTween(_G.farmpiranya);
-end);
+		FarmShark = v1505;
 
-v72:Toggle("Auto Fish Crew", _G.Fish_Crew_Member, function(v1507)
-    _G.Fish_Crew_Member = v1507;
-    StopTween(_G.Fish_Crew_Member);
-end);
+		StopTween(FarmShark);
 
-function UpDownPos(v1508)
-    if not v1508 then return end
-    
-    pcall(function()
-        fastpos(v1508 * CFrame.new(0, 40, 0));
-        wait(2);
-        fastpos(v1508 * CFrame.new(0, 300, 0));
-        wait(3);
-    end)
-end
+	end);
 
-v72:Toggle("Auto Kill Ghost Ship", _G.bjirFishBoat, function(v1509)
-    _G.bjirFishBoat = v1509;
-    StopTween(_G.bjirFishBoat);
-    
-    if not _G.bjirFishBoat then
-        _G.SeaSkill = false;
-        Skillaimbot = false;
-        StopTween(_G.bjirFishBoat);
-    end
-end);
+	v72:Toggle("Auto Kill Piranha", _G.farmpiranya, function(v1506)
 
-v72:Toggle("Auto Kill Pirate Grand Brigade", _G.KillGhostShip, function(v1510)
-    _G.KillGhostShip = v1510;
-    StopTween(_G.KillGhostShip);
-end);
+		_G.farmpiranya = v1506;
 
-v72:Toggle("Auto Kill Terror Shark", _G.Terrorshark, function(v1511)
-    _G.Terrorshark = v1511;
-    StopTween(_G.Terrorshark);
-end);
+		StopTween(_G.farmpiranya);
 
-v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
+	end);
+
+	v72:Toggle("Auto Fish Crew", _G.Fish_Crew_Member, function(v1507)
+
+		_G.Fish_Crew_Member = v1507;
+
+		StopTween(_G.Fish_Crew_Member);
+
+	end);
+
+	function UpDownPos(v1508)
+
+		fastpos(v1508 * CFrame.new(0, 40, 0) );
+
+		wait(2);
+
+		fastpos(v1508 * CFrame.new(0, 300, 0) );
+
+		wait(3);
+
+	end
+
+	v72:Toggle("Auto Kill Ghost Ship", _G.bjirFishBoat, function(v1509)
+
+		_G.bjirFishBoat = v1509;
+
+		StopTween(_G.bjirFishBoat);
+
+		if  not _G.bjirFishBoat then
+
+			_G.SeaSkill = false;
+
+			Skillaimbot = false;
+
+			StopTween(_G.bjirFishBoat);
+
+		end
+
+	end);
+
+	v72:Toggle("Auto Kill Pirate Grand Brigade", _G.KillGhostShip, function(v1510)
+
+		_G.KillGhostShip = v1510;
+
+		StopTween(_G.KillGhostShip);
+
+	end);
+
+	v72:Toggle("Auto Kill Terror Shark", _G.Terrorshark, function(v1511)
+
+		_G.Terrorshark = v1511;
+
+		StopTween(_G.Terrorshark);
+
+	end);
+
+	v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
 
 		_G.SeaBest = v1512;
 
@@ -18855,7 +18716,7 @@ v72:Toggle("Auto Kill Sea Beast", _G.SeaBest, function(v1512)
 
 	end);
 
-	v72:Toggle(" Boat", false, function(v1516)
+	v72:Toggle("Enable Fly Boat", false, function(v1516)
 
 		if v1516 then
 
