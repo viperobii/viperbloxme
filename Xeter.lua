@@ -16206,8 +16206,8 @@ end
 end);
 
 local v146 = v16.Race:AddToggle("ToggleKillTrial", {
-    Title = "Auto Kill Players In Trial",
-    Description = "Manual Use Skill To Win Only Melee Skills",
+    Title = "Auto Combo Kill Players In Trial",
+    Description = "Automatically Uses All Weapons And Skills",
     Default = false
 })
 
@@ -16217,6 +16217,9 @@ end)
 
 v17.ToggleKillTrial:SetValue(false)
 
+-- Define weapon order
+local weaponOrder = {"Melee", "Blox Fruit", "Sword", "Gun"}
+
 spawn(function()
     while wait() do
         pcall(function()
@@ -16225,44 +16228,90 @@ spawn(function()
                     if player.Name and player.Name ~= game.Players.LocalPlayer.Name then
                         local myChar = game.Players.LocalPlayer.Character
                         local targetChar = player.Character
-                        if targetChar and targetChar:FindFirstChild("HumanoidRootPart") and myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                        
+                        if targetChar and targetChar:FindFirstChild("HumanoidRootPart") and 
+                           myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                            
                             local dist = (targetChar.HumanoidRootPart.Position - myChar.HumanoidRootPart.Position).Magnitude
-                            if dist <= 100 and targetChar.Humanoid.Health > 0 then
-                                repeat
-                                    wait(_G.Fast_Delay)
-
-                                    -- Auto switch weapon and use skills
-                                    for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                                        if tool:IsA("Tool") and (tool.Name == "Melee" or tool.Name == "Blox Fruit" or tool.Name == "Sword" or tool.Name == "Gun") then
-                                            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
-
-                                            local virtualInput = game:GetService("VirtualInputManager")
-
-                                            -- Attack using skills (Z, X, C, F)
-                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.Z, false, game) -- Z
-                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.Z, false, game)
-                                            wait(0.2)
-
-                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.X, false, game) -- X
-                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.X, false, game)
-                                            wait(0.2)
-
-                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.C, false, game) -- C
-                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.C, false, game)
-                                            wait(0.2)
-
-                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.F, false, game) -- F
-                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.F, false, game)
-                                            wait(0.2)
+                            
+                            if dist <= 100 and targetChar:FindFirstChild("Humanoid") and targetChar.Humanoid.Health > 0 then
+                                -- Get backpack and equipped items
+                                local backpack = game.Players.LocalPlayer.Backpack
+                                local virtualInput = game:GetService("VirtualInputManager")
+                                
+                                -- Go through each weapon type in order
+                                for _, weaponType in ipairs(weaponOrder) do
+                                    -- Find tool of this type
+                                    local foundTool = nil
+                                    
+                                    -- Check backpack
+                                    for _, tool in pairs(backpack:GetChildren()) do
+                                        if tool:IsA("Tool") and tool.Name == weaponType then
+                                            foundTool = tool
+                                            break
                                         end
                                     end
-                                until not _G.AutoKillTrial or not player.Parent or targetChar.Humanoid.Health <= 0
+                                    
+                                    -- Check if already equipped
+                                    if not foundTool and myChar then
+                                        for _, tool in pairs(myChar:GetChildren()) do
+                                            if tool:IsA("Tool") and tool.Name == weaponType then
+                                                foundTool = tool
+                                                break
+                                            end
+                                        end
+                                    end
+                                    
+                                    -- If found, equip and use skills
+                                    if foundTool then
+                                        -- If not already equipped, equip it
+                                        if foundTool.Parent == backpack then
+                                            myChar.Humanoid:EquipTool(foundTool)
+                                            wait(0.2) -- Wait for equip
+                                        end
+                                        
+                                        -- Use skills
+                                        local skills = {
+                                            {key = Enum.KeyCode.Z, delay = 0.3},
+                                            {key = Enum.KeyCode.X, delay = 0.3},
+                                            {key = Enum.KeyCode.C, delay = 0.3},
+                                            {key = Enum.KeyCode.F, delay = 0.3}
+                                        }
+                                        
+                                        for _, skill in ipairs(skills) do
+                                            -- Check if target is still valid
+                                            if not _G.AutoKillTrial or not player.Parent or not targetChar.Parent or 
+                                               not targetChar:FindFirstChild("Humanoid") or targetChar.Humanoid.Health <= 0 then
+                                                break
+                                            end
+                                            
+                                            -- Use skill
+                                            virtualInput:SendKeyEvent(true, skill.key, false, game)
+                                            wait(0.1)
+                                            virtualInput:SendKeyEvent(false, skill.key, false, game)
+                                            
+                                            wait(skill.delay)
+                                        end
+                                        
+                                        -- Add a small delay between weapon switches
+                                        wait(0.5)
+                                    end
+                                    
+                                    -- Check if target died or toggle turned off
+                                    if not _G.AutoKillTrial or not player.Parent or not targetChar.Parent or 
+                                       not targetChar:FindFirstChild("Humanoid") or targetChar.Humanoid.Health <= 0 then
+                                        break
+                                    end
+                                end
                             end
                         end
                     end
                 end
             end
         end)
+        
+        -- Small wait to prevent script from being too intensive
+        wait(0.1)
     end
 end)
 
