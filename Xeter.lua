@@ -16232,47 +16232,31 @@ spawn(function()
                                     wait(_G.Fast_Delay)
 
                                     -- Auto switch weapon and use skills
-                                    local weapons = {"Melee", "Sword", "Gun", "Blox Fruit"}
-                                    for _, weap in ipairs(weapons) do
-                                        -- Only equip and use skills if the player has the weapon equipped
-                                        if EquipTool(weap) then
-                                            wait(0.1)
-                                            UseSkills()
-                                        end
-                                    end
+                                    for _, tool in pairs(backpack:GetChildren()) do
+                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
+                        player.Character.Humanoid:EquipTool(tool)
 
-                                    AutoHaki()
-                                    Tween(targetChar.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
+                        local virtualInput = game:GetService("VirtualInputManager")
 
-                                    targetChar.HumanoidRootPart.CanCollide = false
-                                    targetChar.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        -- Attack using skills
+                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart) -- Z
+                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
 
-                                    AttackNoCoolDown()
-                                until not _G.AutoKillTrial or not player.Parent or targetChar.Humanoid.Health <= 0
-                            end
-                        end
-                    end
+                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart) -- X
+                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+
+                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart) -- C
+                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
+                        wait(0.2)
+end
                 end
+                wait()
             end
         end)
-    end
+    end 
 end)
-
--- Helper to simulate skill key presses (Z, X, C, F)
-function UseSkills()
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    
-    -- Try using skills in the following order: Z, X, C, F (or use based on your setup)
-    local skillKeys = {"Z", "X", "C", "F"}
-    for _, key in ipairs(skillKeys) do
-        -- Press the key
-        VirtualInputManager:SendKeyEvent(true, key, false, game)
-        wait(0.2)  -- Delay between key presses to simulate skill usage
-        -- Release the key
-        VirtualInputManager:SendKeyEvent(false, key, false, game)
-        wait(0.1)  -- Small wait to ensure it doesn't overlap with other actions
-    end
-end
 
 local v56 = v16.Race:AddSection("Training");
 
