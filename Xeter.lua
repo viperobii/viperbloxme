@@ -6542,6 +6542,25 @@ v68:Toggle("Auto Farm Level", _G.Farm, function(value)
     StopTween(value)
 end)
 
+-- Add a magnet function to bring monsters together
+function BringMob(mob)
+    if StartMagnet then
+        for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+            if v.Name == Mon and (v.HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude <= 350 then
+                v.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame
+                v.HumanoidRootPart.CanCollide = false
+                v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                v.Humanoid.WalkSpeed = 0
+                v.Head.CanCollide = false
+                if v.Humanoid:FindFirstChild("Animator") then
+                    v.Humanoid.Animator:Destroy()
+                end
+                v.Humanoid:ChangeState(11)
+            end
+        end
+    end
+end
+
 spawn(function()
     while task.wait() do
         if _G.Farm then
@@ -6579,8 +6598,10 @@ spawn(function()
                     CheckQuest()
                     local enemies = workspace:FindFirstChild("Enemies")
                     if enemies then
+                        local foundMob = false
                         for _, mob in pairs(enemies:GetChildren()) do
                             if mob.Name == Mon and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                foundMob = true
                                 if string.find(questText, NameMon) then
                                     repeat
                                         task.wait()
@@ -6592,12 +6613,20 @@ spawn(function()
                                         mob.Head.CanCollide = false
                                         mob.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
                                         StartMagnet = true
+                                        BringMob(mob) -- Call the magnet function
                                     until not _G.Farm or mob.Humanoid.Health <= 0 or not mob.Parent or not questGui.Visible
                                 else
                                     StartMagnet = false
                                     game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest")
                                 end
+                                break -- Exit the loop after handling one mob
                             end
+                        end
+                        
+                        if not foundMob then
+                            TP1(CFrameMon)
+                            UnEquipWeapon(_G.SelectWeapon)
+                            StartMagnet = false
                         end
                     else
                         TP1(CFrameMon)
@@ -6647,8 +6676,10 @@ if World1 then
                         local enemies = workspace:FindFirstChild("Enemies")
 
                         if enemies then
+                            local foundShanda = false
                             for _, mob in pairs(enemies:GetChildren()) do
                                 if mob.Name == "Shanda" and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                                    foundShanda = true
                                     repeat
                                         task.wait()
                                         AutoHaki()
@@ -6658,18 +6689,43 @@ if World1 then
                                         mob.HumanoidRootPart.Size = Vector3.new(80, 80, 80)
                                         TP1(mob.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
                                         StardMag = true
+                                        
+                                        -- Add magnet function for Shanda mobs
+                                        if StardMag then
+                                            for i,v in pairs(enemies:GetChildren()) do
+                                                if v.Name == "Shanda" and (v.HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude <= 350 then
+                                                    v.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame
+                                                    v.HumanoidRootPart.CanCollide = false
+                                                    v.HumanoidRootPart.Size = Vector3.new(80, 80, 80)
+                                                    v.Humanoid.WalkSpeed = 0
+                                                    v.Head.CanCollide = false
+                                                    if v.Humanoid:FindFirstChild("Animator") then
+                                                        v.Humanoid.Animator:Destroy()
+                                                    end
+                                                    v.Humanoid:ChangeState(11)
+                                                end
+                                            end
+                                        end
                                     until not _G.Farmfast or not mob.Parent or mob.Humanoid.Health <= 0
 
                                     StardMag = false
                                     TP1(CFrame.new(-7678.48, 5566.40, -497.21))
                                     UnEquipWeapon(_G.SelectWeapon)
+                                    break -- Exit loop after handling one Shanda
                                 end
                             end
-                        end
-
-                        local repMob = game.ReplicatedStorage:FindFirstChild("Shanda")
-                        if repMob and repMob:FindFirstChild("HumanoidRootPart") then
-                            TP1(repMob.HumanoidRootPart.CFrame * CFrame.new(5, 10, 2))
+                            
+                            if not foundShanda then
+                                local repMob = game.ReplicatedStorage:FindFirstChild("Shanda")
+                                if repMob and repMob:FindFirstChild("HumanoidRootPart") then
+                                    TP1(repMob.HumanoidRootPart.CFrame * CFrame.new(5, 10, 2))
+                                end
+                            end
+                        else
+                            local repMob = game.ReplicatedStorage:FindFirstChild("Shanda")
+                            if repMob and repMob:FindFirstChild("HumanoidRootPart") then
+                                TP1(repMob.HumanoidRootPart.CFrame * CFrame.new(5, 10, 2))
+                            end
                         end
                     end
                 end
@@ -6980,89 +7036,65 @@ end);
 
 v68:Seperator("Chest Farm");
 
-v68:Toggle("Auto Farm Chest", false, function(v383)
+v68:Toggle("Auto Farm Chest", false, function(state)
+    AutoFarmChest = state
+    StopTween(state)
+end)
 
-	AutoFarmChest = v383;
+_G.MagnitudeAdd = 0
 
-	StopTween(AutoFarmChest);
-
-end);
-
-_G.MagnitudeAdd = 0;
-
-local function v89()
-
-	local v384 = {};
-
-	for v782, v783 in pairs(game:GetService("Workspace"):GetChildren()) do
-
-		if (v783.Name:find("Chest") and v783:IsA("BasePart")) then
-
-			table.insert(v384, v783);
-
-		end
-
-	end
-
-	return v384;
-
+-- Get all chest parts in workspace
+local function GetChests()
+    local chests = {}
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("BasePart") and obj.Name:find("Chest") then
+            table.insert(chests, obj)
+        end
+    end
+    return chests
 end
 
-local function v90(v385)
-
-	table.sort(v385, function(v784, v785)
-
-		local v786 = (v784.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
-
-		local v787 = (v785.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
-
-		return v786 < v787 ;
-
-	end);
-
+-- Sort chests by closest distance to player
+local function SortChests(chestList)
+    table.sort(chestList, function(a, b)
+        local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+        return (a.Position - playerPos).Magnitude < (b.Position - playerPos).Magnitude
+    end)
 end
 
+-- Main chest farming loop
 spawn(function()
+    while task.wait() do
+        if AutoFarmChest then
+            local chestList = GetChests()
+            if #chestList > 0 then
+                SortChests(chestList)
 
-	while wait() do
+                for _, chest in ipairs(chestList) do
+                    local distance = (chest.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if distance <= (5000 + _G.MagnitudeAdd) then
+                        repeat
+                            task.wait()
+                            if chest and chest.Parent and workspace:FindFirstChild(chest.Name) then
+                                topos(chest.CFrame)
+                            end
+                        until not AutoFarmChest or not chest or not chest.Parent
 
-		if AutoFarmChest then
+                        -- Return to original position after collecting
+                        local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if root then
+                            topos(root.CFrame)
+                        end
 
-			local v1652 = v89();
-
-			v90(v1652);
-
-			for v1740, v1741 in ipairs(v1652) do
-
-				if ((v1741.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= (5000 + _G.MagnitudeAdd)) then
-
-					repeat
-
-						wait();
-
-						if game:GetService("Workspace"):FindFirstChild(v1741.Name) then
-
-							topos(v1741.CFrame);
-
-						end
-
-					until (AutoFarmChest == false) or  not v1741.Parent
-
-					topos(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
-
-					_G.MagnitudeAdd = _G.MagnitudeAdd + 1500 ;
-
-					break;
-
-				end
-
-			end
-
-		end
-
-	end
-
-end);
+                        -- Expand range for next run
+                        _G.MagnitudeAdd = _G.MagnitudeAdd + 1500
+                        break
+                    end
+                end
+            end
+        end
+    end
+end)
 
 v68:Toggle("Auto Stop Items", function(v386)
 
