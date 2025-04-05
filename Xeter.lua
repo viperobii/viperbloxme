@@ -1976,7 +1976,7 @@ v8.Size = UDim2.new(0, 53.5, 0, 53.5);
 
 v8.BackgroundTransparency = 1;
 
-v8.Image = "rbxassetid://75774010417827";
+v8.Image = "rbxassetid://101883839381557";
 
 v8.Draggable = true;
 
@@ -6536,9 +6536,10 @@ end);
 
 v68:Seperator("Farming");
 
+-- AUTO FARM LEVEL TOGGLE
 v68:Toggle("Auto Farm Level", _G.Farm, function(value)
     _G.Farm = value
-    StopTween(_G.Farm)
+    StopTween(value)
 end)
 
 spawn(function()
@@ -6574,10 +6575,9 @@ spawn(function()
                     if dist <= 5 then
                         game.ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
                     end
-
                 else
                     CheckQuest()
-                    local enemies = game.Workspace:FindFirstChild("Enemies")
+                    local enemies = workspace:FindFirstChild("Enemies")
                     if enemies then
                         for _, mob in pairs(enemies:GetChildren()) do
                             if mob.Name == Mon and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
@@ -6615,106 +6615,67 @@ spawn(function()
     end
 end)
 
+-- AUTO FARM FAST LEVEL 1-300
 if World1 then
+    v68:Toggle("Auto Farm Fast (Farm Lv.1-300)", _G.FarmFast, function(value)
+        _G.Farmfast = value
+        _G.Stats_Kaitun = value
+        StopTween(value)
+    end)
 
-	v68:Toggle("Auto Farm Fast (Farm Lv.1-300)", _G.FarmFast, function(v1388)
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                if _G.Farmfast and World1 then
+                    local level = game.Players.LocalPlayer.Data.Level.Value
 
-		_G.Farmfast = v1388;
+                    if level >= 1 then
+                        _G.Level = false
+                        _G.Farmfast = true
+                    end
+                    if level >= 75 then
+                        _G.Farmfast = false
+                        _G.PlayerHunter = true
+                    end
+                    if level >= 200 then
+                        _G.Level = true
+                        _G.PlayerHunter = false
+                    end
 
-		_G.Stats_Kaitun = v1388;
+                    if level >= 1 and _G.Farmfast then
+                        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-7894.61, 5547.14, -380.29))
+                        local enemies = workspace:FindFirstChild("Enemies")
 
-		StopTween(_G.Farmfast);
+                        if enemies then
+                            for _, mob in pairs(enemies:GetChildren()) do
+                                if mob.Name == "Shanda" and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                                    repeat
+                                        task.wait()
+                                        AutoHaki()
+                                        EquipWeapon(_G.SelectWeapon)
+                                        mob.HumanoidRootPart.CanCollide = false
+                                        mob.Humanoid.WalkSpeed = 0
+                                        mob.HumanoidRootPart.Size = Vector3.new(80, 80, 80)
+                                        TP1(mob.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+                                        StardMag = true
+                                    until not _G.Farmfast or not mob.Parent or mob.Humanoid.Health <= 0
 
-	end);
+                                    StardMag = false
+                                    TP1(CFrame.new(-7678.48, 5566.40, -497.21))
+                                    UnEquipWeapon(_G.SelectWeapon)
+                                end
+                            end
+                        end
 
-	spawn(function()
-
-		pcall(function()
-
-			while wait() do
-
-				if (_G.Farmfast and World1) then
-
-					local v1879 = game.Players.LocalPlayer.Data.Level.Value;
-
-					if (v1879 >= 1) then
-
-						_G.Level = false;
-
-						_G.Farmfast = true;
-
-					end
-
-					if (v1879 >= 75) then
-
-						_G.Farmfast = false;
-
-						_G.PlayerHunter = true;
-
-					end
-
-					if (v1879 >= 200) then
-
-						_G.Level = true;
-
-						_G.PlayerHunter = false;
-
-					end
-
-					if (v1879 >= 1) then
-
-						game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new( -7894.6176757813, 5547.1416015625, -380.29119873047));
-
-						for v2354, v2355 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-
-							if ((v2355.Name == "Shanda") and v2355:FindFirstChild("Humanoid") and v2355:FindFirstChild("HumanoidRootPart") and (v2355.Humanoid.Health > 0)) then
-
-								repeat
-
-									task.wait();
-
-									AutoHaki();
-
-									EquipWeapon(_G.SelectWeapon);
-
-									v2355.HumanoidRootPart.CanCollide = false;
-
-									v2355.Humanoid.WalkSpeed = 0;
-
-									StardMag = true;
-
-									FastMon = v2355.HumanoidRootPart.CFrame;
-
-									v2355.HumanoidRootPart.Size = Vector3.new(80, 80, 80);
-
-									TP1(v2355.HumanoidRootPart.CFrame * Pos );
-
-								until  not _G.Farmfast or  not v2355.Parent or (v2355.Humanoid.Health <= 0)
-
-								StardMag = false;
-
-								TP1(CFrame.new( -7678.48974609375, 5566.40380859375, -497.2156066894531));
-
-								UnEquipWeapon(_G.SelectWeapon);
-
-							end
-
-						end
-
-					elseif game:GetService("ReplicatedStorage"):FindFirstChild("Shanda") then
-
-						TP1(game:GetService("ReplicatedStorage"):FindFirstChild("Shanda").HumanoidRootPart.CFrame * CFrame.new(5, 10, 2) );
-
-					end
-
-				end
-
-			end
-
-		end);
-
-	end);
-
+                        local repMob = game.ReplicatedStorage:FindFirstChild("Shanda")
+                        if repMob and repMob:FindFirstChild("HumanoidRootPart") then
+                            TP1(repMob.HumanoidRootPart.CFrame * CFrame.new(5, 10, 2))
+                        end
+                    end
+                end
+            end)
+        end
+    end)
 end
 
 v68:Toggle("Auto Kaitun", false, function(v379)
