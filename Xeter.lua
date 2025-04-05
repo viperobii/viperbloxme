@@ -16206,8 +16206,8 @@ end
 end);
 
 local v146 = v16.Race:AddToggle("ToggleKillTrial", {
-    Title = "Auto Combo Kill Players Trial",
-    Description = "Automatic Combo To Kill Players",
+    Title = "Auto Kill Players In Trial",
+    Description = "Manual Use Skill To Win Only Melee Skills",
     Default = false
 })
 
@@ -16232,30 +16232,38 @@ spawn(function()
                                     wait(_G.Fast_Delay)
 
                                     -- Auto switch weapon and use skills
-                                    for _, tool in pairs(backpack:GetChildren()) do
-                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                        player.Character.Humanoid:EquipTool(tool)
+                                    for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+                                        if tool:IsA("Tool") and (tool.Name == "Melee" or tool.Name == "Blox Fruit" or tool.Name == "Sword" or tool.Name == "Gun") then
+                                            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
 
-                        local virtualInput = game:GetService("VirtualInputManager")
+                                            local virtualInput = game:GetService("VirtualInputManager")
 
-                        -- Attack using skills
-                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart) -- Z
-                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
+                                            -- Attack using skills (Z, X, C, F)
+                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.Z, false, game) -- Z
+                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.Z, false, game)
+                                            wait(0.2)
 
-                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart) -- X
-                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
+                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.X, false, game) -- X
+                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.X, false, game)
+                                            wait(0.2)
 
-                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart) -- C
-                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
-end
+                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.C, false, game) -- C
+                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.C, false, game)
+                                            wait(0.2)
+
+                                            virtualInput:SendKeyEvent(true, Enum.KeyCode.F, false, game) -- F
+                                            virtualInput:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+                                            wait(0.2)
+                                        end
+                                    end
+                                until not _G.AutoKillTrial or not player.Parent or targetChar.Humanoid.Health <= 0
+                            end
+                        end
+                    end
                 end
-                wait()
             end
         end)
-    end 
+    end
 end)
 
 local v56 = v16.Race:AddSection("Training");
