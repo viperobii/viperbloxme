@@ -686,7 +686,7 @@ utils.create =
 
 utils.smoothscrolling = 
 
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/lug1adev/W-Azure/main/SmoothScroll.lua", true))()
+    loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 
 
