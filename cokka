@@ -1,0 +1,671 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Viper Hub Dead-Rails",
+    SubTitle = "by Viper_",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(480, 365),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+-- Fluent provides Lucide Icons, they are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Tab Main", Icon = "" }),
+    Aimbot = Window:AddTab({ Title = "Tab Aimbot", Icon = "" }),
+}
+
+local v22 = Instance.new("ScreenGui")
+local v23 = Instance.new("ImageButton")
+local v24 = Instance.new("UICorner")
+local v25 = Instance.new("ParticleEmitter")
+local v26 = game:GetService("TweenService")
+
+v22.Parent = game.CoreGui
+v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+v23.Parent = v22
+v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+v23.BorderSizePixel = 0
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position of the floating button
+v23.Size = UDim2.new(0, 50, 0, 50)  -- Size of the floating logo
+v23.Draggable = true  -- Makes it draggable
+v23.Image = "rbxassetid://101883839381557"  -- Fixed image ID (removed extra digits)
+
+v24.Parent = v23
+v24.CornerRadius = UDim.new(0, 12)  -- Round corners
+
+v25.Parent = v23
+v25.LightEmission = 1
+v25.Size = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.1),
+    NumberSequenceKeypoint.new(1, 0)
+})
+v25.Lifetime = NumberRange.new(0.5, 1)
+v25.Rate = 0
+v25.Speed = NumberRange.new(5, 10)
+v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))  -- Particle colors
+
+-- Animation on button press
+v23.MouseButton1Down:Connect(function()
+    v25.Rate = 100  -- Start emitting particles
+    
+    -- Toggle UI visibility
+    if Window.Enabled then
+        Window:Minimize(true)
+    else
+        Window:Minimize(false)
+    end
+    
+    task.delay(1, function()
+        v25.Rate = 0  -- Stop emitting after 1 second
+    end)
+end)
+
+-- Optional Tween effect for smooth appearance
+local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.1, 0, 0.1, 0),
+    Size = UDim2.new(0, 50, 0, 50),
+    BackgroundTransparency = 0.2
+})
+v47:Play()
+
+local autoDriveToggle = Tabs.Main:AddToggle("AutoDriveToggle", {
+    Title = "Auto Drive Train",
+    Description = "Automatically holds W to drive forward",
+    Default = false
+})
+
+-- Variable to track auto drive state
+local isDriving = false
+local autoDriveConnection = nil
+
+-- Function to start auto drive
+local function startAutoDrive()
+    isDriving = true
+    
+    -- Create a connection to simulate pressing W
+    autoDriveConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if not isDriving then return end
+        
+        -- Simple approach: directly set the keys in UserInputService
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.W, false, game)
+    end)
+end
+
+-- Function to stop auto drive
+local function stopAutoDrive()
+    isDriving = false
+    
+    -- Disconnect the auto drive loop
+    if autoDriveConnection then
+        autoDriveConnection:Disconnect()
+        autoDriveConnection = nil
+    end
+    
+    -- Ensure W key is released
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.W, false, game)
+end
+
+-- Handle toggle state changes
+autoDriveToggle:OnChanged(function(state)
+    if state then
+        startAutoDrive()
+    else
+        stopAutoDrive()
+    end
+end)
+
+-- Clean up when script is terminated or player leaves
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if isDriving then
+        stopAutoDrive()
+    end
+end)
+
+-- DeadRails Auto-Loot Script
+-- This script will automatically collect loot items, werewolf bodies, and walker/zombie bodies when you have the sack equipped
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- Create UI Tab
+local Tabs = _G.Tabs or {} -- Assuming your UI framework has tabs global variable
+local AutoLootTab = Tabs.AutoLoot or Tabs:AddTab("AutoLoot")
+
+-- Add toggle for auto-loot feature
+local AutoLootToggle = Taba.Main:AddToggle("AutoLootToggle", {Title = "Auto-Loot Enabled", Default = false})
+
+-- Add dropdown for item types to loot
+local LootTypeDropdown = AutoLootTab:AddDropdown("LootTypeDropdown", {
+    Title = "Items to Auto-Loot",
+    Values = {"Items", "Werewolves", "Zombies"},
+    Multi = true,
+    Default = {},
+})
+
+-- Set collection range (fixed value instead of slider)
+local COLLECTION_RANGE = 15
+
+-- Utility function to check if player has sack equipped
+local function hasSackEquipped()
+    local character = LocalPlayer.Character
+    if not character then return false end
+    
+    local backpack = character:FindFirstChild("Backpack")
+    if not backpack then return false end
+    
+    -- Check if sack tool is equipped (you may need to adjust the exact name/property)
+    return character:FindFirstChild("Sack") ~= nil or backpack:FindFirstChild("Sack") ~= nil
+end
+
+-- Function to collect items
+local function collectNearbyItems()
+    if not hasSackEquipped() or not AutoLootToggle.Value then return end
+    
+    local character = LocalPlayer.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local hrp = character.HumanoidRootPart
+    local selectedLoot = LootTypeDropdown:GetActiveValues()
+    
+    -- Scan workspace for collectible items
+    for _, item in pairs(workspace:GetChildren()) do
+        -- Check if item matches any selected type
+        local shouldCollect = false
+        
+        -- Regular items
+        if table.find(selectedLoot, "Items") and item:FindFirstChild("ItemPickup") then
+            shouldCollect = true
+        end
+        
+        -- Werewolf bodies
+        if table.find(selectedLoot, "Werewolves") and item.Name == "WerewolfBody" then
+            shouldCollect = true
+        end
+        
+        -- Zombie/Walker bodies
+        if table.find(selectedLoot, "Zombies") and (item.Name == "ZombieBody" or item.Name == "WalkerBody") then
+            shouldCollect = true
+        end
+        
+        -- If the item should be collected and is within range
+        if shouldCollect then
+            local itemPart = item:FindFirstChild("Handle") or item:FindFirstChild("PrimaryPart") or item:FindFirstChildWhichIsA("BasePart")
+            if itemPart and (itemPart.Position - hrp.Position).Magnitude <= COLLECTION_RANGE then
+                -- Simulate picking up the item (method depends on game's remote event structure)
+                local pickupEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PickupRemote") -- Adjust remote name
+                if pickupEvent then
+                    pickupEvent:FireServer(item)
+                end
+            end
+        end
+    end
+end
+
+-- Connect auto-loot function to RunService
+local autoLootConnection
+local function toggleAutoLoot()
+    if AutoLootToggle.Value then
+        if not autoLootConnection then
+            autoLootConnection = RunService.Heartbeat:Connect(function()
+                collectNearbyItems()
+            end)
+            -- Notification when enabled
+            local NotificationLib = _G.NotificationLib or {Send = function() end}
+            NotificationLib.Send("Auto-Loot", "Auto-Loot enabled! Equip sack to use.", 3)
+        end
+    else
+        if autoLootConnection then
+            autoLootConnection:Disconnect()
+            autoLootConnection = nil
+            -- Notification when disabled
+            local NotificationLib = _G.NotificationLib or {Send = function() end}
+            NotificationLib.Send("Auto-Loot", "Auto-Loot disabled.", 3)
+        end
+    end
+end
+
+-- Connect toggle callback
+AutoLootToggle:OnChanged(toggleAutoLoot)
+
+-- Initialize auto-loot on script load
+toggleAutoLoot()
+
+-- Notification when script loads
+local NotificationLib = _G.NotificationLib or {Send = function() end}
+NotificationLib.Send("Auto-Loot", "Script loaded successfully!", 3)
+
+-- Clean up when script unloads
+local scriptCon
+scriptCon = game:GetService("ScriptContext").Error:Connect(function()
+    if autoLootConnection then 
+        autoLootConnection:Disconnect()
+    end
+    scriptCon:Disconnect()
+end)
+
+local noClipToggle = Tabs.Main:AddToggle("NoClipToggle", {
+    Title = "NoClip",
+    Description = "",
+    Default = false
+})
+
+local noClipConnection = nil
+
+noClipToggle:OnChanged(function(Value)
+    local character = game:GetService("Players").LocalPlayer.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    
+    if Value then
+        if noClipConnection then
+            noClipConnection:Disconnect()
+        end
+        
+        noClipConnection = game:GetService("RunService").Stepped:Connect(function()
+            if character and humanoid then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noClipConnection then
+            noClipConnection:Disconnect()
+            noClipConnection = nil
+            
+            -- Restore collision when disabled
+            if character then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+end)
+
+local infiniteJumpToggle = Tabs.Main:AddToggle("InfiniteJumpToggle", {
+    Title = "Infinite Jump",
+    Description = "",
+    Default = false
+})
+
+local InfiniteJumpConnection = nil
+
+infiniteJumpToggle:OnChanged(function(Value)
+    if Value then
+        if InfiniteJumpConnection then
+            InfiniteJumpConnection:Disconnect()
+        end
+        
+        InfiniteJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
+            game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        end)
+    else
+        if InfiniteJumpConnection then
+            InfiniteJumpConnection:Disconnect()
+            InfiniteJumpConnection = nil
+        end
+    end
+end)
+
+local espBoxToggle = Tabs.Main:AddToggle("ESPBoxToggle", {
+    Title = "ESP Boxes",
+    Description = "",
+    Default = false
+})
+
+local espBoxConnection = nil
+local espBoxes = {}
+
+espBoxToggle:OnChanged(function(Value)
+    local localPlayer = game:GetService("Players").LocalPlayer
+    
+    -- Function to clear all ESP boxes
+    local function clearESPBoxes()
+        for _, object in pairs(espBoxes) do
+            if object and object.Parent then
+                object:Destroy()
+            end
+        end
+        table.clear(espBoxes)
+    end
+    
+    if Value then
+        -- Clear any existing boxes first
+        clearESPBoxes()
+        
+        -- Create the ESP boxes update function
+        if espBoxConnection then
+            espBoxConnection:Disconnect()
+        end
+        
+        espBoxConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            clearESPBoxes()
+            
+            local character = localPlayer.Character
+            if not character then return end
+            
+            -- Get camera for visibility check
+            local camera = workspace.CurrentCamera
+            if not camera then return end
+            
+            for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetCharacter = player.Character
+                    local humanoidRootPart = targetCharacter:FindFirstChild("HumanoidRootPart")
+                    local humanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
+                    
+                    if humanoidRootPart and humanoid then
+                        -- Create box outline
+                        local box = Instance.new("BoxHandleAdornment")
+                        box.Name = "ESPBox"
+                        box.Adornee = humanoidRootPart
+                        box.AlwaysOnTop = true
+                        box.ZIndex = 10
+                        box.Size = humanoidRootPart.Size * 2  -- Adjust size to cover the character
+                        box.Transparency = 0.7
+                        box.Color3 = Color3.fromRGB(255, 0, 0)  -- Red color
+                        box.Parent = game:GetService("CoreGui")
+                        
+                        -- Add to cleanup table
+                        table.insert(espBoxes, box)
+                        
+                        -- Add name label
+                        local billboard = Instance.new("BillboardGui")
+                        billboard.Name = "ESPName"
+                        billboard.Adornee = humanoidRootPart
+                        billboard.AlwaysOnTop = true
+                        billboard.ExtentsOffset = Vector3.new(0, 3, 0)
+                        billboard.Size = UDim2.new(0, 100, 0, 30)
+                        billboard.Parent = game:GetService("CoreGui")
+                        
+                        local nameLabel = Instance.new("TextLabel")
+                        nameLabel.Text = player.Name
+                        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+                        nameLabel.BackgroundTransparency = 1
+                        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                        nameLabel.Font = Enum.Font.SourceSansBold
+                        nameLabel.TextScaled = true
+                        nameLabel.Parent = billboard
+                        
+                        -- Add to cleanup table
+                        table.insert(espBoxes, billboard)
+                        
+                        -- Add health bar
+                        local healthBillboard = Instance.new("BillboardGui")
+                        healthBillboard.Name = "ESPHealth"
+                        healthBillboard.Adornee = humanoidRootPart
+                        healthBillboard.AlwaysOnTop = true
+                        healthBillboard.ExtentsOffset = Vector3.new(0, -3, 0)
+                        healthBillboard.Size = UDim2.new(0, 100, 0, 5)
+                        healthBillboard.Parent = game:GetService("CoreGui")
+                        
+                        local healthBar = Instance.new("Frame")
+                        healthBar.Name = "HealthBar"
+                        healthBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+                        healthBar.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
+                        healthBar.BorderSizePixel = 0
+                        healthBar.Parent = healthBillboard
+                        
+                        -- Add to cleanup table
+                        table.insert(espBoxes, healthBillboard)
+                    end
+                end
+            end
+        end)
+    else
+        -- Disconnect and clean up
+        if espBoxConnection then
+            espBoxConnection:Disconnect()
+            espBoxConnection = nil
+        end
+        
+        clearESPBoxes()
+    end
+end)
+
+local fogToggle = Tabs.Main:AddToggle("FogToggle", {
+    Title = "No Fog",
+    Description = "",
+    Default = false
+})
+
+-- Store original fog settings
+local lighting = game:GetService("Lighting")
+local originalFogEnd = lighting.FogEnd
+local originalFogStart = lighting.FogStart
+local originalFogColor = lighting.FogColor
+local originalAtmosphere = nil
+
+if lighting:FindFirstChildOfClass("Atmosphere") then
+    originalAtmosphere = lighting:FindFirstChildOfClass("Atmosphere"):Clone()
+end
+
+-- Function to remove fog
+local function removeFog()
+    -- Save original atmosphere if it exists and hasn't been saved yet
+    if lighting:FindFirstChildOfClass("Atmosphere") and not originalAtmosphere then
+        originalAtmosphere = lighting:FindFirstChildOfClass("Atmosphere"):Clone()
+    end
+    
+    -- Remove atmosphere
+    if lighting:FindFirstChildOfClass("Atmosphere") then
+        lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+    end
+    
+    -- Set fog to maximum visibility
+    lighting.FogEnd = 1000000
+    lighting.FogStart = 1000000
+    
+    -- Connect to RenderStepped to prevent fog from being re-added
+    fogConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if lighting.FogEnd ~= 1000000 then
+            lighting.FogEnd = 1000000
+        end
+        if lighting.FogStart ~= 1000000 then
+            lighting.FogStart = 1000000
+        end
+        if lighting:FindFirstChildOfClass("Atmosphere") then
+            lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+        end
+    end)
+end
+
+-- Function to restore fog
+local function restoreFog()
+    -- Disconnect fog removal loop
+    if fogConnection then
+        fogConnection:Disconnect()
+        fogConnection = nil
+    end
+    
+    -- Restore original fog settings
+    lighting.FogEnd = originalFogEnd
+    lighting.FogStart = originalFogStart
+    lighting.FogColor = originalFogColor
+    
+    -- Restore atmosphere if it existed
+    if originalAtmosphere and not lighting:FindFirstChildOfClass("Atmosphere") then
+        local newAtmosphere = originalAtmosphere:Clone()
+        newAtmosphere.Parent = lighting
+    end
+end
+
+-- Handle the fog toggle using the OnChanged callback
+fogToggle:OnChanged(function(state)
+    if state then
+        removeFog()
+    else
+        restoreFog()
+    end
+end)
+
+-- Clean up when script is terminated
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if fogConnection then
+        fogConnection:Disconnect()
+    end
+end)
+
+local fullBrightToggle = Tabs.Main:AddToggle("FullBrightToggle", {
+    Title = "Full Bright",
+    Description = "Removes darkness and night time",
+    Default = false
+})
+
+-- Store original lighting properties
+local lighting = game:GetService("Lighting")
+local originalBrightness = lighting.Brightness
+local originalClockTime = lighting.ClockTime
+local originalAmbient = lighting.Ambient
+local originalOutdoorAmbient = lighting.OutdoorAmbient
+local originalColorShift_Bottom = lighting.ColorShift_Bottom
+local originalColorShift_Top = lighting.ColorShift_Top
+local originalShadows = lighting.GlobalShadows
+local originalExposure = lighting.ExposureCompensation
+
+-- Full Bright connection variable
+local fullBrightConnection = nil
+
+-- Functionee to enable full bright
+local function enableFullBright()
+    -- Apply full bright settings
+    lighting.Brightness = 2
+    lighting.ClockTime = 14 -- Midday
+    lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+    lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+    lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+    lighting.GlobalShadows = false
+    lighting.ExposureCompensation = 0.5
+    
+   
+    fullBrightConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if lighting.Brightness ~= 2 then
+            lighting.Brightness = 2
+        end
+        if lighting.ClockTime ~= 14 then
+            lighting.ClockTime = 14
+        end
+        if lighting.GlobalShadows ~= false then
+            lighting.GlobalShadows = false
+        end
+    end)
+    
+   
+    for _, effect in pairs(lighting:GetChildren()) do
+        if effect:IsA("BloomEffect") or 
+           effect:IsA("BlurEffect") or 
+           effect:IsA("ColorCorrectionEffect") or 
+           effect:IsA("SunRaysEffect") then
+            effect.Enabled = false
+        end
+    end
+end
+
+-- Function to restore original lighting
+local function restoreOriginalLighting()
+    
+    if fullBrightConnection then
+        fullBrightConnection:Disconnect()
+        fullBrightConnection = nil
+    end
+    
+    
+    lighting.Brightness = originalBrightness
+    lighting.ClockTime = originalClockTime
+    lighting.Ambient = originalAmbient
+    lighting.OutdoorAmbient = originalOutdoorAmbient
+    lighting.ColorShift_Bottom = originalColorShift_Bottom
+    lighting.ColorShift_Top = originalColorShift_Top
+    lighting.GlobalShadows = originalShadows
+    lighting.ExposureCompensation = originalExposure
+    
+    
+    for _, effect in pairs(lighting:GetChildren()) do
+        if effect:IsA("BloomEffect") or 
+           effect:IsA("BlurEffect") or 
+           effect:IsA("ColorCorrectionEffect") or 
+           effect:IsA("SunRaysEffect") then
+            effect.Enabled = true
+        end
+    end
+end
+
+
+fullBrightToggle:OnChanged(function(state)
+    if state then
+        enableFullBright()
+    else
+        restoreOriginalLighting()
+    end
+end)
+
+-- Clean up when script is terminated or player leaves
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if fullBrightConnection then
+        fullBrightConnection:Disconnect()
+    end
+end)
+
+-- Aimbot
+Tabs.Aimbot:AddButton({
+    Title = "Aimbot Lock",
+    Description = "Recommended Full Accurate",
+    Callback = function()
+        -- Execute the script from the URL
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/ViperisEnot/refs/heads/main/DeadLock.txt"))()
+    end
+})
+
+local player = game:GetService("Players").LocalPlayer
+local camera = workspace.CurrentCamera
+
+function getClosestWalker()
+    local closest, minDist = nil, math.huge
+    for _, walker in pairs(workspace:GetChildren()) do
+        if walker.Name == "Walker" and walker:FindFirstChild("Head") then
+            local dist = (walker.Head.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                closest = walker
+            end
+        end
+    end
+    return closest
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    local target = getClosestWalker()
+    if target then
+        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
+    end
+end)
+
+
+local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
+
+Toggle:OnChanged(function(v)
+    _G.Aimbot = v
+end)
+
+spawn(function()
+    pcall(function()
+        while task.wait() do 
+            if _G.Aimbot then
+                local target = getClosestWalker()
+                if target then  
+                    camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
+                end
+            end
+        end
+    end)
+end)
+
