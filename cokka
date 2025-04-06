@@ -16,25 +16,54 @@ local Tabs = {
     Aimbot = Window:AddTab({ Title = "Tab Aimbot", Icon = "" }),
 }
 
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local v22 = Instance.new("ScreenGui")
 
--- Create circular logo button
-local logoButton = Instance.new("ImageButton")
-logoButton.Name = "FloatingLogo"
-logoButton.Size = UDim2.new(0, 30, 0, 30) -- Small circle size
-logoButton.Position = UDim2.new(0, 10, 0, 10) -- Top-left corner
-logoButton.Image = "rbxassetid://101883839381557" -- Replace with your image ID
-logoButton.BackgroundTransparency = 1
-logoButton.ClipsDescendants = true
-logoButton.ZIndex = 1000
-logoButton.Parent = playerGui
+local v23 = Instance.new("ImageButton")
 
--- Make it circular
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1, 0) -- Fully round
-corner.Parent = logoButton
+local v24 = Instance.new("UICorner")
+
+local v25 = Instance.new("ParticleEmitter")
+
+local v26 = game:GetService("TweenService")
+
+v22.Parent = game.CoreGui
+v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+v23.Parent = v22
+v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+v23.BorderSizePixel = 0
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position of the floating button
+v23.Size = UDim2.new(0, 100, 0, 100)  -- Size of the floating logo
+v23.Draggable = true  -- Makes it draggable
+v23.Image = "rbxassetid://101883839381557"  -- Replace with your desired image ID
+
+v24.Parent = v23
+v24.CornerRadius = UDim.new(0, 12)  -- Round corners
+
+v25.Parent = v23
+v25.LightEmission = 1
+v25.Size = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.1),
+    NumberSequenceKeypoint.new(1, 0)
+})
+v25.Lifetime = NumberRange.new(0.5, 1)
+v25.Rate = 0
+v25.Speed = NumberRange.new(5, 10)
+v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))  -- Particle colors
+
+-- Animation on button press
+v23.MouseButton1Down:Connect(function()
+    v25.Rate = 100  -- Start emitting particles
+    task.delay(1, function()
+        v25.Rate = 0  -- Stop emitting after 1 second
+    end)
+end)
+
+-- Optional Tween effect for smooth movement or appearance
+local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+    -- Tween properties (optional)
+})
+v47:Play()
 
 
 local espToggle = Tabs.Main:AddToggle("EspToggle", {
@@ -155,7 +184,7 @@ game:GetService("RunService").RenderStepped:Connect(function()
 end)
 
 
-local Toggle = Tabs.Main:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
+local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
 
 Toggle:OnChanged(function(v)
     _G.Aimbot = v
