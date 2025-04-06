@@ -4,6 +4,217 @@ local Window = Fluent:CreateWindow({
     Title = "Viper Hub Dead-Rails",
     SubTitle = "by Viper_",
     TabWidth = 160,
+    Size = UDim2.fromOffset(480, 365),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+-- Fluent provides Lucide Icons, they are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Tab Visual", Icon = "" }),
+    Aimbot = Window:AddTab({ Title = "Tab Aimbot", Icon = "" }),
+}
+
+local v22 = Instance.new("ScreenGui")
+local v23 = Instance.new("ImageButton")
+local v24 = Instance.new("UICorner")
+local v25 = Instance.new("ParticleEmitter")
+local v26 = game:GetService("TweenService")
+
+v22.Parent = game.CoreGui
+v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+v23.Parent = v22
+v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+v23.BorderSizePixel = 0
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position of the floating button
+v23.Size = UDim2.new(0, 60, 0, 60)  -- Size of the floating logo
+v23.Draggable = true  -- Makes it draggable
+v23.Image = "rbxassetid://10188383915"  -- Fixed image ID (removed extra digits)
+
+v24.Parent = v23
+v24.CornerRadius = UDim.new(0, 12)  -- Round corners
+
+v25.Parent = v23
+v25.LightEmission = 1
+v25.Size = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.1),
+    NumberSequenceKeypoint.new(1, 0)
+})
+v25.Lifetime = NumberRange.new(0.5, 1)
+v25.Rate = 0
+v25.Speed = NumberRange.new(5, 10)
+v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))  -- Particle colors
+
+-- Animation on button press
+v23.MouseButton1Down:Connect(function()
+    v25.Rate = 100  -- Start emitting particles
+    
+    -- Toggle UI visibility
+    if Window.Enabled then
+        Window:Minimize(true)
+    else
+        Window:Minimize(false)
+    end
+    
+    task.delay(1, function()
+        v25.Rate = 0  -- Stop emitting after 1 second
+    end)
+end)
+
+-- Optional Tween effect for smooth appearance
+local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.1, 0, 0.1, 0),
+    Size = UDim2.new(0, 100, 0, 100),
+    BackgroundTransparency = 0.2
+})
+v47:Play()
+
+
+local espToggle = Tabs.Main:AddToggle("EspToggle", {
+    Title = "ESP Box",
+    Description = "Box Red Players",
+    Default = false
+})
+
+local espConnections = {}
+local espDrawings = {}
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Create ESP box for player
+local function createESP(player)
+    if player == LocalPlayer or espDrawings[player] then return end
+
+    local box = Drawing.new("Square")
+    box.Thickness = 2
+    box.Color = Color3.fromRGB(255, 0, 0)
+    box.Filled = false
+    box.Visible = true
+    espDrawings[player] = box
+
+    espConnections[player] = RunService.RenderStepped:Connect(function()
+        local character = player.Character
+        -- Attempt to find any base part (HumanoidRootPart, Torso, etc.)
+        local root = character and (character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso") or character:FindFirstChildWhichIsA("BasePart"))
+
+        -- If the root part exists and the player is alive, show ESP
+        if root and character:FindFirstChildOfClass("Humanoid") and character:FindFirstChildOfClass("Humanoid").Health > 0 then
+            local pos, visible = Camera:WorldToViewportPoint(root.Position)
+            if visible then
+                local size = Vector2.new(60, 100)  -- Adjust size if necessary
+                box.Size = size
+                box.Position = Vector2.new(pos.X - size.X/2, pos.Y - size.Y/2)
+                box.Visible = true
+            else
+                box.Visible = false
+            end
+        else
+            box.Visible = false
+        end
+    end)
+end
+
+-- Destroy ESP box for player
+local function destroyESP(player)
+    if espConnections[player] then
+        espConnections[player]:Disconnect()
+        espConnections[player] = nil
+    end
+    if espDrawings[player] then
+        espDrawings[player]:Remove()
+        espDrawings[player] = nil
+    end
+end
+
+-- Enable ESP for all players
+local function enableESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        createESP(player)
+    end
+    Players.PlayerAdded:Connect(createESP)
+    Players.PlayerRemoving:Connect(destroyESP)
+end
+
+-- Disable ESP for all players
+local function disableESP()
+    for _, player in pairs(Players:GetPlayers()) do
+        destroyESP(player)
+    end
+end
+
+-- Handle the ESP toggle using the OnChanged callback
+espToggle:OnChanged(function(state)
+    if state then
+        enableESP()
+    else
+        disableESP()
+    end
+end)
+
+-- Aimbot
+Tabs.Aimbot:AddButton({
+    Title = "Aimbot Lock",
+    Description = "NPC Aimbot Head",
+    Callback = function()
+        -- Execute the script from the URL
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/ViperisEnot/refs/heads/main/DeadLock.txt"))()
+    end
+})
+
+local player = game:GetService("Players").LocalPlayer
+local camera = workspace.CurrentCamera
+
+function getClosestWalker()
+    local closest, minDist = nil, math.huge
+    for _, walker in pairs(workspace:GetChildren()) do
+        if walker.Name == "Walker" and walker:FindFirstChild("Head") then
+            local dist = (walker.Head.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                closest = walker
+            end
+        end
+    end
+    return closest
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    local target = getClosestWalker()
+    if target then
+        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
+    end
+end)
+
+
+local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
+
+Toggle:OnChanged(function(v)
+    _G.Aimbot = v
+end)
+
+spawn(function()
+    pcall(function()
+        while task.wait() do 
+            if _G.Aimbot then
+                local target = getClosestWalker()
+                if target then  
+                    camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
+                end
+            end
+        end
+    end)
+end)
+
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Viper Hub Dead-Rails",
+    SubTitle = "by Viper_",
+    TabWidth = 160,
     Size = UDim2.fromOffset(480, 320),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
     Theme = "Dark",
