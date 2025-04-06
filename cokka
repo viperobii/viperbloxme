@@ -124,129 +124,6 @@ game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
     end
 end)
 
--- DeadRails Auto-Loot Script
--- This script will automatically collect loot items, werewolf bodies, and walker/zombie bodies when you have the sack equipped
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-
--- Create UI Tab
-local Tabs = _G.Tabs or {} -- Assuming your UI framework has tabs global variable
-local AutoLootTab = Tabs.AutoLoot or Tabs:AddTab("AutoLoot")
-
--- Add toggle for auto-loot feature
-local AutoLootToggle = Taba.Main:AddToggle("AutoLootToggle", {Title = "Auto-Loot Enabled", Default = false})
-
--- Add dropdown for item types to loot
-local LootTypeDropdown = AutoLootTab:AddDropdown("LootTypeDropdown", {
-    Title = "Items to Auto-Loot",
-    Values = {"Items", "Werewolves", "Zombies"},
-    Multi = true,
-    Default = {},
-})
-
--- Set collection range (fixed value instead of slider)
-local COLLECTION_RANGE = 15
-
--- Utility function to check if player has sack equipped
-local function hasSackEquipped()
-    local character = LocalPlayer.Character
-    if not character then return false end
-    
-    local backpack = character:FindFirstChild("Backpack")
-    if not backpack then return false end
-    
-    -- Check if sack tool is equipped (you may need to adjust the exact name/property)
-    return character:FindFirstChild("Sack") ~= nil or backpack:FindFirstChild("Sack") ~= nil
-end
-
--- Function to collect items
-local function collectNearbyItems()
-    if not hasSackEquipped() or not AutoLootToggle.Value then return end
-    
-    local character = LocalPlayer.Character
-    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
-    
-    local hrp = character.HumanoidRootPart
-    local selectedLoot = LootTypeDropdown:GetActiveValues()
-    
-    -- Scan workspace for collectible items
-    for _, item in pairs(workspace:GetChildren()) do
-        -- Check if item matches any selected type
-        local shouldCollect = false
-        
-        -- Regular items
-        if table.find(selectedLoot, "Items") and item:FindFirstChild("ItemPickup") then
-            shouldCollect = true
-        end
-        
-        -- Werewolf bodies
-        if table.find(selectedLoot, "Werewolves") and item.Name == "WerewolfBody" then
-            shouldCollect = true
-        end
-        
-        -- Zombie/Walker bodies
-        if table.find(selectedLoot, "Zombies") and (item.Name == "ZombieBody" or item.Name == "WalkerBody") then
-            shouldCollect = true
-        end
-        
-        -- If the item should be collected and is within range
-        if shouldCollect then
-            local itemPart = item:FindFirstChild("Handle") or item:FindFirstChild("PrimaryPart") or item:FindFirstChildWhichIsA("BasePart")
-            if itemPart and (itemPart.Position - hrp.Position).Magnitude <= COLLECTION_RANGE then
-                -- Simulate picking up the item (method depends on game's remote event structure)
-                local pickupEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PickupRemote") -- Adjust remote name
-                if pickupEvent then
-                    pickupEvent:FireServer(item)
-                end
-            end
-        end
-    end
-end
-
--- Connect auto-loot function to RunService
-local autoLootConnection
-local function toggleAutoLoot()
-    if AutoLootToggle.Value then
-        if not autoLootConnection then
-            autoLootConnection = RunService.Heartbeat:Connect(function()
-                collectNearbyItems()
-            end)
-            -- Notification when enabled
-            local NotificationLib = _G.NotificationLib or {Send = function() end}
-            NotificationLib.Send("Auto-Loot", "Auto-Loot enabled! Equip sack to use.", 3)
-        end
-    else
-        if autoLootConnection then
-            autoLootConnection:Disconnect()
-            autoLootConnection = nil
-            -- Notification when disabled
-            local NotificationLib = _G.NotificationLib or {Send = function() end}
-            NotificationLib.Send("Auto-Loot", "Auto-Loot disabled.", 3)
-        end
-    end
-end
-
--- Connect toggle callback
-AutoLootToggle:OnChanged(toggleAutoLoot)
-
--- Initialize auto-loot on script load
-toggleAutoLoot()
-
--- Notification when script loads
-local NotificationLib = _G.NotificationLib or {Send = function() end}
-NotificationLib.Send("Auto-Loot", "Script loaded successfully!", 3)
-
--- Clean up when script unloads
-local scriptCon
-scriptCon = game:GetService("ScriptContext").Error:Connect(function()
-    if autoLootConnection then 
-        autoLootConnection:Disconnect()
-    end
-    scriptCon:Disconnect()
-end)
-
 local noClipToggle = Tabs.Main:AddToggle("NoClipToggle", {
     Title = "NoClip",
     Description = "",
@@ -669,3 +546,80 @@ spawn(function()
     end)
 end)
 
+
+-- Dropdown for selecting loot types
+local autoLootDropdown = Tabs.Main:AddDropdown("AutoLootDropdown", {
+    Title = "Auto-Loot Items",
+    Values = {"Items", "Werewolves Bodies", "Zombies/Walker Bodies"},
+    Multi = true,
+    Default = {}
+})
+
+-- Toggle for enabling auto-loot
+local autoLootToggle = Tabs.Main:AddToggle("AutoLootToggle", {
+    Title = "Auto Loot",
+    Description = "",
+    Default = false
+})
+
+-- Auto-loot function
+autoLootToggle:OnChanged(function()
+    if autoLootToggle.Value then
+        -- Create the auto-loot loop when enabled
+        _G.AutoLootConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            -- Only proceed if player has sack equipped
+            local character = game.Players.LocalPlayer.Character
+            if not character or not (character:FindFirstChild("Sack") or character.Backpack:FindFirstChild("Sack")) then 
+                return 
+            end
+            
+            -- Get selected loot types
+            local selectedLoot = autoLootDropdown:GetActiveValues()
+            if #selectedLoot == 0 then return end
+            
+            -- Collection range
+            local COLLECTION_RANGE = 15
+            local hrp = character:FindFirstChild("HumanoidRootPart")
+            if not hrp then return end
+            
+            -- Loop through workspace items
+            for _, item in pairs(workspace:GetChildren()) do
+                -- Check if item matches selected types
+                local shouldCollect = false
+                
+                -- Check for regular items
+                if table.find(selectedLoot, "Items") and item:FindFirstChild("ItemPickup") then
+                    shouldCollect = true
+                end
+                
+                -- Check for werewolf bodies
+                if table.find(selectedLoot, "Werewolves Bodies") and item.Name == "WerewolfBody" then
+                    shouldCollect = true
+                end
+                
+                -- Check for zombie/walker bodies
+                if table.find(selectedLoot, "Zombies/Walker Bodies") and (item.Name == "ZombieBody" or item.Name == "WalkerBody") then
+                    shouldCollect = true
+                end
+                
+                -- If item should be collected and is within range
+                if shouldCollect then
+                    local itemPart = item:FindFirstChild("Handle") or item:FindFirstChild("PrimaryPart") or item:FindFirstChildWhichIsA("BasePart")
+                    if itemPart and (itemPart.Position - hrp.Position).Magnitude <= COLLECTION_RANGE then
+                        -- Simulate picking up the item (adjust remote name as needed)
+                        local pickupEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PickupRemote")
+                        if pickupEvent then
+                            pickupEvent:FireServer(item)
+                        end
+                    end
+                end
+            end
+        end)
+    else
+        -- Disconnect auto-loot loop when disabled
+        if _G.AutoLootConnection then
+            _G.AutoLootConnection:Disconnect()
+            _G.AutoLootConnection = nil
+        end
+    end
+end)
