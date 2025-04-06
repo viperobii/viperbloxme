@@ -130,12 +130,17 @@ local noClipToggle = Tabs.Main:AddToggle("NoClipToggle", {
     Default = false
 })
 
+local noClipConnection = nil
+
 noClipToggle:OnChanged(function(Value)
     local character = game:GetService("Players").LocalPlayer.Character
     local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-    local noClipConnection
     
     if Value then
+        if noClipConnection then
+            noClipConnection:Disconnect()
+        end
+        
         noClipConnection = game:GetService("RunService").Stepped:Connect(function()
             if character and humanoid then
                 for _, part in pairs(character:GetDescendants()) do
@@ -145,22 +150,20 @@ noClipToggle:OnChanged(function(Value)
                 end
             end
         end)
-        
-        noClipToggle:OnChanged(function(NewValue)
-            if not NewValue and noClipConnection then
-                noClipConnection:Disconnect()
-                noClipConnection = nil
-                
-                -- Restore collision when disabled
-                if character then
-                    for _, part in pairs(character:GetDescendants()) do
-                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                            part.CanCollide = true
-                        end
+    else
+        if noClipConnection then
+            noClipConnection:Disconnect()
+            noClipConnection = nil
+            
+            -- Restore collision when disabled
+            if character then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                        part.CanCollide = true
                     end
                 end
             end
-        end)
+        end
     end
 end)
 
@@ -170,21 +173,114 @@ local infiniteJumpToggle = Tabs.Main:AddToggle("InfiniteJumpToggle", {
     Default = false
 })
 
+local InfiniteJumpConnection = nil
+
 infiniteJumpToggle:OnChanged(function(Value)
     if Value then
-        local InfiniteJumpConnection
+        if InfiniteJumpConnection then
+            InfiniteJumpConnection:Disconnect()
+        end
+        
         InfiniteJumpConnection = game:GetService("UserInputService").JumpRequest:Connect(function()
             game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
         end)
+    else
+        if InfiniteJumpConnection then
+            InfiniteJumpConnection:Disconnect()
+            InfiniteJumpConnection = nil
+        end
+    end
+end)
+
+local espLinesToggle = Tabs.Main:AddToggle("ESPLinesToggle", {
+    Title = "ESP Lines",
+    Description = "",
+    Default = false
+})
+
+local espLinesConnection = nil
+local espLines = {}
+
+espLinesToggle:OnChanged(function(Value)
+    local localPlayer = game:GetService("Players").LocalPlayer
+    
+    -- Function to clear all ESP lines
+    local function clearESPLines()
+        for _, line in pairs(espLines) do
+            if line and line.Parent then
+                line:Destroy()
+            end
+        end
+        table.clear(espLines)
+    end
+    
+    if Value then
+        -- Clear any existing lines first
+        clearESPLines()
         
-        infiniteJumpToggle:OnChanged(function(NewValue)
-            if not NewValue then
-                if InfiniteJumpConnection then
-                    InfiniteJumpConnection:Disconnect()
-                    InfiniteJumpConnection = nil
+        -- Create the ESP lines update function
+        if espLinesConnection then
+            espLinesConnection:Disconnect()
+        end
+        
+        espLinesConnection = game:GetService("RunService").RenderStepped:Connect(function()
+            clearESPLines()
+            
+            local character = localPlayer.Character
+            if not character then return end
+            
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if not rootPart then return end
+            
+            -- Starting position for lines (below the character)
+            local startPos = rootPart.Position - Vector3.new(0, 3, 0)
+            
+            for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetRootPart = player.Character.HumanoidRootPart
+                    local endPos = targetRootPart.Position
+                    
+                    -- Create new line
+                    local line = Instance.new("Beam")
+                    local attachment0 = Instance.new("Attachment")
+                    local attachment1 = Instance.new("Attachment")
+                    
+                    attachment0.Position = Vector3.new(0, 0, 0)
+                    attachment1.Position = endPos - startPos
+                    
+                    attachment0.Parent = workspace.Terrain
+                    attachment1.Parent = workspace.Terrain
+                    
+                    line.Attachment0 = attachment0
+                    line.Attachment1 = attachment1
+                    line.Width0 = 0.15
+                    line.Width1 = 0.15
+                    line.FaceCamera = true
+                    
+                    -- Customize line color (you can change this)
+                    line.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0))
+                    
+                    line.Parent = workspace.Terrain
+                    
+                    -- Position attachments in world space
+                    attachment0.WorldPosition = startPos
+                    attachment1.WorldPosition = endPos
+                    
+                    -- Store for cleanup
+                    table.insert(espLines, line)
+                    table.insert(espLines, attachment0)
+                    table.insert(espLines, attachment1)
                 end
             end
         end)
+    else
+        -- Disconnect and clean up
+        if espLinesConnection then
+            espLinesConnection:Disconnect()
+            espLinesConnection = nil
+        end
+        
+        clearESPLines()
     end
 end)
 
