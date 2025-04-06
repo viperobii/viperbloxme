@@ -12,7 +12,7 @@ local Window = Fluent:CreateWindow({
 
 -- Fluent provides Lucide Icons, they are optional
 local Tabs = {
-    Main = Window:AddTab({ Title = "Tab Visual", Icon = "" }),
+    Main = Window:AddTab({ Title = "Tab Main", Icon = "" }),
     Aimbot = Window:AddTab({ Title = "Tab Aimbot", Icon = "" }),
 }
 
@@ -235,6 +235,107 @@ end)
 game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
     if fogConnection then
         fogConnection:Disconnect()
+    end
+end)
+
+local fullBrightToggle = Tabs.Main:AddToggle("FullBrightToggle", {
+    Title = "Full Bright",
+    Description = "Removes darkness and night time",
+    Default = false
+})
+
+-- Store original lighting properties
+local lighting = game:GetService("Lighting")
+local originalBrightness = lighting.Brightness
+local originalClockTime = lighting.ClockTime
+local originalAmbient = lighting.Ambient
+local originalOutdoorAmbient = lighting.OutdoorAmbient
+local originalColorShift_Bottom = lighting.ColorShift_Bottom
+local originalColorShift_Top = lighting.ColorShift_Top
+local originalShadows = lighting.GlobalShadows
+local originalExposure = lighting.ExposureCompensation
+
+-- Full Bright connection variable
+local fullBrightConnection = nil
+
+-- Function to enable full bright
+local function enableFullBright()
+    -- Apply full bright settings
+    lighting.Brightness = 2
+    lighting.ClockTime = 14 -- Midday
+    lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+    lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+    lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+    lighting.GlobalShadows = false
+    lighting.ExposureCompensation = 0.5
+    
+    -- Connect to RenderStepped to prevent settings from changing
+    fullBrightConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if lighting.Brightness ~= 2 then
+            lighting.Brightness = 2
+        end
+        if lighting.ClockTime ~= 14 then
+            lighting.ClockTime = 14
+        end
+        if lighting.GlobalShadows ~= false then
+            lighting.GlobalShadows = false
+        end
+    end)
+    
+    -- Remove any post-processing effects that might affect brightness
+    for _, effect in pairs(lighting:GetChildren()) do
+        if effect:IsA("BloomEffect") or 
+           effect:IsA("BlurEffect") or 
+           effect:IsA("ColorCorrectionEffect") or 
+           effect:IsA("SunRaysEffect") then
+            effect.Enabled = false
+        end
+    end
+end
+
+-- Function to restore original lighting
+local function restoreOriginalLighting()
+    -- Disconnect full bright loop
+    if fullBrightConnection then
+        fullBrightConnection:Disconnect()
+        fullBrightConnection = nil
+    end
+    
+    -- Restore original lighting properties
+    lighting.Brightness = originalBrightness
+    lighting.ClockTime = originalClockTime
+    lighting.Ambient = originalAmbient
+    lighting.OutdoorAmbient = originalOutdoorAmbient
+    lighting.ColorShift_Bottom = originalColorShift_Bottom
+    lighting.ColorShift_Top = originalColorShift_Top
+    lighting.GlobalShadows = originalShadows
+    lighting.ExposureCompensation = originalExposure
+    
+    -- Re-enable post-processing effects
+    for _, effect in pairs(lighting:GetChildren()) do
+        if effect:IsA("BloomEffect") or 
+           effect:IsA("BlurEffect") or 
+           effect:IsA("ColorCorrectionEffect") or 
+           effect:IsA("SunRaysEffect") then
+            effect.Enabled = true
+        end
+    end
+end
+
+-- Handle toggle state changes
+fullBrightToggle:OnChanged(function(state)
+    if state then
+        enableFullBright()
+    else
+        restoreOriginalLighting()
+    end
+end)
+
+-- Clean up when script is terminated or player leaves
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if fullBrightConnection then
+        fullBrightConnection:Disconnect()
     end
 end)
 
