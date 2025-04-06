@@ -548,7 +548,7 @@ end)
 
 
 -- Dropdown for selecting loot types
-local autoLootDropdown = Tabs.AutoLoot:AddDropdown("AutoLootDropdown", {
+local autoLootDropdown = Tabs.Main:AddDropdown("AutoLootDropdown", {
     Title = "Auto-Loot Items",
     Values = {"Items", "Werewolf Body", "Vampire Body", "Gold Bar", "Zombie/Walker Body"},
     Multi = true,
@@ -556,7 +556,7 @@ local autoLootDropdown = Tabs.AutoLoot:AddDropdown("AutoLootDropdown", {
 })
 
 -- Toggle for enabling auto-loot
-local autoLootToggle = Tabs.AutoLoot:AddToggle("AutoLootToggle", {
+local autoLootToggle = Tabs.Main:AddToggle("AutoLootToggle", {
     Title = "Auto-Loot Enabled",
     Description = "",
     Default = false
