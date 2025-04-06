@@ -4,7 +4,7 @@ local Window = Fluent:CreateWindow({
     Title = "Viper Hub Dead-Rails",
     SubTitle = "by Viper_",
     TabWidth = 160,
-    Size = UDim2.fromOffset(480, 365),
+    Size = UDim2.fromOffset(480, 320),
     Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
@@ -12,7 +12,7 @@ local Window = Fluent:CreateWindow({
 
 -- Fluent provides Lucide Icons, they are optional
 local Tabs = {
-    Main = Window:AddTab({ Title = "Tab Visual", Icon = "" }),
+    Main = Window:AddTab({ Title = "Tab Main", Icon = "" }),
     Aimbot = Window:AddTab({ Title = "Tab Aimbot", Icon = "" }),
 }
 
@@ -29,9 +29,9 @@ v23.Parent = v22
 v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 v23.BorderSizePixel = 0
 v23.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position of the floating button
-v23.Size = UDim2.new(0, 100, 0, 100)  -- Size of the floating logo
+v23.Size = UDim2.new(0, 60, 0, 60)  -- Size of the floating logo
 v23.Draggable = true  -- Makes it draggable
-v23.Image = "rbxassetid://10188383915"  -- Fixed image ID (removed extra digits)
+v23.Image = "rbxassetid://101883839381557"  -- Fixed image ID (removed extra digits)
 
 v24.Parent = v23
 v24.CornerRadius = UDim.new(0, 12)  -- Round corners
@@ -190,7 +190,8 @@ game:GetService("RunService").RenderStepped:Connect(function()
 end)
 
 
-local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
+local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false
+Description = "Works Only In Zombie" })
 
 Toggle:OnChanged(function(v)
     _G.Aimbot = v
@@ -207,4 +208,87 @@ spawn(function()
             end
         end
     end)
+end)
+
+local fogToggle = Tabs.Main:AddToggle("FogToggle", {
+    Title = "Remove Fog",
+    Description = "Removes fog for better visibility",
+    Default = false
+})
+
+-- Store original fog settings
+local lighting = game:GetService("Lighting")
+local originalFogEnd = lighting.FogEnd
+local originalFogStart = lighting.FogStart
+local originalFogColor = lighting.FogColor
+local originalAtmosphere = nil
+
+if lighting:FindFirstChildOfClass("Atmosphere") then
+    originalAtmosphere = lighting:FindFirstChildOfClass("Atmosphere"):Clone()
+end
+
+-- Function to remove fog
+local function removeFog()
+    -- Save original atmosphere if it exists and hasn't been saved yet
+    if lighting:FindFirstChildOfClass("Atmosphere") and not originalAtmosphere then
+        originalAtmosphere = lighting:FindFirstChildOfClass("Atmosphere"):Clone()
+    end
+    
+    -- Remove atmosphere
+    if lighting:FindFirstChildOfClass("Atmosphere") then
+        lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+    end
+    
+    -- Set fog to maximum visibility
+    lighting.FogEnd = 1000000
+    lighting.FogStart = 1000000
+    
+    -- Connect to RenderStepped to prevent fog from being re-added
+    fogConnection = game:GetService("RunService").RenderStepped:Connect(function()
+        if lighting.FogEnd ~= 1000000 then
+            lighting.FogEnd = 1000000
+        end
+        if lighting.FogStart ~= 1000000 then
+            lighting.FogStart = 1000000
+        end
+        if lighting:FindFirstChildOfClass("Atmosphere") then
+            lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+        end
+    end)
+end
+
+-- Function to restore fog
+local function restoreFog()
+    -- Disconnect fog removal loop
+    if fogConnection then
+        fogConnection:Disconnect()
+        fogConnection = nil
+    end
+    
+    -- Restore original fog settings
+    lighting.FogEnd = originalFogEnd
+    lighting.FogStart = originalFogStart
+    lighting.FogColor = originalFogColor
+    
+    -- Restore atmosphere if it existed
+    if originalAtmosphere and not lighting:FindFirstChildOfClass("Atmosphere") then
+        local newAtmosphere = originalAtmosphere:Clone()
+        newAtmosphere.Parent = lighting
+    end
+end
+
+-- Handle the fog toggle using the OnChanged callback
+fogToggle:OnChanged(function(state)
+    if state then
+        removeFog()
+    else
+        restoreFog()
+    end
+end)
+
+-- Clean up when script is terminated
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if fogConnection then
+        fogConnection:Disconnect()
+    end
 end)
