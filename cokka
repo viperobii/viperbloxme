@@ -71,6 +71,105 @@ local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.Eas
 })
 v47:Play()
 
+local autoDriveToggle = Tabs.Main:AddToggle("AutoDriveToggle", {
+    Title = "Auto Drive Train",
+    Description = "Sit First To Drive",
+    Default = false
+})
+
+-- Reference to the UserInputService
+local UserInputService = game:GetService("UserInputService")
+
+-- Create a virtual input object for the W key
+local virtualInput = {
+    KeyCode = Enum.KeyCode.W,
+    UserInputType = Enum.UserInputType.Keyboard,
+    UserInputState = Enum.UserInputState.Begin
+}
+
+-- Variables to track auto drive state
+local isDriving = false
+local autoDriveConnection = nil
+
+-- Function to simulate key press/release
+local function simulateKeyPress(keyCode, isPressed)
+    -- Create an input object that simulates pressing or releasing the W key
+    local inputObject = {
+        KeyCode = keyCode,
+        UserInputType = Enum.UserInputType.Keyboard,
+        UserInputState = isPressed and Enum.UserInputState.Begin or Enum.UserInputState.End
+    }
+    
+    -- Fire the input began or ended event based on isPressed
+    if isPressed then
+        for _, connection in pairs(getconnections(UserInputService.InputBegan)) do
+            connection:Fire(inputObject, false)  -- false means not a game processed event
+        end
+    else
+        for _, connection in pairs(getconnections(UserInputService.InputEnded)) do
+            connection:Fire(inputObject, false)  -- false means not a game processed event
+        end
+    end
+end
+
+-- Function to start auto drive
+local function startAutoDrive()
+    isDriving = true
+    
+    -- Simulate pressing W
+    simulateKeyPress(Enum.KeyCode.W, true)
+    
+    -- Create a connection to ensure W remains pressed
+    autoDriveConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if not isDriving then return end
+        
+        -- Periodically re-send the W key press to ensure it stays active
+        -- This is useful if the game has systems that might stop detecting held keys
+        simulateKeyPress(Enum.KeyCode.W, true)
+    end)
+end
+
+-- Function to stop auto drive
+local function stopAutoDrive()
+    isDriving = false
+    
+    -- Disconnect the auto drive loop
+    if autoDriveConnection then
+        autoDriveConnection:Disconnect()
+        autoDriveConnection = nil
+    end
+    
+    -- Simulate releasing W
+    simulateKeyPress(Enum.KeyCode.W, false)
+end
+
+-- Handle toggle state changes
+autoDriveToggle:OnChanged(function(state)
+    if state then
+        startAutoDrive()
+    else
+        stopAutoDrive()
+    end
+end)
+
+-- Clean up when script is terminated or player leaves
+game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
+    if isDriving then
+        stopAutoDrive()
+    end
+end)
+
+-- Also clean up when the player respawns
+game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
+    if isDriving then
+        -- Wait a moment after respawn, then reapply auto drive if it was on
+        task.wait(1)
+        if autoDriveToggle:GetState() then
+            startAutoDrive()
+        end
+    end
+end)
+
 
 local espToggle = Tabs.Main:AddToggle("EspToggle", {
     Title = "ESP Box",
@@ -342,7 +441,7 @@ end)
 -- Aimbot
 Tabs.Aimbot:AddButton({
     Title = "Aimbot Lock",
-    Description = "NPC Aimbot Head",
+    Description = "Recommended Full Accurate",
     Callback = function()
         -- Execute the script from the URL
         loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/ViperisEnot/refs/heads/main/DeadLock.txt"))()
