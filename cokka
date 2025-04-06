@@ -155,63 +155,9 @@ espToggle:OnChanged(function(state)
     end
 end)
 
--- Aimbot
-Tabs.Aimbot:AddButton({
-    Title = "Aimbot Lock",
-    Description = "NPC Aimbot Head",
-    Callback = function()
-        -- Execute the script from the URL
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/ViperisEnot/refs/heads/main/DeadLock.txt"))()
-    end
-})
-
-local player = game:GetService("Players").LocalPlayer
-local camera = workspace.CurrentCamera
-
-function getClosestWalker()
-    local closest, minDist = nil, math.huge
-    for _, walker in pairs(workspace:GetChildren()) do
-        if walker.Name == "Walker" and walker:FindFirstChild("Head") then
-            local dist = (walker.Head.Position - player.Character.HumanoidRootPart.Position).Magnitude
-            if dist < minDist then
-                minDist = dist
-                closest = walker
-            end
-        end
-    end
-    return closest
-end
-
-game:GetService("RunService").RenderStepped:Connect(function()
-    local target = getClosestWalker()
-    if target then
-        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
-    end
-end)
-
-
-local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
-
-Toggle:OnChanged(function(v)
-    _G.Aimbot = v
-end)
-
-spawn(function()
-    pcall(function()
-        while task.wait() do 
-            if _G.Aimbot then
-                local target = getClosestWalker()
-                if target then  
-                    camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
-                end
-            end
-        end
-    end)
-end)
-
 local fogToggle = Tabs.Main:AddToggle("FogToggle", {
-    Title = "Remove Fog",
-    Description = "Removes fog for better visibility",
+    Title = "No Fog",
+    Description = "",
     Default = false
 })
 
@@ -291,3 +237,58 @@ game:GetService("Players").LocalPlayer.OnTeleport:Connect(function()
         fogConnection:Disconnect()
     end
 end)
+
+-- Aimbot
+Tabs.Aimbot:AddButton({
+    Title = "Aimbot Lock",
+    Description = "NPC Aimbot Head",
+    Callback = function()
+        -- Execute the script from the URL
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/ViperisEnot/refs/heads/main/DeadLock.txt"))()
+    end
+})
+
+local player = game:GetService("Players").LocalPlayer
+local camera = workspace.CurrentCamera
+
+function getClosestWalker()
+    local closest, minDist = nil, math.huge
+    for _, walker in pairs(workspace:GetChildren()) do
+        if walker.Name == "Walker" and walker:FindFirstChild("Head") then
+            local dist = (walker.Head.Position - player.Character.HumanoidRootPart.Position).Magnitude
+            if dist < minDist then
+                minDist = dist
+                closest = walker
+            end
+        end
+    end
+    return closest
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    local target = getClosestWalker()
+    if target then
+        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
+    end
+end)
+
+
+local Toggle = Tabs.Aimbot:AddToggle("MyToggle", {Title = "Aimbot Zombie ", Default = false })
+
+Toggle:OnChanged(function(v)
+    _G.Aimbot = v
+end)
+
+spawn(function()
+    pcall(function()
+        while task.wait() do 
+            if _G.Aimbot then
+                local target = getClosestWalker()
+                if target then  
+                    camera.CFrame = CFrame.new(camera.CFrame.Position, target.Head.Position)
+                end
+            end
+        end
+    end)
+end)
+
