@@ -548,16 +548,16 @@ end)
 
 
 -- Dropdown for selecting loot types
-local autoLootDropdown = Tabs.Main:AddDropdown("AutoLootDropdown", {
+local autoLootDropdown = Tabs.AutoLoot:AddDropdown("AutoLootDropdown", {
     Title = "Auto-Loot Items",
-    Values = {"Items", "Werewolves Bodies", "Zombies/Walker Bodies"},
+    Values = {"Items", "Werewolf Body", "Vampire Body", "Gold Bar", "Zombie/Walker Body"},
     Multi = true,
     Default = {}
 })
 
 -- Toggle for enabling auto-loot
-local autoLootToggle = Tabs.Main:AddToggle("AutoLootToggle", {
-    Title = "Auto Loot",
+local autoLootToggle = Tabs.AutoLoot:AddToggle("AutoLootToggle", {
+    Title = "Auto-Loot Enabled",
     Description = "",
     Default = false
 })
@@ -593,12 +593,22 @@ autoLootToggle:OnChanged(function()
                 end
                 
                 -- Check for werewolf bodies
-                if table.find(selectedLoot, "Werewolves Bodies") and item.Name == "WerewolfBody" then
+                if table.find(selectedLoot, "Werewolf Body") and item.Name == "WerewolfBody" then
                     shouldCollect = true
                 end
                 
-                -- Check for zombie/walker bodies
-                if table.find(selectedLoot, "Zombies/Walker Bodies") and (item.Name == "ZombieBody" or item.Name == "WalkerBody") then
+                -- Check for vampire bodies
+                if table.find(selectedLoot, "Vampire Body") and item.Name == "VampireBody" then
+                    shouldCollect = true
+                end
+                
+                -- Check for gold bars
+                if table.find(selectedLoot, "Gold Bar") and item.Name == "GoldBar" then
+                    shouldCollect = true
+                end
+                
+                -- Check for zombie/walker bodies (checking both names since exact name is uncertain)
+                if table.find(selectedLoot, "Zombie/Walker Body") and (item.Name == "ZombieBody" or item.Name == "WalkerBody") then
                     shouldCollect = true
                 end
                 
@@ -607,7 +617,7 @@ autoLootToggle:OnChanged(function()
                     local itemPart = item:FindFirstChild("Handle") or item:FindFirstChild("PrimaryPart") or item:FindFirstChildWhichIsA("BasePart")
                     if itemPart and (itemPart.Position - hrp.Position).Magnitude <= COLLECTION_RANGE then
                         -- Simulate picking up the item (adjust remote name as needed)
-                        local pickupEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PickupRemote")
+                        local pickupEvent = game:GetService("ReplicatedStorage"):FindFirstChild("PickupRemote") 
                         if pickupEvent then
                             pickupEvent:FireServer(item)
                         end
