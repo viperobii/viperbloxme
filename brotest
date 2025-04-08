@@ -16084,7 +16084,7 @@ end);
 
 end);
 
-local RaidToggle = v16.Raid:AddToggle("ToggleMobAura", {
+local RaidToggle = v16.Race:AddToggle("ToggleMobAura", {
 
 Title = "Auto Trial Ghoul / Human",
 
