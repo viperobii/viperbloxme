@@ -7001,7 +7001,7 @@ end);
 local v511 = {}; -- Store available boats
 local v512 = false; -- Lock for finding boat
 local v513 = false; -- Notification lock
-local FlyHeight = 50; -- Medium fly height (adjust as needed)
+local FlyHeight = 90; -- Medium fly height (adjust as needed)
 local BoatSpeed = 350; -- Boat speed
 
 v505.RenderStepped:Connect(function()
@@ -7084,14 +7084,14 @@ v505.RenderStepped:Connect(function()
     end
     
     -- Check for sea threats (seabeasts, sharks, piranhas, etc.)
-    local seaThreats = {"SeaBeast", "Shark", "Piranha", "TerrorShark"}
     local nearbyThreat = false
     local threatDetectionRange = 300 -- Detection range
     
-    -- Check workspace for threats
-    for _, entity in pairs(v507:GetChildren()) do
-        for _, threatName in ipairs(seaThreats) do
-            if entity.Name:find(threatName) or (entity:IsA("Model") and entity:FindFirstChild("Humanoid") and entity.Name:find(threatName)) then
+    -- Check specifically for SeaBeasts in the SeaBeasts folder (common in Blox Fruits)
+    local seaBeasts = v507:FindFirstChild("SeaBeasts")
+    if seaBeasts then
+        for _, entity in pairs(seaBeasts:GetChildren()) do
+            if entity.Name:find("SeaBeast") then
                 local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
                 if distance < threatDetectionRange then
                     nearbyThreat = true
@@ -7099,32 +7099,38 @@ v505.RenderStepped:Connect(function()
                 end
             end
         end
-        
-        if nearbyThreat then
-            break
-        end
     end
     
-    -- Also check in specific folders like NPCs, SeaMonsters, etc. (common in Blox Fruits)
-    local possibleFolders = {"NPCs", "SeaMonsters", "Enemies", "Mobs"}
-    
-    for _, folderName in ipairs(possibleFolders) do
-        local folder = v507:FindFirstChild(folderName)
-        if folder then
-            for _, entity in pairs(folder:GetChildren()) do
-                for _, threatName in ipairs(seaThreats) do
-                    if entity.Name:find(threatName) or (entity:FindFirstChild("Humanoid") and entity.Name:find(threatName)) then
-                        local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
-                        if distance < threatDetectionRange then
-                            nearbyThreat = true
-                            break
+    -- Check for other sea threats like sharks and piranhas
+    if not nearbyThreat then
+        -- Check for sharks and other sea mobs in the Workspace
+        local seaThreats = {"Shark", "Piranha", "TerrorShark"}
+        
+        -- Check in specific folders where sea mobs might be found
+        local possibleFolders = {"SeaMobs", "Enemies", "NPCs", "Mobs", "LivingThings"}
+        
+        for _, folderName in ipairs(possibleFolders) do
+            local folder = v507:FindFirstChild(folderName)
+            if folder then
+                for _, entity in pairs(folder:GetChildren()) do
+                    for _, threatName in ipairs(seaThreats) do
+                        if entity.Name:find(threatName) then
+                            local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
+                            if distance < threatDetectionRange then
+                                nearbyThreat = true
+                                break
+                            end
                         end
                     end
+                    
+                    if nearbyThreat then
+                        break
+                    end
                 end
-                
-                if nearbyThreat then
-                    break
-                end
+            end
+            
+            if nearbyThreat then
+                break
             end
         end
     end
