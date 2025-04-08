@@ -1333,7 +1333,7 @@ Window = Fluent:CreateWindow({
     Title = "Viler Hub Blox-Fruit [Zeisha]",
     SubTitle = "by Viper",
     TabWidth = 155,
-    Size = UDim2.fromOffset(555, 320),
+    Size = UDim2.fromOffset(480, 365),
     Acrylic = false, 
     Theme = "Luffy",
     MinimizeKey = Enum.KeyCode.LeftControl 
@@ -5800,14 +5800,48 @@ Toggle = Sea:AddToggle("Toggle", {
     Title = "Auto Sea Beast",
     Default = false
 })
-Toggle:OnChanged(function(value)
-    getgenv().AutoSeaBest = value
-    StopTween(getgenv().AutoSeaBest)
-    if not getgenv().AutoSeaBest then
-        getgenv().SeaSkill = false
-        Skillaimbot = false
+-- Initialize toggles
+getgenv().AutoSeaBest = false
+getgenv().SeaSkill = false
+getgenv().UseSeaFruitSkill = true
+getgenv().UseSeaMeleeSkill = true
+getgenv().UseSeaSwordSkill = true
+getgenv().UseSeaGunSkill = true
+
+getgenv().SkillFruitZ = true
+getgenv().SkillFruitX = true
+getgenv().SkillFruitC = true
+getgenv().SkillFruitV = true
+getgenv().SkillFruitF = true
+
+getgenv().SkillMeleeZ = true
+getgenv().SkillMeleeX = true
+getgenv().SkillMeleeC = true
+
+getgenv().SkillSwordZ = true
+getgenv().SkillSwordX = true
+
+getgenv().SkillGunZ = true
+getgenv().SkillGunX = true
+
+getgenv().SeaHoldSKillZ = 0.1
+getgenv().SeaHoldSKillX = 0.1
+getgenv().SeaHoldSKillC = 0.1
+getgenv().SeaHoldSKillV = 0.1
+getgenv().SeaHoldSKillF = 0.1
+
+-- Utility functions
+function StopTween(state)
+    -- Add your tween cancellation logic here if needed
+end
+
+function topos(cf)
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = cf
     end
-end)
+end
+
 function CheckSeaBeast()
     local seaBeasts = game:GetService("Workspace"):FindFirstChild("SeaBeasts")
     if not seaBeasts then return false end
@@ -5820,32 +5854,44 @@ function CheckSeaBeast()
     end
     return false
 end
+
+Toggle:OnChanged(function(value)
+    getgenv().AutoSeaBest = value
+    StopTween(value)
+    if not value then
+        getgenv().SeaSkill = false
+        Skillaimbot = false
+    end
+end)
+
+-- Sea Beast Farming Logic
 task.spawn(function()
     while task.wait(0.5) do
         if getgenv().AutoSeaBest then
             pcall(function()
                 local workspace = game:GetService("Workspace")
                 local player = game.Players.LocalPlayer
-                if workspace:FindFirstChild("SeaBeasts") then
-                    for _, v in pairs(workspace.SeaBeasts:GetChildren()) do
+                local beasts = workspace:FindFirstChild("SeaBeasts")
+
+                if beasts then
+                    for _, v in pairs(beasts:GetChildren()) do
                         if CheckSeaBeast() then
                             repeat
-                                wait()
-                                CFrameSeaBeast = v.HumanoidRootPart.CFrame * CFrame.new(0, 400, 0)
-                                if (CFrameSeaBeast.Position - player.Character.HumanoidRootPart.CFrame.Position).Magnitude <= 50 then
-                                    getgenv().SeaSkill = true
-                                else
-                                    getgenv().SeaSkill = false
-                                end
+                                task.wait()
+                                local root = v:FindFirstChild("HumanoidRootPart")
+                                if not root then break end
+                                local humanoid = v:FindFirstChild("Humanoid")
+                                if not humanoid or humanoid.Health <= 0 then break end
+
+                                CFrameSeaBeast = root.CFrame * CFrame.new(0, 400, 0)
+                                local distance = (CFrameSeaBeast.Position - player.Character.HumanoidRootPart.Position).Magnitude
+
+                                getgenv().SeaSkill = distance <= 50
                                 Skillaimbot = true
-                                AimBotSkillPosition = v.HumanoidRootPart.CFrame.Position
+                                AimBotSkillPosition = root.Position
                                 topos(CFrameSeaBeast)
-                            until 
-                                not getgenv().AutoSeaBest or 
-                                not v:FindFirstChild("Humanoid") or 
-                                not v:FindFirstChild("HumanoidRootPart") or 
-                                v.Humanoid.Health < 0 or 
-                                not v.Parent
+                            until not getgenv().AutoSeaBest or not v.Parent or humanoid.Health <= 0
+                            
                             Skillaimbot = false
                             getgenv().SeaSkill = false
                         end
@@ -5855,68 +5901,78 @@ task.spawn(function()
         end
     end
 end)
-local function UseSkill(key, holdTime)
-    game:service('VirtualInputManager'):SendKeyEvent(true, key, false, game)
+
+-- Skill Use Logic
+function UseSkill(key, holdTime)
+    local vim = game:GetService("VirtualInputManager")
+    vim:SendKeyEvent(true, key, false, game)
     task.wait(holdTime)
-    game:service('VirtualInputManager'):SendKeyEvent(false, key, false, game)
+    vim:SendKeyEvent(false, key, false, game)
 end
+
 task.spawn(function()
     while task.wait(1) do
         pcall(function()
             if getgenv().SeaSkill then
                 local player = game.Players.LocalPlayer
-                local backpack = player.Backpack                
+                local backpack = player.Backpack
+
+                local DoneSkillFruit, DoneSkillMelee, DoneSkillSword, DoneSkillGun = false, false, false, false
+
                 if getgenv().UseSeaFruitSkill and not DoneSkillFruit then
                     for _, v in pairs(backpack:GetChildren()) do
                         if v:IsA("Tool") and v.ToolTip == "Blox Fruit" then
                             player.Character.Humanoid:EquipTool(v)
                         end
-                    end                    
+                    end
                     if getgenv().SkillFruitZ then UseSkill("Z", getgenv().SeaHoldSKillZ) end
                     if getgenv().SkillFruitX then UseSkill("X", getgenv().SeaHoldSKillX) end
                     if getgenv().SkillFruitC then UseSkill("C", getgenv().SeaHoldSKillC) end
                     if getgenv().SkillFruitV then UseSkill("V", getgenv().SeaHoldSKillV) end
-                    if getgenv().SkillFruitF then UseSkill("F", getgenv().SeaHoldSKillF) end                    
+                    if getgenv().SkillFruitF then UseSkill("F", getgenv().SeaHoldSKillF) end
                     DoneSkillFruit = true
-                end                
+                end
+
                 if getgenv().UseSeaMeleeSkill and not DoneSkillMelee then
                     for _, v in pairs(backpack:GetChildren()) do
                         if v:IsA("Tool") and v.ToolTip == "Melee" then
                             player.Character.Humanoid:EquipTool(v)
                         end
-                    end                    
+                    end
                     if getgenv().SkillMeleeZ then UseSkill("Z", 0) end
                     if getgenv().SkillMeleeX then UseSkill("X", 0) end
-                    if getgenv().SkillMeleeC then UseSkill("C", 0) end                    
+                    if getgenv().SkillMeleeC then UseSkill("C", 0) end
                     DoneSkillMelee = true
-                end                
+                end
+
                 if getgenv().UseSeaSwordSkill and not DoneSkillSword then
                     for _, v in pairs(backpack:GetChildren()) do
                         if v:IsA("Tool") and v.ToolTip == "Sword" then
                             player.Character.Humanoid:EquipTool(v)
                         end
-                    end                    
+                    end
                     if getgenv().SkillSwordZ then UseSkill("Z", 0) end
-                    if getgenv().SkillSwordX then UseSkill("X", 0) end                    
+                    if getgenv().SkillSwordX then UseSkill("X", 0) end
                     DoneSkillSword = true
-                end                
+                end
+
                 if getgenv().UseSeaGunSkill and not DoneSkillGun then
                     for _, v in pairs(backpack:GetChildren()) do
                         if v:IsA("Tool") and v.ToolTip == "Gun" then
                             player.Character.Humanoid:EquipTool(v)
                         end
-                    end                    
+                    end
                     if getgenv().SkillGunZ then UseSkill("Z", 0.1) end
                     if getgenv().SkillGunX then UseSkill("X", 0.1) end
-                    
                     DoneSkillGun = true
-                end                
+                end
+
                 task.wait(0.5)
-                DoneSkillGun, DoneSkillSword, DoneSkillFruit, DoneSkillMelee = false, false, false, false
             end
         end)
     end
-end)         
+end)
+
 Sea:AddParagraph({
         Title = "Kitsune Event",
         Content = string.rep("-", 21)
