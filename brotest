@@ -220,7 +220,7 @@ v3.Window = function(v110, v111)
 
 	v132.ApplyStrokeMode = Enum.ApplyStrokeMode.Border;
 
-	v132.Color = Color3.fromRGB(0, 205, 0);
+	v132.Color = Color3.fromRGB(255, 50, 50);
 
 	v132.LineJoinMode = Enum.LineJoinMode.Round;
 
@@ -306,11 +306,11 @@ v3.Window = function(v110, v111)
 
 	v173.Font = Enum.Font.SourceSansBold;
 
-	v173.Text = "Arca Hub";
+	v173.Text = "Viper Hub [ARCA]";
 
 	v173.TextSize = 17;
 
-	v173.TextColor3 = Color3.fromRGB(75, 188, 6);
+	v173.TextColor3 = Color3.fromRGB(255, 0, 0);
 
 	v173.TextXAlignment = Enum.TextXAlignment.Left;
 
@@ -5766,7 +5766,7 @@ v32:Label("Everyone Goes Into Socialize");
 
 v32:Button("Copy Discord Link", function()
 
-	setclipboard("https://discord.com/invite/hcJ8PHtkfy");
+	setclipboard("https://discord.gg/qx9rKaC35f");
 
 end);
 
@@ -20572,7 +20572,7 @@ local v102 = game:GetService("Players");
 
 game:GetService("StarterGui"):SetCore("SendNotification", {
 
-	Title = "Arca Hub",
+	Title = "Viper Hub",
 
 	Text = "Loading Done!",
 
