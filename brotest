@@ -6992,280 +6992,192 @@ local v514 = v16.Sea:AddToggle("AutoDriveBoat", {
     Default = false
 });
 
-v514:OnChanged(function(state)
-    getgenv().SailBoat = state
-    StopTween(getgenv().SailBoat)
-end)
-function CheckBoat()
-    local workspace = game:GetService("Workspace")
-    local boats = workspace:FindFirstChild("Boats")
-    local selectedBoat = getgenv().SelectedBoat
-    if not (boats and selectedBoat) then
-        return false
+v17.AutoDriveBoat:SetValue(false);
+
+v514:OnChanged(function(v595)
+    _G.AutoDriveBoat = v595;
+end);
+
+local v511 = {}; -- Store available boats
+local v512 = false; -- Lock for finding boat
+local v513 = false; -- Notification lock
+local FlyHeight = 100; -- Medium fly height (adjust as needed)
+local BoatSpeed = 350; -- Boat speed
+
+v505.RenderStepped:Connect(function()
+    if not _G.AutoDriveBoat then
+        v513 = false;
+        return;
     end
-    for _, boat in pairs(boats:GetChildren()) do
-        if boat.Name == selectedBoat then
-            if boat:FindFirstChild("MyBoatEsp") then
-                return boat
+
+    local v596 = v504.LocalPlayer;
+    local v597 = v596.Character;
+    
+    if (not v597 or not v597:FindFirstChild("Humanoid")) then
+        return;
+    end
+
+    -- Function to find and get on a boat if not already on one
+    local function v598()
+        if v512 then
+            return;
+        end
+        
+        v512 = true;
+        
+        for v771, v772 in pairs(v511) do
+            if (v772 and v772.Parent and (v772.Name == "VehicleSeat") and not v772.Occupant) then
+                Tween2(v772.CFrame);
+                break;
+            end
+        end
+        
+        v512 = false;
+    end
+
+    local v599 = v597.Humanoid;
+    local v600 = false; -- Flag if player is on boat
+    local v601 = nil; -- Current boat seat
+    
+    -- Check if player is on a boat or find available boats
+    for v694, v695 in pairs(v507.Boats:GetChildren()) do
+        local v696 = v695:FindFirstChild("VehicleSeat");
+        
+        if (v696 and (v696.Occupant == v599)) then
+            v600 = true;
+            v601 = v696;
+            v511[v695.Name] = v696;
+        elseif (v696 and (v696.Occupant == nil)) then
+            v598();
+        end
+    end
+    
+    if not v600 then
+        return;
+    end
+    
+    -- Set boat speed and make it fly at medium height
+    v601.MaxSpeed = BoatSpeed;
+    
+    -- Make the boat fly at medium height
+    local targetY = v601.Position.Y
+    if v601.Position.Y < FlyHeight then
+        targetY = FlyHeight
+    end
+    
+    v601.CFrame = CFrame.new(Vector3.new(v601.Position.X, targetY, v601.Position.Z)) * v601.CFrame.Rotation;
+    
+    -- Auto drive forward
+    v506:SendKeyEvent(true, "W", false, game);
+    
+    -- Make boat parts non-collidable for smoother movement
+    for v697, v698 in pairs(v507.Boats:GetDescendants()) do
+        if v698:IsA("BasePart") then
+            v698.CanCollide = false;
+        end
+    end
+    
+    for v699, v700 in pairs(v597:GetDescendants()) do
+        if v700:IsA("BasePart") then
+            v700.CanCollide = false;
+        end
+    end
+    
+    -- Check for sea threats (seabeasts, sharks, piranhas, etc.)
+    local nearbyThreat = false
+    local threatDetectionRange = 300 -- Detection range
+    local threatName = ""
+    
+    -- Check specifically for SeaBeasts in the SeaBeasts folder
+    local seaBeasts = v507:FindFirstChild("SeaBeasts")
+    if seaBeasts then
+        for _, entity in pairs(seaBeasts:GetChildren()) do
+            if entity.Name:find("SeaBeast") then
+                local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
+                if distance < threatDetectionRange then
+                    nearbyThreat = true
+                    threatName = entity.Name
+                    break
+                end
             end
         end
     end
-    return false
-end
-function CheckEnemiesBoat()
-    local enemies = game:GetService("Workspace"):FindFirstChild("Enemies")    
-    if not enemies then
-        return false
-    end
-    return enemies:FindFirstChild("FishBoat") 
-        or enemies:FindFirstChild("PirateBrigade") 
-        or enemies:FindFirstChild("PirateGrandBrigade") 
-        and true or false
-end
-function CheckShark()
-    local workspace = game:GetService("Workspace")
-    local enemies = workspace:FindFirstChild("Enemies")
-    local player = game.Players.LocalPlayer
-    local character = player and player.Character
-    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-    if not (enemies and rootPart) then
-        return false
-    end
-    for _, v in pairs(enemies:GetChildren()) do
-        local humanoid = v:FindFirstChild("Humanoid")
-        local enemyRoot = v:FindFirstChild("HumanoidRootPart")
-        if v.Name == "Shark" and humanoid and enemyRoot and humanoid.Health > 0 then
-            if (enemyRoot.Position - rootPart.Position).Magnitude <= 200 then
-                return true
-            end
-        end
-    end
-    return false
-end
-function CheckPiranha()
-    local workspace = game:GetService("Workspace")
-    local enemies = workspace:FindFirstChild("Enemies")
-    local player = game.Players.LocalPlayer
-    local character = player and player.Character
-    local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-    if not (enemies and rootPart) then
-        return false
-    end
-    for _, v in pairs(enemies:GetChildren()) do
-        local humanoid = v:FindFirstChild("Humanoid")
-        local enemyRoot = v:FindFirstChild("HumanoidRootPart")
-        if v.Name == "Piranha" and humanoid and enemyRoot and humanoid.Health > 0 then
-            if (enemyRoot.Position - rootPart.Position).Magnitude <= 200 then
-                return true
-            end
-        end
-    end
-    return false
-end
-function AddEsp(Name, Parent)
-    if not Parent or not Parent:IsA("Instance") then
-        return
-    end
-    local BillboardGui = Instance.new("BillboardGui")
-    local TextLabel = Instance.new("TextLabel")
-    BillboardGui.Name = Name
-    BillboardGui.Parent = Parent
-    BillboardGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    BillboardGui.AlwaysOnTop = true
-    BillboardGui.Size = UDim2.new(0, 200, 0, 50)
-    BillboardGui.StudsOffset = Vector3.new(0, 2.5, 0)
-    TextLabel.Parent = BillboardGui
-    TextLabel.BackgroundTransparency = 1
-    TextLabel.Size = UDim2.new(1, 0, 1, 0)
-    TextLabel.Font = Enum.Font.GothamBold
-    TextLabel.TextColor3 = Color3.new(1, 1, 1)
-    TextLabel.TextSize = 15
-    TextLabel.Text = "YOUR BOAT IS HERE↓"
-    return BillboardGui
-end
-spawn(function()
-    while wait(0.2) do
-        pcall(function()
-            if getgenv().SailBoat then
-                if not CheckBoat() then
-                    BuyBoatCFrame = CFrame.new(-16927.451171875, 9.0863618850708, 433.8642883300781)                    
-                    if (BuyBoatCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude > 1000 then
-                        topos(CFrame.new(-16224, 9, 439))
-                    else
-                        buyb = topos(BuyBoatCFrame)
+    
+    -- Check for specific enemies in the Enemies folder as provided
+    if not nearbyThreat then
+        local enemies = v507:FindFirstChild("Enemies")
+        if enemies then
+            -- Check for specific sea threats with exact names
+            local specificThreats = {
+                "Terrorshark",
+                "Piranha", 
+                "Shark",
+                "Fish Crew Member"
+            }
+            
+            for _, threatType in ipairs(specificThreats) do
+                local entity = enemies:FindFirstChild(threatType)
+                if entity then
+                    local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
+                    if distance < threatDetectionRange then
+                        nearbyThreat = true
+                        threatName = entity.Name
+                        break
                     end
-                    if (CFrame.new(-16927.451171875, 9.0863618850708, 433.8642883300781).Position 
-                        - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 then                        
-                        if buyb then buyb:Stop() end
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBoat", getgenv().SelectedBoat)
-                        for i, v in pairs(game:GetService("Workspace").Boats:GetChildren()) do
-                            if v.Name == getgenv().SelectedBoat then
-                                if (v.VehicleSeat.CFrame.Position 
-                                    - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100 then
-                                    AddEsp('MyBoatEsp', v)
-                                end
+                end
+            end
+            
+            -- Check for pirate ships/brigades
+            if not nearbyThreat then
+                local pirateShips = {
+                    "PirateGrandBrigade",
+                    "PirateBrigade"
+                }
+                
+                for _, enemy in pairs(enemies:GetChildren()) do
+                    for _, shipType in ipairs(pirateShips) do
+                        if enemy.Name == shipType then
+                            local distance = (enemy:GetPivot().Position - v597:GetPivot().Position).Magnitude
+                            if distance < threatDetectionRange then
+                                nearbyThreat = true
+                                threatName = enemy.Name
+                                break
                             end
                         end
                     end
-                elseif CheckBoat() then
-                    for i, v in pairs(game:GetService("Workspace").Boats:GetChildren()) do
-                        if v.Name == getgenv().SelectedBoat then
-                            if v:FindFirstChild("MyBoatEsp") then
-                                if game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == false then
-                                    if ((CheckShark() and getgenv().AutoKillShark) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark") and getgenv().AutoTerrorshark) 
-                                        or (CheckPiranha() and getgenv().AutoKillPiranha) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("Fish Crew Member") and getgenv().AutoKillFishCrew) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("FishBoat") and getgenv().RelzFishBoat) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("PirateBrigade") and getgenv().RelzPirateBrigade) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("PirateGrandBrigade") and getgenv().RelzPirateGrandBrigade) 
-                                        or (CheckSeaBeast() and getgenv().AutoSeaBest)) then                                        
-                                        if stoppos then stoppos:Stop() end
-                                    else
-                                        stoppos = topos(v.VehicleSeat.CFrame * CFrame.new(0, 1, 0))
-                                    end
-                                else
-                                    repeat 
-                                        wait()
-                                        stopboat = TPB(CFrameSelectedZone, v.VehicleSeat)
-                                    until ((CheckShark() and getgenv().AutoKillShark) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("Terrorshark") and getgenv().AutoTerrorshark) 
-                                        or (CheckPiranha() and getgenv().AutoKillPiranha) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("Fish Crew Member") and getgenv().AutoKillFishCrew) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("FishBoat") and getgenv().RelzFishBoat) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("PirateBrigade") and getgenv().RelzPirateBrigade) 
-                                        or (game:GetService("Workspace").Enemies:FindFirstChild("PirateGrandBrigade") and getgenv().RelzPirateGrandBrigade) 
-                                        or (CheckSeaBeast() and getgenv().AutoSeaBest)) 
-                                        or game.Players.LocalPlayer.Character:WaitForChild("Humanoid").Sit == false 
-                                        or getgenv().SailBoat == false                                    
-                                    if stopboat then stopboat:Stop() end
-                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, 32, false, game)
-                                    wait(0.1)
-                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, 32, false, game)
-                                end
-                            end
-                        end
+                    
+                    if nearbyThreat then
+                        break
                     end
-                end
-            end
-        end)
-    end
-end)
-spawn(function()
-    pcall(function()
-        while task.wait(0.2) do
-            if not getgenv().SailBoat then continue end
-            local enemies = game:GetService("Workspace").Enemies
-            local hasEnemy = false
-            if (CheckShark() and getgenv().AutoKillShark) or 
-               (enemies:FindFirstChild("Terrorshark") and getgenv().AutoTerrorshark) or 
-               (CheckPiranha() and getgenv().AutoKillPiranha) or 
-               (enemies:FindFirstChild("Fish Crew Member") and getgenv().AutoKillFishCrew) or 
-               (enemies:FindFirstChild("FishBoat") and getgenv().RelzFishBoat) or 
-               (enemies:FindFirstChild("PirateBrigade") and getgenv().RelzPirateBrigade) or 
-               (enemies:FindFirstChild("PirateGrandBrigade") and getgenv().RelzPirateGrandBrigade) or 
-               (CheckSeaBeast() and getgenv().AutoSeaBest) then
-                hasEnemy = true
-            end
-            if hasEnemy then
-                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-                if humanoid and humanoid.Sit then
-                    local vim = game:GetService("VirtualInputManager")
-                    vim:SendKeyEvent(true, 32, false, game)
-                    task.wait(0.1)
-                    vim:SendKeyEvent(false, 32, false, game)
                 end
             end
         end
-    end)
-end)
-spawn(function()
-    while task.wait(0.1) do
-        pcall(function()
-            if not getgenv().SailBoat then return end            
-            local enemies = game:GetService("Workspace").Enemies:GetChildren()
-            if getgenv().AutoKillFishCrew then
-                for _, enemy in pairs(enemies) do
-                    if enemy.Name == "Fish Crew Member" and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        StartBring = true
-                        repeat
-                            task.wait()
-                            AutoHaki()
-                            EquipWeapon(getgenv().SelectWeapon)
-                            local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-                            local enemyPos = enemy.HumanoidRootPart.Position
-                            if (enemyPos - playerPos).Magnitude > 5 then
-                                topos(enemy.HumanoidRootPart.CFrame * Pos)
-                            end
-                            getgenv().SeaSkill = false
-                        until not getgenv().AutoKillFishCrew or not enemy.Parent or enemy.Humanoid.Health <= 0
-                        StartBring = false
-                    end
-                end
-            end
-            if getgenv().RelzFishBoat then
-                for _, enemy in pairs(enemies) do
-                    if enemy:FindFirstChild("Engine") then
-                        local boatCFrame = enemy.Engine.CFrame
-                        repeat
-                            task.wait()
-                            local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position                            
-                            if (boatCFrame.Position - playerPos).Magnitude > 5 then
-                                topos(boatCFrame)
-                            end
-                            getgenv().SeaSkill = (boatCFrame.Position - playerPos).Magnitude <= 50
-                            Skillaimbot = true
-                            AimBotSkillPosition = boatCFrame.Position + Vector3.new(0, -15, 0)
-                        until not enemy.Parent or enemy.Health < 0 or not getgenv().RelzFishBoat
-                        Skillaimbot = false
-                        getgenv().SeaSkill = false
-                    end
-                end
-            end
-        end)
     end
-end)
-spawn(function()
-    while task.wait(0.1) do
-        pcall(function()
-            if not getgenv().SailBoat then return end
-            local enemies = game:GetService("Workspace").Enemies:GetChildren()
-            if getgenv().AutoKillFishCrew then
-                for _, enemy in pairs(enemies) do
-                    if enemy.Name == "Fish Crew Member" and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        getgenv().StartMagnet = true
-                        repeat
-                            task.wait()
-                            AutoHaki()
-                            EquipWeapon(getgenv().SelectWeapon)
-                            topos(enemy.HumanoidRootPart.CFrame * Pos)
-                            getgenv().SeaSkill = false
-                        until not getgenv().AutoKillFishCrew or not enemy.Parent or enemy.Humanoid.Health <= 0
-                        getgenv().StartMagnet = false
-                    end
-                end
-            elseif getgenv().RelzFishBoat then
-                for _, enemy in pairs(enemies) do
-                    if enemy:FindFirstChild("Engine") then
-                        local boatCFrame = enemy.Engine.CFrame
-                        repeat
-                            task.wait()
-                            local playerPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-                            getgenv().SeaSkill = (boatCFrame.Position - playerPos).Magnitude <= 50                            
-                            if (boatCFrame.Position - playerPos).Magnitude > 5 then
-                                topos(boatCFrame)
-                            end
-                            Skillaimbot = true
-                            AimBotSkillPosition = boatCFrame.Position + Vector3.new(0, -15, 0)
-                        until not enemy.Parent or enemy.Health < 0 or not getgenv().RelzFishBoat
-                        Skillaimbot = false
-                        getgenv().SeaSkill = false
-                    end
-                end
-            end
-        end)
+    
+    -- Stop boat if threat detected
+    if nearbyThreat then
+        -- Stop pressing W key
+        v506:SendKeyEvent(false, "W", false, game);
+        
+        -- Make character jump
+        v506:SendKeyEvent(true, "Space", false, game);
+        wait(0.1)
+        v506:SendKeyEvent(false, "Space", false, game);
+        
+        if not v513 then
+            v14:Notify({
+                Title = "Viper Hub Notify",
+                Content = "Stopped boat - Detected: " .. threatName,
+                Duration = 5
+            });
+            v513 = true;
+            wait(5) -- Reset notification lock after 5 seconds
+            v513 = false;
+        end
+    else
+        v513 = false;  -- Reset notification lock if no threats
     end
-end)
+end);
 
 local v510 = v16.Volcano:AddToggle("AutoFindPrehistoric", {
 
