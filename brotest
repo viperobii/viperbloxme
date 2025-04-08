@@ -20576,8 +20576,6 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 
 	Text = "Loading Done!",
 
-	Icon = "rbxthumb://type=Asset&id=13717478897&w=150&h=150",
-
 	Duration = 10
 
 })
