@@ -16,7 +16,7 @@ local notificationCooldown = 10
 local currentTime = tick()
 if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
-        Title = "Hiru Hub",
+        Title = "Viper Hub",
         Text = "Loading",
         Duration = 5
     })
@@ -5800,78 +5800,123 @@ Toggle = Sea:AddToggle("Toggle", {
     Title = "Auto Sea Beast",
     Default = false
 })
-AutoKillSeabeast:OnChanged(function(state) 
-    if state then 
-        spawn(function() 
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-
-            local seaBeast = game:GetService("Workspace").SeaBeasts:FindFirstChild("SeaBeast1")
-            if seaBeast and humanoidRootPart then
-                local rootPart = seaBeast:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- Set initial target position (400 studs above, but near horizontally)
-                    local initialTargetPosition = rootPart.Position + Vector3.new(0, 400, -10) -- Slightly behind the Sea Beast
-
-                    -- Move player to the initial position once
-                    Tween(CFrame.new(initialTargetPosition))
-
-                    -- Keep checking if the player moves away
-                    while AutoKillSeabeast.Value do
-                        local currentY = humanoidRootPart.Position.Y
-                        local currentXZ = Vector3.new(humanoidRootPart.Position.X, 0, humanoidRootPart.Position.Z)
-                        local targetXZ = Vector3.new(rootPart.Position.X, 0, rootPart.Position.Z) -- Follow X and Z
-
-                        -- Update target position to stay near but maintain height
-                        local newTargetPosition = Vector3.new(targetXZ.X, initialTargetPosition.Y, targetXZ.Z - 10)
-
-                        -- If the player moves too far from the Sea Beast, re-tween
-                        if (humanoidRootPart.Position - newTargetPosition).Magnitude > 15 or currentY < initialTargetPosition.Y - 5 then
-                            Tween(CFrame.new(newTargetPosition))
+Toggle:OnChanged(function(value)
+    getgenv().AutoSeaBest = value
+    StopTween(getgenv().AutoSeaBest)
+    if not getgenv().AutoSeaBest then
+        getgenv().SeaSkill = false
+        Skillaimbot = false
+    end
+end)
+function CheckSeaBeast()
+    local seaBeasts = game:GetService("Workspace"):FindFirstChild("SeaBeasts")
+    if not seaBeasts then return false end
+    for _, beast in ipairs(seaBeasts:GetChildren()) do
+        local humanoid = beast:FindFirstChild("Humanoid")
+        local rootPart = beast:FindFirstChild("HumanoidRootPart")
+        if humanoid and rootPart and humanoid.Health > 0 then
+            return true
+        end
+    end
+    return false
+end
+task.spawn(function()
+    while task.wait(0.5) do
+        if getgenv().AutoSeaBest then
+            pcall(function()
+                local workspace = game:GetService("Workspace")
+                local player = game.Players.LocalPlayer
+                if workspace:FindFirstChild("SeaBeasts") then
+                    for _, v in pairs(workspace.SeaBeasts:GetChildren()) do
+                        if CheckSeaBeast() then
+                            repeat
+                                wait()
+                                CFrameSeaBeast = v.HumanoidRootPart.CFrame * CFrame.new(0, 400, 0)
+                                if (CFrameSeaBeast.Position - player.Character.HumanoidRootPart.CFrame.Position).Magnitude <= 50 then
+                                    getgenv().SeaSkill = true
+                                else
+                                    getgenv().SeaSkill = false
+                                end
+                                Skillaimbot = true
+                                AimBotSkillPosition = v.HumanoidRootPart.CFrame.Position
+                                topos(CFrameSeaBeast)
+                            until 
+                                not getgenv().AutoSeaBest or 
+                                not v:FindFirstChild("Humanoid") or 
+                                not v:FindFirstChild("HumanoidRootPart") or 
+                                v.Humanoid.Health < 0 or 
+                                not v.Parent
+                            Skillaimbot = false
+                            getgenv().SeaSkill = false
                         end
-                        wait(0.5) -- Check every 0.5 seconds
                     end
                 end
-            end
-        end) 
-
-        -- Start Auto Attack
-        spawn(function()
-            local player = game.Players.LocalPlayer
-            local backpack = player.Backpack
-
-            while AutoKillSeabeast.Value do
-                for _, tool in pairs(backpack:GetChildren()) do
-                    if tool:IsA("Tool") and (tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun") then
-                        player.Character.Humanoid:EquipTool(tool)
-
-                        local virtualInput = game:GetService("VirtualInputManager")
-
-                        -- Attack using skills
-                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart) -- Z
-                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
-
-                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart) -- X
-                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
-
-                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart) -- C
-                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
-
-                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart) -- V
-                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
-                        wait(0.2)
-                    end
-                end
-                wait()
+            end)
+        end
+    end
+end)
+local function UseSkill(key, holdTime)
+    game:service('VirtualInputManager'):SendKeyEvent(true, key, false, game)
+    task.wait(holdTime)
+    game:service('VirtualInputManager'):SendKeyEvent(false, key, false, game)
+end
+task.spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            if getgenv().SeaSkill then
+                local player = game.Players.LocalPlayer
+                local backpack = player.Backpack                
+                if getgenv().UseSeaFruitSkill and not DoneSkillFruit then
+                    for _, v in pairs(backpack:GetChildren()) do
+                        if v:IsA("Tool") and v.ToolTip == "Blox Fruit" then
+                            player.Character.Humanoid:EquipTool(v)
+                        end
+                    end                    
+                    if getgenv().SkillFruitZ then UseSkill("Z", getgenv().SeaHoldSKillZ) end
+                    if getgenv().SkillFruitX then UseSkill("X", getgenv().SeaHoldSKillX) end
+                    if getgenv().SkillFruitC then UseSkill("C", getgenv().SeaHoldSKillC) end
+                    if getgenv().SkillFruitV then UseSkill("V", getgenv().SeaHoldSKillV) end
+                    if getgenv().SkillFruitF then UseSkill("F", getgenv().SeaHoldSKillF) end                    
+                    DoneSkillFruit = true
+                end                
+                if getgenv().UseSeaMeleeSkill and not DoneSkillMelee then
+                    for _, v in pairs(backpack:GetChildren()) do
+                        if v:IsA("Tool") and v.ToolTip == "Melee" then
+                            player.Character.Humanoid:EquipTool(v)
+                        end
+                    end                    
+                    if getgenv().SkillMeleeZ then UseSkill("Z", 0) end
+                    if getgenv().SkillMeleeX then UseSkill("X", 0) end
+                    if getgenv().SkillMeleeC then UseSkill("C", 0) end                    
+                    DoneSkillMelee = true
+                end                
+                if getgenv().UseSeaSwordSkill and not DoneSkillSword then
+                    for _, v in pairs(backpack:GetChildren()) do
+                        if v:IsA("Tool") and v.ToolTip == "Sword" then
+                            player.Character.Humanoid:EquipTool(v)
+                        end
+                    end                    
+                    if getgenv().SkillSwordZ then UseSkill("Z", 0) end
+                    if getgenv().SkillSwordX then UseSkill("X", 0) end                    
+                    DoneSkillSword = true
+                end                
+                if getgenv().UseSeaGunSkill and not DoneSkillGun then
+                    for _, v in pairs(backpack:GetChildren()) do
+                        if v:IsA("Tool") and v.ToolTip == "Gun" then
+                            player.Character.Humanoid:EquipTool(v)
+                        end
+                    end                    
+                    if getgenv().SkillGunZ then UseSkill("Z", 0.1) end
+                    if getgenv().SkillGunX then UseSkill("X", 0.1) end
+                    
+                    DoneSkillGun = true
+                end                
+                task.wait(0.5)
+                DoneSkillGun, DoneSkillSword, DoneSkillFruit, DoneSkillMelee = false, false, false, false
             end
         end)
-    end 
-end)
-
+    end
+end)         
 Sea:AddParagraph({
         Title = "Kitsune Event",
         Content = string.rep("-", 21)
@@ -7366,7 +7411,7 @@ task.spawn(function()
                             EquipWeapon("Tushita")
                         elseif not hasNotified then
                             game.StarterGui:SetCore("SendNotification", {
-                                Title = "Hiru Hub",
+                                Title = "Viper Hub",
                                 Text = "Use! - Yama or Tushita",
                                 con = "rbxassetid://11995210995",
                                 Duration = 10,
@@ -8066,7 +8111,7 @@ local notificationCooldown = 10
 local currentTime = tick()
 if currentTime - lastNotificationTime >= notificationCooldown then
     game.StarterGui:SetCore("SendNotification", {
-        Title = "Viper [Zeisha] Hub",
+        Title = "Viper Hub",
         Text = "Successfully",
         Duration = 1
     })
