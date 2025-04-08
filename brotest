@@ -7001,8 +7001,8 @@ end);
 local v511 = {}; -- Store available boats
 local v512 = false; -- Lock for finding boat
 local v513 = false; -- Notification lock
-local FlyHeight = 90; -- Medium fly height (adjust as needed)
-local BoatSpeed = 350; -- Boat speed
+local FlyHeight = 50; -- Medium fly height (adjust as needed)
+local BoatSpeed = 150; -- Boat speed
 
 v505.RenderStepped:Connect(function()
     if not _G.AutoDriveBoat then
@@ -7086,8 +7086,9 @@ v505.RenderStepped:Connect(function()
     -- Check for sea threats (seabeasts, sharks, piranhas, etc.)
     local nearbyThreat = false
     local threatDetectionRange = 300 -- Detection range
+    local threatName = ""
     
-    -- Check specifically for SeaBeasts in the SeaBeasts folder (common in Blox Fruits)
+    -- Check specifically for SeaBeasts in the SeaBeasts folder
     local seaBeasts = v507:FindFirstChild("SeaBeasts")
     if seaBeasts then
         for _, entity in pairs(seaBeasts:GetChildren()) do
@@ -7095,29 +7096,51 @@ v505.RenderStepped:Connect(function()
                 local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
                 if distance < threatDetectionRange then
                     nearbyThreat = true
+                    threatName = entity.Name
                     break
                 end
             end
         end
     end
     
-    -- Check for other sea threats like sharks and piranhas
+    -- Check for specific enemies in the Enemies folder as provided
     if not nearbyThreat then
-        -- Check for sharks and other sea mobs in the Workspace
-        local seaThreats = {"Shark", "Piranha", "TerrorShark"}
-        
-        -- Check in specific folders where sea mobs might be found
-        local possibleFolders = {"SeaMobs", "Enemies", "NPCs", "Mobs", "LivingThings"}
-        
-        for _, folderName in ipairs(possibleFolders) do
-            local folder = v507:FindFirstChild(folderName)
-            if folder then
-                for _, entity in pairs(folder:GetChildren()) do
-                    for _, threatName in ipairs(seaThreats) do
-                        if entity.Name:find(threatName) then
-                            local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
+        local enemies = v507:FindFirstChild("Enemies")
+        if enemies then
+            -- Check for specific sea threats with exact names
+            local specificThreats = {
+                "Terrorshark",
+                "Piranha", 
+                "Shark",
+                "Fish Crew Member"
+            }
+            
+            for _, threatType in ipairs(specificThreats) do
+                local entity = enemies:FindFirstChild(threatType)
+                if entity then
+                    local distance = (entity:GetPivot().Position - v597:GetPivot().Position).Magnitude
+                    if distance < threatDetectionRange then
+                        nearbyThreat = true
+                        threatName = entity.Name
+                        break
+                    end
+                end
+            end
+            
+            -- Check for pirate ships/brigades
+            if not nearbyThreat then
+                local pirateShips = {
+                    "PirateGrandBrigade",
+                    "PirateBrigade"
+                }
+                
+                for _, enemy in pairs(enemies:GetChildren()) do
+                    for _, shipType in ipairs(pirateShips) do
+                        if enemy.Name == shipType then
+                            local distance = (enemy:GetPivot().Position - v597:GetPivot().Position).Magnitude
                             if distance < threatDetectionRange then
                                 nearbyThreat = true
+                                threatName = enemy.Name
                                 break
                             end
                         end
@@ -7128,16 +7151,15 @@ v505.RenderStepped:Connect(function()
                     end
                 end
             end
-            
-            if nearbyThreat then
-                break
-            end
         end
     end
     
     -- Stop boat if threat detected
     if nearbyThreat then
+        -- Stop pressing W key
         v506:SendKeyEvent(false, "W", false, game);
+        
+        -- Make character jump
         v506:SendKeyEvent(true, "Space", false, game);
         wait(0.1)
         v506:SendKeyEvent(false, "Space", false, game);
@@ -7145,7 +7167,7 @@ v505.RenderStepped:Connect(function()
         if not v513 then
             v14:Notify({
                 Title = "Viper Hub Notify",
-                Content = "Stopped boat - Sea threat detected nearby!",
+                Content = "Stopped boat - Detected: " .. threatName,
                 Duration = 5
             });
             v513 = true;
