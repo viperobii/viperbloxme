@@ -7001,8 +7001,8 @@ end);
 local v511 = {}; -- Store available boats
 local v512 = false; -- Lock for finding boat
 local v513 = false; -- Notification lock
-local FlyHeight = 50; -- Medium fly height (adjust as needed)
-local BoatSpeed = 150; -- Boat speed
+local FlyHeight = 100; -- Medium fly height (adjust as needed)
+local BoatSpeed = 350; -- Boat speed
 
 v505.RenderStepped:Connect(function()
     if not _G.AutoDriveBoat then
