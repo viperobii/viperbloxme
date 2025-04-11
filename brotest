@@ -44,7 +44,7 @@ v23.Size = UDim2.new(0, 50, 0, 50);
 
 v23.Draggable = true;
 
-v23.Image = "rbxassetid://101883839381557";
+v23.Image = "rbxassetid://140295213769017";
 
 v24.Parent = v23;
 
