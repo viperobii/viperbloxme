@@ -18887,11 +18887,41 @@ BlazeEM:OnChanged(function(Value)
     _G.FarmBlazeEM = Value
 end)
 
--- Define the missing teleport function
+-- Define the teleport function with tweening
 function _tp(position)
     local player = game.Players.LocalPlayer
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = position
+        local humanoidRootPart = player.Character.HumanoidRootPart
+        
+        -- Create tween service and info
+        local tweenService = game:GetService("TweenService")
+        local distance = (humanoidRootPart.Position - position.Position).Magnitude
+        local speed = 250 -- Speed in studs per second
+        local timeToTween = distance / speed
+        
+        -- Create and play tween
+        local tweenInfo = TweenInfo.new(
+            timeToTween,
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.Out,
+            0,
+            false,
+            0
+        )
+        
+        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = position})
+        tween:Play()
+        
+        -- Wait for tween to complete or timeout after 20 seconds
+        local startTime = tick()
+        local timeout = math.min(timeToTween * 1.5, 20) -- 50% buffer or max 20 seconds
+        
+        repeat wait() until (tick() - startTime) > timeout or not tween.PlaybackState == Enum.PlaybackState.Playing
+        
+        -- If tween failed or timed out, teleport directly
+        if (humanoidRootPart.Position - position.Position).Magnitude > 10 then
+            humanoidRootPart.CFrame = position
+        end
     end
 end
 
@@ -18951,23 +18981,50 @@ end
 
 local function checkQuest()
     local args = { [1] = { ["Context"] = "Check" } }
-    local result = nil
     
-    -- Properly handle the remote function call
+    -- Try multiple possible remote locations
     local success, data = pcall(function()
-        -- Find the correct remote
+        -- Method 1: Try ReplicatedStorage
         local questRemote = game:GetService("ReplicatedStorage"):FindFirstChild("QuestRemote")
-        if questRemote then
+        if questRemote and questRemote:IsA("RemoteFunction") then
             return questRemote:InvokeServer(unpack(args))
-        else
-            -- Try workspace as fallback (though this is unusual)
-            return workspace:InvokeServer("QuestRemote", args)
         end
+        
+        -- Method 2: Try workspace - for some games
+        if workspace:FindFirstChild("QuestRemote") and typeof(workspace.QuestRemote.InvokeServer) == "function" then
+            return workspace.QuestRemote:InvokeServer(unpack(args))
+        end
+        
+        -- Method 3: Scan all remote functions for possible quest remotes
+        for _, remote in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
+            if remote:IsA("RemoteFunction") and (remote.Name:lower():find("quest") or remote.Name == "QuestRemote") then
+                local result = remote:InvokeServer(unpack(args))
+                if result and (result.Quest or result.Name or result.Type) then
+                    return result
+                end
+            end
+        end
+        
+        -- Method 4: Direct workspace method (unusual but seen in some scripts)
+        return workspace:InvokeServer("QuestRemote", args)
     end)
-    
-    if success and data and data.Quest and data.Context == "Check" then
-        return true, data.Quest, data.Name, data.Type
+    源
+    if success and data then
+        if data.Quest and data.Context == "Check" then
+            return true, data.Quest, data.Name, data.Type
+        elseif type(data) == "table" then
+            -- Some games have different response structures
+            local questName = data.Quest or data.QuestName or data.Name
+            local mobName = data.Target or data.Monster or data.Mob or data.Quest
+            local questType = data.Type or data.QuestType or 1
+            
+            if questName or mobName then
+                return true, mobName or questName, questName, questType
+            end
+        end
     end
+    
+    -- If all methods fail, return false
     return false
 end
 
