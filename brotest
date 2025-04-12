@@ -18880,78 +18880,6 @@ AutoKillLeviathan:OnChanged(function(state)
 end)
 
 
-local AutoAttackSegments = v16.Levi:AddToggle("ToggleAutoAttackSegments", {
-    Title = "Auto Attack Leviathan Segments (Updating)",
-    Description = "Don't Use Updating",
-    Default = false
-})
-
-AutoAttackSegments:OnChanged(function(state) 
-    if state then 
-        spawn(function() 
-            while AutoAttackSegments.Value do 
-                local seaBeasts = game:GetService("Workspace").SeaBeasts
-                
-                for _, segment in ipairs(seaBeasts:GetChildren()) do
-                    if segment:IsA("Model") and segment.Name:find("Leviathan") and segment:GetAttribute("HealthEnabled") then
-                        if segment:FindFirstChild("PrimaryPart") then -- Ensure segment has a primary part
-                            Tween(segment.PrimaryPart.CFrame * CFrame.new(0, 450, 0))
-                            
-                            local player = game.Players.LocalPlayer
-                            local backpack = player.Backpack
-
-                            for _, tool in pairs(backpack:GetChildren()) do
-                                if tool:IsA("Tool") then
-                                    if tool.ToolTip == "Melee" or tool.ToolTip == "Blox Fruit" or tool.ToolTip == "Sword" or tool.ToolTip == "Gun" then
-                                        player.Character.Humanoid:EquipTool(tool)
-
-                                        local virtualInput = game:GetService("VirtualInputManager")
-
-                                        -- Z Skill
-                                        virtualInput:SendKeyEvent(true, 122, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 122, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- X Skill
-                                        virtualInput:SendKeyEvent(true, 120, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 120, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- C Skill
-                                        virtualInput:SendKeyEvent(true, 99, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 99, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- V Skill
-                                        virtualInput:SendKeyEvent(true, 118, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 118, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-
-                                        -- F Skill
-                                        virtualInput:SendKeyEvent(true, 102, false, player.Character.HumanoidRootPart)
-                                        virtualInput:SendKeyEvent(false, 102, false, player.Character.HumanoidRootPart)
-                                        wait(0.2)
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-                wait()
-            end
-        end) 
-    end 
-end)
-
-
-v16.Draco:AddButton({
-    Title = "Viper Fly GUI",
-    Description = "Use For Draco Trial Ez Win",
-    Callback = function()
-     loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/cokka"))()
-    end
-})
-
 local BlazeEM = v16.Drago:AddToggle("BlazeEM", {
     Title = "Auto Dragon Hunter",
 })
@@ -19032,6 +18960,17 @@ spawn(function()
         end
     end
 end)
+
+
+v16.Draco:AddButton({
+    Title = "Viper Fly GUI",
+    Description = "Use For Draco Trial Ez Win",
+    Callback = function()
+     loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/cokka"))()
+    end
+})
+
+
 
 
 v14:Notify({
