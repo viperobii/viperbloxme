@@ -18879,8 +18879,7 @@ AutoKillLeviathan:OnChanged(function(state)
     end 
 end)
 
-
-local BlazeEM = v16.Drago:AddToggle("BlazeEM", {
+local BlazeEM = v16.Draco:AddToggle("BlazeEM", {
     Title = "Auto Dragon Hunter",
 })
 
@@ -18888,71 +18887,159 @@ BlazeEM:OnChanged(function(Value)
     _G.FarmBlazeEM = Value
 end)
 
-local function checkQuesta()
-    local a = { [1] = { ["Context"] = "Check" } }
-    local b = nil
-    pcall(function()
-        b = workspace:InvokeServer("QuestRemote", a)
+-- Define the missing teleport function
+function _tp(position)
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = position
+    end
+end
+
+-- Define the skill usage function
+function Useskills(ToolType, Key)
+    local player = game.Players.LocalPlayer
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    
+    -- Find and equip tool of specified type if not already equipped
+    local foundTool = false
+    if player.Character then
+        for _, tool in pairs(player.Character:GetChildren()) do
+            if tool:IsA("Tool") then
+                if ToolType == "Melee" and tool.ToolTip and tool.ToolTip == "Melee" then
+                    foundTool = true
+                elseif ToolType == "Sword" and tool.ToolTip and tool.ToolTip == "Sword" then
+                    foundTool = true
+                elseif ToolType == "Blox Fruit" and tool.ToolTip and tool.ToolTip == "Blox Fruit" then
+                    foundTool = true
+                elseif ToolType == "Gun" and tool.ToolTip and tool.ToolTip == "Gun" then
+                    foundTool = true
+                end
+            end
+        end
+    end
+    
+    -- If not found/equipped, try to equip from backpack
+    if not foundTool then
+        for _, tool in pairs(player.Backpack:GetChildren()) do
+            if tool:IsA("Tool") then
+                if ToolType == "Melee" and tool.ToolTip and tool.ToolTip == "Melee" then
+                    tool.Parent = player.Character
+                    wait(0.1)
+                    break
+                elseif ToolType == "Sword" and tool.ToolTip and tool.ToolTip == "Sword" then
+                    tool.Parent = player.Character
+                    wait(0.1)
+                    break
+                elseif ToolType == "Blox Fruit" and tool.ToolTip and tool.ToolTip == "Blox Fruit" then
+                    tool.Parent = player.Character
+                    wait(0.1)
+                    break
+                elseif ToolType == "Gun" and tool.ToolTip and tool.ToolTip == "Gun" then
+                    tool.Parent = player.Character
+                    wait(0.1)
+                    break
+                end
+            end
+        end
+    end
+    
+    -- Use virtual key press to use the skill
+    VirtualInputManager:SendKeyEvent(true, Key, false, game)
+    wait(0.1)
+    VirtualInputManager:SendKeyEvent(false, Key, false, game)
+end
+
+local function checkQuest()
+    local args = { [1] = { ["Context"] = "Check" } }
+    local result = nil
+    
+    -- Properly handle the remote function call
+    local success, data = pcall(function()
+        -- Find the correct remote
+        local questRemote = game:GetService("ReplicatedStorage"):FindFirstChild("QuestRemote")
+        if questRemote then
+            return questRemote:InvokeServer(unpack(args))
+        else
+            -- Try workspace as fallback (though this is unusual)
+            return workspace:InvokeServer("QuestRemote", args)
+        end
     end)
-    if b and b.Quest and b.Context == "Check" then
-        return true, b.Quest, b.Name, b.Type
+    
+    if success and data and data.Quest and data.Context == "Check" then
+        return true, data.Quest, data.Name, data.Type
     end
     return false
 end
 
 local function BackTODoJo()
-    for a, b in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
-        if b:IsA("Tool") and b:FindFirstChild("Remote") and b.Name == "Teleport to Dojo" then
+    for _, tool in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+        if tool:IsA("Tool") and tool:FindFirstChild("Remote") and tool.Name == "Teleport to Dojo" then
             return true
+        end
+    end
+    -- Also check equipped tools
+    if game.Players.LocalPlayer.Character then
+        for _, tool in pairs(game.Players.LocalPlayer.Character:GetChildren()) do
+            if tool:IsA("Tool") and tool:FindFirstChild("Remote") and tool.Name == "Teleport to Dojo" then
+                return true
+            end
         end
     end
     return false
 end
 
-local function DragonMobClear(a, b, c)
-    if workspace.Enemies:FindFirstChild(b) then
+local function DragonMobClear(enabled, mobName, targetCFrame)
+    if enabled and workspace.Enemies:FindFirstChild(mobName) then
         for _, mob in pairs(workspace.Enemies:GetChildren()) do
-            if mob.Name == b then
-                mob.HumanoidRootPart.CFrame = c
+            if mob.Name == mobName and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") then
+                mob.HumanoidRootPart.CFrame = targetCFrame
                 mob.Humanoid:TakeDamage(1000000)
             end
         end
     end
 end
 
+-- Main farm loop
 spawn(function()
     while wait(0.1) do
         if _G.FarmBlazeEM then
             pcall(function()
-                local a, v, h, x = checkQuesta()
-                if a == true and not BackTODoJo() then
-                    if x == 1 then
-                        if v == "Hydra Enforcer" or v == "Venomous Assailant" then
+                local hasQuest, questMob, questName, questType = checkQuest()
+                if hasQuest == true and not BackTODoJo() then
+                    if questType == 1 then  -- Kill quest
+                        if questMob == "Hydra Enforcer" or questMob == "Venomous Assailant" then
                             repeat
                                 wait()
-                                DragonMobClear(true, v, CFrame.new(4620.6157, 1002.2954, 784.6431))
-                            until not _G.FarmBlazeEM or not a or BackTODoJo()
+                                DragonMobClear(true, questMob, CFrame.new(4620.6157, 1002.2954, 784.6431))
+                            until not _G.FarmBlazeEM or not hasQuest or BackTODoJo()
                         end
-                    elseif x == 2 then
-                        if workspace.Map.Waterfall.IslandModel:FindFirstChild("Meshes/bamboo_low") then
+                    elseif questType == 2 then  -- Bamboo quest
+                        local bamboo = workspace.Map.Waterfall.IslandModel:FindFirstChild("Meshes/bamboo_low")
+                        if bamboo then
                             repeat
                                 wait()
-                                _tp(workspace.Map.Waterfall.IslandModel:FindFirstChild("Meshes/bamboo_low").CFrame)
-                                MousePos = workspace.Map.Waterfall.IslandModel:FindFirstChild("Meshes/bamboo_low").Position
+                                _tp(bamboo.CFrame)
+                                local MousePos = bamboo.Position  -- Set target for skills
+                                
+                                -- Use skills on bamboo
                                 Useskills("Melee", "Z")
                                 Useskills("Melee", "X")
-                                Useskills("Melee", "C") wait(0.5)
+                                Useskills("Melee", "C") 
+                                wait(0.5)
                                 Useskills("Sword", "Z")
-                                Useskills("Sword", "X") wait(0.5)
+                                Useskills("Sword", "X") 
+                                wait(0.5)
                                 Useskills("Blox Fruit", "Z")
                                 Useskills("Blox Fruit", "X")
-                                Useskills("Blox Fruit", "C") wait(0.5)
+                                Useskills("Blox Fruit", "C") 
+                                wait(0.5)
                                 Useskills("Gun", "Z")
                                 Useskills("Gun", "X")
-                            until not _G.FarmBlazeEM or not a or BackTODoJo()
+                            until not _G.FarmBlazeEM or not hasQuest or BackTODoJo()
                         end
                     end
                 else
+                    -- Go to quest giver
                     _tp(CFrame.new(5813, 1208, 884))
                     DragonMobClear(false, nil, nil)
                 end
@@ -18960,6 +19047,7 @@ spawn(function()
         end
     end
 end)
+
 
 
 v16.Draco:AddButton({
