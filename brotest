@@ -618,29 +618,3 @@ Items:AddToggle({
     end
 })
 
-
-
-Player:AddDropdown({
-    Name = "Select FOV",
-    Flag = "Settings/FOVDropdown",
-    Options = {"60", "100", "120"},
-    Default = "100",  -- Default FOV
-    Callback = function(Option)
-        if game.Workspace.CurrentCamera then
-            game.Workspace.CurrentCamera.FieldOfView = tonumber(Option)
-        end
-    end
-})
-
-Player:AddToggle({
-    Name = "Field Person View FOV",
-    Flag = "Settings/FOVToggle",
-    Default = false,
-    Callback = function(State)
-        if State then
-            game.Workspace.CurrentCamera.FieldOfView = tonumber(Player.Flags["Settings/FOVDropdown"])
-        else
-            game.Workspace.CurrentCamera.FieldOfView = 70
-        end
-    end
-})
