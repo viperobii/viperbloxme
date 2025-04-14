@@ -424,31 +424,32 @@ Main:AddToggle({
 Player:AddToggle({
     Name = "NoClip",
     Flag = "Player/NoClip",
-    Description = "",
-    Default = true,
+    Description = "Walk through walls",
+    Default = false,
     Callback = function(Value)
-        if Value then
-            getgenv().NoClipEnabled = true
-            while getgenv().NoClipEnabled do
-                local character = game.Players.LocalPlayer.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    -- Set the character's Humanoid to not be affected by collisions
-                    character.HumanoidRootPart.CanCollide = false
-                    for _, part in pairs(character:GetChildren()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
+        _G.NoClip = Value
+
+        if _G.NoClip and not _G.NoClipLoop then
+            _G.NoClipLoop = task.spawn(function()
+                while _G.NoClip do
+                    local char = game.Players.LocalPlayer.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        for _, part in pairs(char:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                            end
                         end
                     end
+                    task.wait(0.1)
                 end
-                wait(0.1) -- Wait a little before checking again
-            end
-        else
-            getgenv().NoClipEnabled = false
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                -- Restore collisions when NoClip is turned off
-                character.HumanoidRootPart.CanCollide = true
-                for _, part in pairs(character:GetChildren()) do
+                _G.NoClipLoop = nil
+            end)
+        end
+
+        if not _G.NoClip and _G.NoClipLoop then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                for _, part in pairs(char:GetDescendants()) do
                     if part:IsA("BasePart") then
                         part.CanCollide = true
                     end
@@ -1192,84 +1193,94 @@ spawn(function()
         if _G.Auto_Saber and game.Players.LocalPlayer.Data.Level.Value >= 200 then
             pcall(function()
                 local player = game.Players.LocalPlayer
-                local hrp = player.Character.HumanoidRootPart
+                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
 
                 -- Plates Puzzle
                 if Workspace.Map.Jungle.Final.Part.Transparency == 0 and Workspace.Map.Jungle.QuestPlates.Door.Transparency == 0 then
-                    if (CFrame.new(-1612.55, 36.97, 148.71).Position - hrp.Position).Magnitude <= 100 then
+                    local junglePos = CFrame.new(-1612.55, 36.97, 148.71)
+                    if (junglePos.Position - hrp.Position).Magnitude <= 100 then
                         Tween(hrp.CFrame)
                         task.wait(1)
                         for i = 1, 5 do
                             local plate = Workspace.Map.Jungle.QuestPlates["Plate" .. i].Button
-                            hrp.CFrame = plate.CFrame
-                            task.wait(1)
+                            if plate then
+                                hrp.CFrame = plate.CFrame
+                                task.wait(1)
+                            end
                         end
                     else
-                        Tween(CFrame.new(-1612.55, 36.97, 148.71))
+                        Tween(junglePos)
                     end
 
                 -- Torch Puzzle
                 elseif Workspace.Map.Desert.Burn.Part.Transparency == 0 then
                     if player.Backpack:FindFirstChild("Torch") or player.Character:FindFirstChild("Torch") then
                         EquipTool("Torch")
-                        Tween(CFrame.new(1114.61, 5.04, 4350.22))
+                        Tween(CFrame.new(1114.61, 5.04, 4350.22)) -- Burn place
                     else
-                        Tween(CFrame.new(-1610, 11.5, 164))
+                        Tween(CFrame.new(-1610, 11.5, 164)) -- Torch spawn
                     end
 
                 -- SickMan Quest
                 elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0 then
-                    ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup")
-                    task.wait(0.5)
+                    if not player.Backpack:FindFirstChild("Cup") and not player.Character:FindFirstChild("Cup") then
+                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup")
+                        task.wait(0.5)
+                    end
+
                     EquipTool("Cup")
                     task.wait(0.5)
-                    ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", player.Character:FindFirstChild("Cup"))
-                    ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan")
 
-                -- RichSon Quest
+                    if player.Character:FindFirstChild("Cup") then
+                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", player.Character.Cup)
+                        task.wait(0.5)
+                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan")
+                    end
+
+                -- RichSon Quest (Start)
                 elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil then
                     ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon")
 
                 -- Mob Leader Fight
                 elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0 then
                     local boss = Workspace.Enemies:FindFirstChild("Mob Leader")
-                    if boss then
-                        Tween(CFrame.new(-2967.59, -4.91, 5328.7))
-                        if boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") then
-                            repeat
-                                task.wait(_G.Fast_Delay)
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-                                boss.HumanoidRootPart.CanCollide = false
-                                boss.Humanoid.WalkSpeed = 0
-                                boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                Tween(boss.HumanoidRootPart.CFrame * Pos)
-                                AttackNoCoolDown()
-                            until boss.Humanoid.Health <= 0 or not _G.Auto_Saber
-                        end
+                    if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") then
+                        Tween(CFrame.new(-2967.59, -4.91, 5328.7)) -- Boss spawn
+                        repeat
+                            task.wait(_G.Fast_Delay)
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+                            boss.Humanoid.WalkSpeed = 0
+                            boss.Humanoid.JumpPower = 0
+                            boss.HumanoidRootPart.CanCollide = false
+                            boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            Tween(boss.HumanoidRootPart.CFrame * Pos)
+                            AttackNoCoolDown()
+                        until boss.Humanoid.Health <= 0 or not _G.Auto_Saber
                     end
 
-                -- Place Relic and Saber Expert
+                -- Place Relic
                 elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1 then
-                    ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon")
-                    task.wait(0.5)
                     EquipTool("Relic")
                     task.wait(0.5)
-                    Tween(CFrame.new(-1404.91, 29.97, 3.8))
-                end
+                    Tween(CFrame.new(-1404.91, 29.97, 3.8)) -- Relic place
 
                 -- Saber Expert Fight
+                end
+
                 local saber = Workspace.Enemies:FindFirstChild("Saber Expert")
                 if saber and saber:FindFirstChild("Humanoid") and saber:FindFirstChild("HumanoidRootPart") and saber.Humanoid.Health > 0 then
                     repeat
                         task.wait(_G.Fast_Delay)
+                        AutoHaki()
                         EquipTool(SelectWeapon)
-                        Tween(saber.HumanoidRootPart.CFrame * Pos)
-                        saber.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        saber.HumanoidRootPart.Transparency = 1
                         saber.Humanoid.WalkSpeed = 0
                         saber.Humanoid.JumpPower = 0
                         saber.HumanoidRootPart.CanCollide = false
+                        saber.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        saber.HumanoidRootPart.Transparency = 1
+                        Tween(saber.HumanoidRootPart.CFrame * Pos)
                         bringmob = true
                         FarmPos = saber.HumanoidRootPart.CFrame
                         MonFarm = saber.Name
@@ -1286,210 +1297,7 @@ spawn(function()
 end)
 
 
-Items:AddToggle({
-    Name = "Auto Pole V1",
-    Flag = "Items/AutoPoleV1",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.Auto_PoleV1 = Value
-    end
-})
 
-
-
-spawn(function()
-    while task.wait() do
-        if _G.Auto_PoleV1 then
-            pcall(function()
-                local boss = Workspace.Enemies:FindFirstChild("Thunder God")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
-                    repeat
-                        task.wait(_G.Fast_Delay)
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-                        boss.HumanoidRootPart.CanCollide = false
-                        boss.Humanoid.WalkSpeed = 0
-                        boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                        Tween(boss.HumanoidRootPart.CFrame * Pos)
-                        AttackNoCoolDown()
-                    until not _G.Auto_PoleV1 or not boss.Parent or boss.Humanoid.Health <= 0
-                end
-            end)
-        end
-    end
-end)
-
-
-Items:AddSection("Third Sea");
-
-Items:AddToggle({
-    Name = "Auto Hallow Scythe",
-    Flag = "Items/AutoHallowScythe",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        AutoHallowScythe = Value
-    end
-})
-
-spawn(function()
-    while wait() do
-        if AutoHallowScythe then
-            pcall(function()
-                local Enemies = workspace.Enemies
-                local Player = game.Players.LocalPlayer
-                local Backpack = Player.Backpack
-                local Character = Player.Character
-                
-                -- Define Pos if not already defined
-                if not Pos then
-                    Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
-                end
-
-                if Enemies:FindFirstChild("Soul Reaper") then
-                    for _, v in pairs(Enemies:GetChildren()) do
-                        if string.find(v.Name, "Soul Reaper") and 
-                           v:FindFirstChild("Humanoid") and 
-                           v:FindFirstChild("HumanoidRootPart") and 
-                           v.Humanoid.Health > 0 then
-                            
-                            repeat
-                                wait(_G.Fast_Delay)
-                                AttackNoCoolDown()
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-
-                                v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                v.HumanoidRootPart.CanCollide = false
-                                v.HumanoidRootPart.Transparency = 1
-                                v.Humanoid.JumpPower = 0
-                                v.Humanoid.WalkSpeed = 0
-                                v.Humanoid:ChangeState(14)
-                                
-                                Tween(v.HumanoidRootPart.CFrame * Pos)
-
-                                sethiddenproperty(Player, "SimulationRadius", math.huge)
-                            until not v or not v.Parent or v.Humanoid.Health <= 0 or not AutoHallowScythe
-                        end
-                    end
-                elseif (Backpack:FindFirstChild("Hallow Essence") or Character:FindFirstChild("Hallow Essence")) then
-                    repeat
-                        Tween(CFrame.new(-8932.322, 146.831, 6062.550))
-                        wait(1)
-                    until (Character.HumanoidRootPart.Position - Vector3.new(-8932.322, 146.831, 6062.550)).Magnitude <= 8
-                    
-                    wait(1)
-                    EquipTool("Hallow Essence")
-                    wait(1) -- Give time for the tool to be equipped and used
-                else
-                    -- Check if Soul Reaper exists in ReplicatedStorage (not spawned yet)
-                    if game.ReplicatedStorage:FindFirstChild("Soul Reaper") then
-                        local soulReaper = game.ReplicatedStorage:FindFirstChild("Soul Reaper")
-                        if soulReaper:FindFirstChild("HumanoidRootPart") then
-                            Tween(soulReaper.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
-                            wait(2) -- Wait at spawn location for mob to appear
-                        end
-                    else
-                        -- If Soul Reaper is not found, go to its spawn location
-                        Tween(CFrame.new(-9570.42773, 315.952209, 6726.36963))
-                        wait(3) -- Wait at spawn location for mob to appear
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- Auto Bone Buy
-spawn(function()
-    while wait() do
-        if AutoHallowScythe then
-            local args = {
-                [1] = "Bones",
-                [2] = "Buy",
-                [3] = 1,
-                [4] = 1
-            }
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-        end
-    end
-end)
-
-Items:AddToggle({
-    Name = "Auto Tushita",
-    Flag = "Items/AutoTushita",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        AutoTushita = Value
-    end
-})
-
-spawn(function()
-    while wait() do
-        if AutoTushita then
-            local Enemies = workspace.Enemies
-            local Player = game.Players.LocalPlayer
-            
-            if Enemies:FindFirstChild("Longma") then
-                for _, enemy in pairs(Enemies:GetChildren()) do
-                    if enemy.Name == "Longma" and enemy:IsA("Model") and 
-                       enemy:FindFirstChild("Humanoid") and 
-                       enemy:FindFirstChild("HumanoidRootPart") and 
-                       enemy.Humanoid.Health > 0 then
-                        
-                        repeat
-                            wait(_G.Fast_Delay)
-                            AttackNoCoolDown()
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            
-                            -- Define Pos if not already defined
-                            if not Pos then
-                                Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
-                            end
-                            
-                            -- Set farm position and modify enemy properties
-                            FarmPos = enemy.HumanoidRootPart.CFrame
-                            enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            enemy.Humanoid.JumpPower = 0
-                            enemy.Humanoid.WalkSpeed = 0
-                            enemy.HumanoidRootPart.CanCollide = false
-                            enemy.Humanoid:ChangeState(14) -- Stun state (14) instead of 11
-                            
-                            -- Move to position relative to enemy
-                            Tween(enemy.HumanoidRootPart.CFrame * Pos)
-                            
-                            -- Check for water less frequently to avoid interrupting combat
-                            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                                local playerPosition = Player.Character.HumanoidRootPart.Position
-                                if playerPosition.Y <= 0 then
-                                    Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                                end
-                            end
-                            
-                        until not AutoTushita or not enemy.Parent or enemy.Parent ~= Enemies or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0
-                    end
-                end
-            else
-                -- Tween to Longma spawn location
-                if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                    Tween(CFrame.new(-10238.875, 389.791, -9549.794))
-                    
-                    -- Wait a moment after teleporting to spawn area
-                    wait(1)
-                    
-                    -- Ensure no fall into water here
-                    local playerPosition = Player.Character.HumanoidRootPart.Position
-                    if playerPosition.Y <= 0 then
-                        Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                    end
-                end
-            end
-        end
-    end
-end)
 
 
 Trial:AddSection("Temple Clock Teleport");
