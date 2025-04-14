@@ -5,36 +5,19 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "Nova.GG : Blox-Fruit",
+    Title = "Nova.GG : Dead-Rails",
     SubTitle = "by Viper x Tanny",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
 
 local Main = Window:MakeTab({
-    Title = "Main Farm",
+    Title = "Tab Main Farm",
     Description = "Info",
     Icon = "home",  -- Fixed the split "Icon"
 })
 
-local Player = Window:MakeTab({
-    Title = "Player Combat",
-    Description = "Info",
-    Icon = "swords",  -- Fixed the split "Icon"
-})
 
-local Raids = Window:MakeTab({
-    Title = "Raids & Fruit",
-    Description = "Info",
-    Icon = "cherry",  -- Fixed the split "Icon"
-})
-
-local Teleport = Window:MakeTab({
-    Title = "Teleport Sea",
-    Description = "Info",
-    Icon = "book",  -- Fixed the split "Icon"
-})
-
-
+-- AUTO FARM LEVEL TOGGLE
 Main:AddToggle({
     Name = "Auto Farm Level",
     Flag = "Main/AutoFarmLevel",
@@ -42,69 +25,115 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoLevel = Value
-        if not Value then
-            wait()
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
+        if not Value then bringmob = false end
     end
 })
 
+-- VARIABLES
+Ms = Ms or ""
+NameMon = NameMon or ""
+NameQuest = NameQuest or ""
+QuestLv = QuestLv or 1
+CFrameQ = CFrameQ or CFrame.new(0, 0, 0)
+CFrameMon = CFrameMon or CFrame.new(0, 0, 0)
+SelectWeapon = SelectWeapon or ""
+
+-- FUNCTIONS
+if not CheckLevel then
+    function CheckLevel()
+        -- Your logic to set Ms, NameMon, NameQuest, QuestLv, CFrameQ, CFrameMon
+    end
+end
+
+function AutoHaki()
+    if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+    end
+end
+
+function EquipTool(ToolName)
+    local tool = game:GetService("Players").LocalPlayer.Backpack:FindFirstChild(ToolName) or
+                 game:GetService("Players").LocalPlayer.Character:FindFirstChild(ToolName)
+    if tool then
+        game:GetService("Players").LocalPlayer.Character.Humanoid:EquipTool(tool)
+    end
+end
+
+function AttackNoCoolDown()
+    local Combat = game.Players.LocalPlayer.Character:FindFirstChild("Combat") or
+                   game.Players.LocalPlayer.Backpack:FindFirstChild("Combat")
+    if Combat then
+        Combat:Activate()
+    end
+end
+
+function Tween(Pos)
+    local TweenService = game:GetService("TweenService")
+    local player = game.Players.LocalPlayer
+    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local dist = (hrp.Position - Pos.Position).Magnitude
+        local speed = math.clamp(dist / 325, 1, 10)
+        local tw = TweenService:Create(hrp, TweenInfo.new(speed, Enum.EasingStyle.Linear), {CFrame = Pos})
+        tw:Play()
+        return tw
+    end
+end
+
+-- AUTO FARM LEVEL LOOP
 spawn(function()
     while task.wait() do
         if _G.AutoLevel then
             pcall(function()
-                CheckLevel()
-
-                local player = game:GetService("Players").LocalPlayer
+                local player = game.Players.LocalPlayer
                 local questGui = player.PlayerGui.Main.Quest
 
-                if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    Tween(CFrameQ)
+                CheckLevel()
 
-                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
-                        wait(0.5) -- Small delay before accepting quest
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) then
+                    bringmob = false
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+                    local questTween = Tween(CFrameQ)
+                    if questTween then questTween.Completed:Wait() end
+                    task.wait(1)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                    task.wait(0.5)
+                end
+
+                local found = false
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy.Name == Ms and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        found = true
+                        break
                     end
-                else
-                    -- Check if there are mobs to farm
-                    local foundMob = false
-                    
-                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            if string.find(enemy.Name, Ms) then
-                                foundMob = true
-                                
-                                -- Target and attack the mob
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-                                
+                end
+
+                if not found then
+                    Tween(CFrameMon)
+                    task.wait(1)
+                end
+
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if _G.AutoLevel and enemy.Name == Ms and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                        bringmob = true
+                        repeat
+                            if not _G.AutoLevel or not enemy.Parent then break end
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+                            Tween(CFrame.new(enemy.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                            AttackNoCoolDown()
+                            if enemy:FindFirstChild("HumanoidRootPart") then
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
-                                enemy.Humanoid.JumpPower = 0
-                                enemy.Humanoid.WalkSpeed = 0
                                 enemy.HumanoidRootPart.CanCollide = false
-                                
-                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                                
-                                -- Attack
-                                AttackNoCoolDown()
-                                bringmob = true
-                                
-                                wait(0.1)
-                                break -- Focus on one mob at a time
                             end
-                        end
-                    end
-                    
-                    -- If no mobs found, go to spawn location
-                    if not foundMob then
+                            if enemy:FindFirstChild("Humanoid") then
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.Humanoid.JumpPower = 0
+                            end
+                            task.wait()
+                        until not _G.AutoLevel or not enemy or not enemy.Parent or enemy.Humanoid.Health <= 0
                         bringmob = false
-                        -- Go to mob spawn location
-                        Tween(CFrameMon)
-                        wait(0.5)
                     end
                 end
             end)
@@ -116,17 +145,11 @@ end)
 Main:AddToggle({
     Name = "Auto Farm Nearest Mob",
     Flag = "Main/AutoFarmNearestMob",
-    Description = "Nearest",
+    Description = "Nearest Mob",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
-        if not Value then 
-            bringmob = false
-            -- Return to original position when turning off
-            wait()
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
+        if not Value then bringmob = false end
     end
 })
 
@@ -137,8 +160,6 @@ spawn(function()
             pcall(function()
                 local Closest = nil
                 local ClosestDistance = math.huge
-                
-                -- Find the closest enemy
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
@@ -150,41 +171,24 @@ spawn(function()
                 end
 
                 if Closest then
-                    -- Target and attack the closest mob
-                    AutoHaki()
-                    EquipTool(SelectWeapon)
-                    
-                    -- Modify mob properties for easier farming
-                    if Closest:FindFirstChild("HumanoidRootPart") then
-                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        Closest.HumanoidRootPart.Transparency = 1
-                        Closest.HumanoidRootPart.CanCollide = false
-                    end
-                    if Closest:FindFirstChild("Humanoid") then
-                        Closest.Humanoid.WalkSpeed = 0
-                        Closest.Humanoid.JumpPower = 0
-                    end
-                    
-                    -- Position above the mob
-                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                    
-                    -- Attack
-                    AttackNoCoolDown()
-                    bringmob = true
-                    
-                    -- Wait before next loop iteration
-                    wait(_G.Fast_Delay or 0.1)
-                    
-                    -- Check if mob is dead or no longer valid
-                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
-                        bringmob = false
-                        wait(0.5) -- Short wait before targeting next mob
-                    end
-                else
-                    -- No enemies found
+                    repeat
+                        task.wait(_G.Fast_Delay or 0.1)
+                        AutoHaki()
+                        EquipTool(SelectWeapon)
+                        Tween(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                        AttackNoCoolDown()
+                        if Closest:FindFirstChild("HumanoidRootPart") then
+                            Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            Closest.HumanoidRootPart.Transparency = 1
+                            Closest.HumanoidRootPart.CanCollide = false
+                        end
+                        if Closest:FindFirstChild("Humanoid") then
+                            Closest.Humanoid.WalkSpeed = 0
+                            Closest.Humanoid.JumpPower = 0
+                        end
+                        bringmob = true
+                    until not _G.AutoNear or Closest.Humanoid.Health <= 0 or not Closest.Parent
                     bringmob = false
-                    wait(0.5)
                 end
             end)
         end
@@ -193,57 +197,38 @@ end)
 
 -- AUTO COLLECT CHEST TOGGLE
 Main:AddSection("Chest Farm")
-
 Main:AddToggle({
     Name = "Auto Farm Chest",
     Flag = "Main/AutoCollectChest",
-    Description = "Automatically farm nearest chest",
+    Description = "Collect All Chest",
     Default = false,
     Callback = function(Value)
         _G.AutoCollectChest = Value
-        if not Value then
-            wait()
-            Tween(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
     end
 })
 
--- AUTO FARM CHEST LOOP
 spawn(function()
-    while task.wait() do
+    while wait() do
         if _G.AutoCollectChest then
             pcall(function()
-                local player = game.Players.LocalPlayer
+                local player = game:GetService("Players").LocalPlayer
                 local character = player.Character or player.CharacterAdded:Wait()
-                local root = character:FindFirstChild("HumanoidRootPart")
-                if not root then return end
+                local rootPos = character:GetPivot().Position
 
+                local chestTag = game:GetService("CollectionService"):GetTagged("_ChestTagged")
+                local closestDistance = math.huge
                 local closestChest = nil
-                local shortestDistance = math.huge
-                local chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
 
-                -- Find closest enabled chest
-                for _, chest in pairs(chests) do
-                    if chest:IsA("Model") and not chest:GetAttribute("IsDisabled") then
-                        local dist = (root.Position - chest:GetPivot().Position).Magnitude
-                        if dist < shortestDistance then
-                            shortestDistance = dist
-                            closestChest = chest
-                        end
+                for _, chest in pairs(chestTag) do
+                    local dist = (chest:GetPivot().Position - rootPos).Magnitude
+                    if not chest:GetAttribute("IsDisabled") and dist < closestDistance then
+                        closestDistance = dist
+                        closestChest = chest
                     end
                 end
 
-                -- Go to chest
                 if closestChest then
-                    local targetPos = closestChest:GetPivot().Position + Vector3.new(0, 5, 0)
-                    local tweenService = game:GetService("TweenService")
-                    local tweenInfo = TweenInfo.new((root.Position - targetPos).Magnitude / 350, Enum.EasingStyle.Linear)
-                    local goal = { CFrame = CFrame.new(targetPos) }
-
-                    local tween = tweenService:Create(root, tweenInfo, goal)
-                    tween:Play()
-                    tween.Completed:Wait()
+                    Tween2(CFrame.new(closestChest:GetPivot().Position))
                 end
             end)
         end
@@ -255,7 +240,7 @@ Main:AddSection("Bones Farm");
 Main:AddToggle({
     Name = "Auto Farm Bones",
     Flag = "Main/AutoFarmBones",
-    Description = "",
+    Description = "Farm Reborn Skeletons for Bones",
     Default = false,
     Callback = function(Value)
         _G.AutoFarmBones = Value
@@ -333,7 +318,7 @@ end)
 Main:AddToggle({
     Name = "Auto Roll Bones",
     Flag = "Main/AutoRollBones",
-    Description = "",
+    Description = "Auto Spin Bone",
     Default = false,
     Callback = function(Value)
         _G.AutoRollBones = Value
@@ -355,789 +340,6 @@ Main:AddToggle({
         end
     end
 })
-
-
-Main:AddToggle({
-    Name = "Auto Pray",
-    Flag = "Main/AutoPray",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoPray = Value
-        if Value then
-            spawn(function()
-                while _G.AutoPray do
-                    pcall(function()
-                        local args = {
-                            [1] = "gravestoneEvent",
-                            [2] = 1
-                        }
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-                    end)
-                    wait(1)
-                end
-            end)
-        end
-    end
-})
-
-
-
-
-Player:AddToggle({
-    Name = "NoClip",
-    Flag = "Player/NoClip",
-    Description = "",
-    Default = true,
-    Callback = function(Value)
-        if Value then
-            getgenv().NoClipEnabled = true
-            while getgenv().NoClipEnabled do
-                local character = game.Players.LocalPlayer.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    -- Set the character's Humanoid to not be affected by collisions
-                    character.HumanoidRootPart.CanCollide = false
-                    for _, part in pairs(character:GetChildren()) do
-                        if part:IsA("BasePart") then
-                            part.CanCollide = false
-                        end
-                    end
-                end
-                wait(0.1) -- Wait a little before checking again
-            end
-        else
-            getgenv().NoClipEnabled = false
-            local character = game.Players.LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                -- Restore collisions when NoClip is turned off
-                character.HumanoidRootPart.CanCollide = true
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = true
-                    end
-                end
-            end
-        end
-    end
-})
-
-
-
-
-
-
-Player:AddSection("Anti Slow");
-
--- WalkSpeed Toggle
-Player:AddToggle({
-    Name = "Enable WalkSpeed",
-    Flag = "Player/EnableWalkSpeed",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.EnableWalkSpeed = Value
-        if not Value then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = 16
-            end
-        end
-    end,
-})
-
--- WalkSpeed Slider
-Player:AddSlider({
-    Name = "WalkSpeed",
-    Flag = "Player/WalkSpeed",
-    Description = "",
-    Range = {16, 300},
-    Suffix = "Speed",
-    CurrentValue = 50,
-    Increment = 1,  -- Added increment for smoother slider
-    Callback = function(Value)
-        _G.CustomWalkSpeed = Value
-        -- Apply speed immediately if enabled
-        if _G.EnableWalkSpeed then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = Value
-            end
-        end
-    end,
-})
-
--- Initialize global variables
-_G.EnableWalkSpeed = false
-_G.CustomWalkSpeed = 50
-
--- Loop to Apply WalkSpeed continuously 
-task.spawn(function()
-    while true do  -- Changed to true for reliability
-        if _G.EnableWalkSpeed then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = _G.CustomWalkSpeed
-            end
-        end
-        task.wait(0.1)  -- Moved wait to end of loop for better flow
-    end
-end)
-
-Teleport:AddSection("Sea 1")
-
--- Required Services
-local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
-
--- Selected Island
-_G.SelectedTeleportIsland = "WindMill"
-
--- Tween Teleport Function
-local function Tween2(destination)
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local hrp = character.HumanoidRootPart
-        local distance = (hrp.Position - destination.Position).Magnitude
-        local duration = distance / 350
-
-        if hrp.Position.Y < 50 then
-            duration = duration * 1.5
-        end
-
-        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-        local tween = TweenService:Create(hrp, tweenInfo, {CFrame = destination})
-        tween:Play()
-    end
-end
-
--- Island CFrames
-local IslandCFrames = {
-    ["WindMill"] = CFrame.new(979.79, 16.51, 1429.04),
-    ["Marine"] = CFrame.new(-2566.42, 6.85, 2045.25),
-    ["Middle Town"] = CFrame.new(-690.33, 15.09, 1582.23),
-    ["Jungle"] = CFrame.new(-1612.79, 36.85, 149.12),
-    ["Pirate Village"] = CFrame.new(-1181.30, 4.75, 3803.54),
-    ["Desert"] = CFrame.new(944.15, 20.91, 4373.30),
-    ["Snow Island"] = CFrame.new(1347.80, 104.66, -1319.73),
-    ["Marine Ford"] = CFrame.new(-4914.82, 50.96, 4281.02),
-    ["Colosseum"] = CFrame.new(-1427.62, 7.28, -2792.77),
-    ["Sky Island 1"] = CFrame.new(-4869.10, 733.46, -2667.01),
-    ["Prison"] = CFrame.new(4875.33, 5.65, 734.85),
-    ["Magma Village"] = CFrame.new(-5247.71, 12.88, 8504.96),
-    ["Fountain City"] = CFrame.new(5127.12, 59.50, 4105.44),
-}
-
--- RequestEntrance Islands
-local function TeleportSpecialIsland(name)
-    if name == "Sky Island 2" then
-        CommF_:InvokeServer("requestEntrance", Vector3.new(-4607.82, 872.54, -1667.55))
-    elseif name == "Sky Island 3" then
-        CommF_:InvokeServer("requestEntrance", Vector3.new(-7894.61, 5547.14, -380.29))
-    elseif name == "Underwater Island" then
-        CommF_:InvokeServer("requestEntrance", Vector3.new(61163.85, 11.67, 1819.78))
-    end
-end
-
--- Dropdown
-Teleport:AddDropdown({
-    Name = "Select Island Teleport",
-    Flag = "Teleport/IslandSelection",
-    Default = "WindMill",
-    Options = {
-        "WindMill", "Marine", "Middle Town", "Jungle", "Pirate Village", "Desert", "Snow Island",
-        "Marine Ford", "Colosseum", "Sky Island 1", "Sky Island 2", "Sky Island 3",
-        "Prison", "Magma Village", "Underwater Island", "Fountain City"
-    },
-    Callback = function(option)
-        _G.SelectedTeleportIsland = option
-        print("Selected Island:", _G.SelectedTeleportIsland)
-    end
-})
-
--- Toggle
-Teleport:AddToggle({
-    Name = "Teleport To Island",
-    Flag = "Teleport/EnableTeleport",
-    Default = false,
-    Callback = function(Value)
-        if Value and game.PlaceId == 2753915549 then -- First Sea
-            if IslandCFrames[_G.SelectedTeleportIsland] then
-                Tween2(IslandCFrames[_G.SelectedTeleportIsland])
-            else
-                TeleportSpecialIsland(_G.SelectedTeleportIsland)
-            end
-        end
-    end
-})
-
-
-
-local IslandCFramesSea2 = {
-    ["Shank Room"] = CFrame.new(-1442.16553, 29.8788261, -28.3547478),
-    ["Mob Island"] = CFrame.new(-2850.20068, 7.39224768, 5354.99268),
-    ["Kingdom Of Rose"] = CFrame.new(-11.311455726624, 29.276733398438, 2771.5224609375),
-    ["Green Zone"] = CFrame.new(-2448.5300292969, 73.016105651855, -3210.6306152344),
-    ["Factory"] = CFrame.new(424.12698364258, 211.16171264648, -427.54049682617),
-    ["Colossuim"] = CFrame.new(-1503.6224365234, 219.7956237793, 1369.3101806641),
-    ["Graveyard Island"] = CFrame.new(-5622.033203125, 492.19604492188, -781.78552246094),
-    ["Snow Mountain"] = CFrame.new(753.14288330078, 408.23559570313, -5274.6147460938),
-    ["Hot & Cold"] = CFrame.new(-6127.654296875, 15.951762199402, -5040.2861328125),
-    ["Ice Castle"] = CFrame.new(6148.4116210938, 294.38687133789, -6741.1166992188),
-    ["Forgotten Island"] = CFrame.new(-3032.7641601563, 317.89672851563, -10075.373046875)
-}
-
-
-
-local function TeleportSpecialIslandSea2(name)
-    if name == "The Cafe" or name == "Flamingo Mansion" then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-281.93707275390625, 306.130615234375, 609.280029296875))
-        wait()
-        if name == "The Cafe" then
-            Tween2(CFrame.new(-380.47927856445, 77.220390319824, 255.82550048828))
-        end
-    elseif name == "Flamingo Room" then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(2284.912109375, 15.152034759521484, 905.48291015625))
-    elseif name == "Cursed Ship" then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(923.40197753906, 125.05712890625, 32885.875))
-    end
-end
-
-
-Teleport:AddSection("Sea 2")
-
-Teleport:AddDropdown({
-    Name = "Select Island Teleport",
-    Flag = "Teleport/IslandSelectionSea2",
-    Default = "The Cafe",
-    Options = {
-        "The Cafe", "Shank Room", "Mob Island", "Kingdom Of Rose", "Flamingo Mansion", "Flamingo Room", "Green Zone",
-        "Factory", "Colossuim", "Graveyard Island", "Snow Mountain", "Hot & Cold", "Cursed Ship", "Ice Castle", "Forgotten Island"
-    },
-    Callback = function(option)
-        _G.SelectedTeleportIslandSea2 = option
-        print("Selected Sea 2 Island:", _G.SelectedTeleportIslandSea2)
-    end
-})
-
-
-
-Teleport:AddToggle({
-    Name = "Teleport To Island",
-    Flag = "Teleport/EnableTeleportSea2",
-    Default = false,
-    Callback = function(Value)
-        if Value and game.PlaceId == 4442272183 then -- Second Sea
-            if IslandCFramesSea2[_G.SelectedTeleportIslandSea2] then
-                Tween2(IslandCFramesSea2[_G.SelectedTeleportIslandSea2])
-            else
-                TeleportSpecialIslandSea2(_G.SelectedTeleportIslandSea2)
-            end
-        end
-    end
-})
-
-
-
-local IslandCFramesSea3 = {
-    ["Ussop Island"] = CFrame.new(4816.8618164063, 8.4599885940552, 2863.8195800781),
-    ["Mini Sky Island"] = CFrame.new(-288.74060058594, 49326.31640625, -35248.59375),
-    ["Great Tree"] = CFrame.new(2681.2736816406, 1682.8092041016, -7190.9853515625),
-    ["MiniSky"] = CFrame.new(-260.65557861328, 49325.8046875, -35253.5703125),
-    ["Port Town"] = CFrame.new(-290.7376708984375, 6.729952812194824, 5343.5537109375),
-    ["Floating Turtle"] = CFrame.new(-13274.528320313, 531.82073974609, -7579.22265625),
-    ["Haunted Castle"] = CFrame.new(-9515.3720703125, 164.00624084473, 5786.0610351562),
-    ["Ice Cream Island"] = CFrame.new(-902.56817626953, 79.93204498291, -10988.84765625),
-    ["Peanut Island"] = CFrame.new(-2062.7475585938, 50.473892211914, -10232.568359375),
-    ["Cake Island"] = CFrame.new(-1884.7747802734375, 19.327526092529297, -11666.8974609375),
-    ["Cocoa Island"] = CFrame.new(87.94276428222656, 73.55451202392578, -12319.46484375),
-    ["Candy Island"] = CFrame.new(-1014.4241943359375, 149.11068725585938, -14555.962890625),
-    ["Tiki Outpost"] = CFrame.new(-16542.447265625, 55.68632888793945, 1044.41650390625)
-}
-
-local function TeleportSpecialIslandSea3(name)
-    if name == "Castle On The Sea" then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
-    elseif name == "Hydra Island" then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, -334.9649963378906))
-    elseif name == "Mansion" then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-12468.5380859375, 375.0094299316406, -7554.62548828125))
-    end
-end
-
-Teleport:AddSection("Sea 3")
-
-Teleport:AddDropdown({
-    Name = "Select Island Teleport",
-    Flag = "Teleport/IslandSelectionSea3",
-    Default = "Port Town",
-    Options = {
-        "Ussop Island", "Mini Sky Island", "Great Tree", "Castle On The Sea",
-        "MiniSky", "Port Town", "Hydra Island", "Floating Turtle", "Mansion",
-        "Haunted Castle", "Ice Cream Island", "Peanut Island", "Cake Island",
-        "Cocoa Island", "Candy Island", "Tiki Outpost"
-    },
-    Callback = function(option)
-        _G.SelectedTeleportIslandSea3 = option
-        print("Selected Sea 3 Island:", _G.SelectedTeleportIslandSea3)
-    end
-})
-
-Teleport:AddToggle({
-    Name = "Teleport To Island",
-    Flag = "Teleport/EnableTeleportSea3",
-    Default = false,
-    Callback = function(Value)
-        if Value and game.PlaceId == 7449423635 then -- Sea 3 ID
-            local selected = _G.SelectedTeleportIslandSea3
-            if IslandCFramesSea3[selected] then
-                Tween2(IslandCFramesSea3[selected])
-            else
-                TeleportSpecialIslandSea3(selected)
-            end
-        end
-    end
-})
-
-
-
-
-Teleport:AddSection("Sea World");
-
-Teleport:AddToggle({
-    Name = "Teleport To Sea 1",
-    Flag = "Teleport/ToSea1",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
-            task.wait(0.2)
-            getgenv().Flags["Teleport/ToSea1"] = false
-        end
-    end
-})
-
-
-
-
-Teleport:AddToggle({
-    Name = "Teleport To Sea 2",
-    Flag = "Teleport/ToSea2",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelDressrosa")
-            task.wait(0.2)
-            getgenv().Flags["Teleport/ToSea2"] = false
-        end
-    end
-})
-
-Teleport:AddToggle({
-    Name = "Teleport To Sea 3",
-    Flag = "Teleport/ToSea3",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelZou")
-            task.wait(0.2)
-            getgenv().Flags["Teleport/ToSea3"] = false
-        end
-    end
-})
-
-
-Main:AddSection("Cakes Farm");
-
-Main:AddToggle({
-    Name = "Auto Farm Cake Commander",
-    Flag = "Main/AutoFarmCakeCommander",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.CakePrince = Value
-        if Value then
-            -- Initial teleport to cake area
-            local cakeArea = CFrame.new(-2003.932861328125, 380.4824523925781, -12561.0185546875)
-            Tween(cakeArea)
-        else
-            -- Return to original position when turned off
-            wait()
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-            bringmob = false
-        end
-    end
-})
-
-spawn(function()
-    while task.wait() do
-        if _G.CakePrince then
-            pcall(function()
-                -- Priority 1: Farm Cake Prince if available
-                if game:GetService("Workspace").Enemies:FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]") then
-                    local prince = game:GetService("Workspace").Enemies:FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]")
-                    if prince and prince:FindFirstChild("Humanoid") and prince:FindFirstChild("HumanoidRootPart") and prince.Humanoid.Health > 0 then
-                        -- Setup for combat
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-                        
-                        -- Modify boss for easier combat
-                        prince.HumanoidRootPart.CanCollide = false
-                        prince.Humanoid.WalkSpeed = 0
-                        prince.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        
-                        -- Position and attack
-                        local targetPos = prince.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                        AttackNoCoolDown()
-                        
-                        wait(_G.Fast_Delay or 0.1)
-                    end
-                -- Priority 2: Move to Cake Prince in ReplicatedStorage if visible
-                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]") then
-                    local princeRS = game:GetService("ReplicatedStorage"):FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]")
-                    if princeRS:FindFirstChild("HumanoidRootPart") then
-                        Tween(princeRS.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                    end
-                -- Priority 3: Farm minions when mirror is transparent (means boss can be spawned)
-                elseif game:GetService("Workspace").Map.CakeLoaf.BigMirror.Other.Transparency == 1 then
-                    local targets = {
-                        "Cookie Crafter",
-                        "Cake Guard",
-                        "Baking Staff",
-                        "Head Baker"
-                    }
-                    
-                    local foundTarget = false
-                    for _, target in pairs(targets) do
-                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if enemy.Name == target and enemy:FindFirstChild("Humanoid") and 
-                               enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                                
-                                foundTarget = true
-                                
-                                -- Setup for combat
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-                                bringmob = true
-                                
-                                -- Modify enemy for easier combat
-                                enemy.HumanoidRootPart.CanCollide = false
-                                enemy.Humanoid.WalkSpeed = 0
-                                if enemy:FindFirstChild("Head") then
-                                    enemy.Head.CanCollide = false
-                                end
-                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                
-                                -- Set farm variables
-                                FarmPos = enemy.HumanoidRootPart.CFrame
-                                MonFarm = enemy.Name
-                                
-                                -- Position and attack
-                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                                AttackNoCoolDown()
-                                
-                                wait(_G.Fast_Delay or 0.1)
-                                break
-                            end
-                        end
-                        
-                        if foundTarget then break end
-                    end
-                    
-                    if not foundTarget then
-                        bringmob = false
-                        -- Move to the center area to find minions if none are visible
-                        local centerArea = CFrame.new(-2003.932861328125, 380.4824523925781, -12561.0185546875)
-                        Tween(centerArea)
-                        wait(1)
-                    end
-                else
-                    -- If mirror is not transparent and no other conditions are met
-                    bringmob = false
-                    -- Move to the center area
-                    local centerArea = CFrame.new(-2003.932861328125, 380.4824523925781, -12561.0185546875)
-                    Tween(centerArea)
-                    wait(1)
-                end
-            end)
-        end
-    end
-end)
-
-
-local RaidChips = {
-    "Flame",
-    "Ice",
-    "Quake",
-    "Light",
-    "Dark",
-    "Spider",
-    "Rumble",
-    "Magma",
-    "Buddha",
-    "Sand",
-    "Phoenix",
-    "Dough"
-}
-
-Raids:AddSection("Setting Raids");
-
-Raids:AddDropdown({
-    Name = "Select Raid",
-    Flag = "Raids/SelectChip",
-    Default = "Flame",
-    Options = {
-        "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
-    },
-    Callback = function(option)
-        SelectChip = option
-    end
-})
-
-
-Raids:AddToggle({
-    Name = "Auto Buy Chip",
-    Flag = "Raids/AutoBuyChip",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.Auto_Buy_Chips_Dungeon = Value
-    end
-})
-
-spawn(function()
-    while task.wait() do
-        if _G.Auto_Buy_Chips_Dungeon then
-            pcall(function()
-                local args = {
-                    [1] = "RaidsNpc",
-                    [2] = "Select",
-                    [3] = SelectChip
-                }
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
-            end)
-        end
-    end
-end)
-
-Raids:AddToggle({
-    Name = "Auto Start Raids",
-    Flag = "Raids/AutoStartRaid",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.Auto_StartRaid = Value
-    end
-})
-
-spawn(function()
-    while wait(1) do -- Slower check to reduce lag
-        if _G.Auto_StartRaid then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local backpack = player.Backpack
-                local char = player.Character
-                
-                -- Check for chip in both backpack and character
-                local hasChip = backpack:FindFirstChild("Special Microchip") or (char and char:FindFirstChild("Special Microchip"))
-                
-                -- Check if raid is already in progress
-                local timerVisible = player.PlayerGui.Main.Timer.Visible
-                local hasIsland = workspace["_WorldOrigin"].Locations:FindFirstChild("Island 1")
-                
-                if not timerVisible and not hasIsland then
-                    if hasChip then
-                        -- Set spawn point first
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetSpawnPoint")
-                        
-                        -- Different handling based on sea level
-                        if Sea2 then
-                            -- Teleport to Second Sea raid location
-                            Tween2(CFrame.new(-6438.73535, 250.645355, -4501.50684))
-                            wait(1) -- Wait for teleport to complete
-                            
-                            -- Make sure we're close to the button
-                            local button = workspace.Map.CircleIsland.RaidSummon2.Button
-                            if button and button:FindFirstChild("Main") and button.Main:FindFirstChild("ClickDetector") then
-                                local distance = (button.Main.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                if distance <= 10 then
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Second Sea raid button")
-                                else
-                                    -- Try to teleport closer
-                                    Tween2(button.Main.CFrame)
-                                    wait(1)
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Second Sea raid button after repositioning")
-                                end
-                            end
-                        elseif Sea3 then
-                            -- Request entrance to Third Sea raid location
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.509, 314.5155, -3150.022))
-                            wait(1) -- Wait for teleport to complete
-                            
-                            -- Teleport to the button
-                            Tween2(CFrame.new(-5017.40869, 314.844055, -2823.0127))
-                            wait(1) -- Wait for teleport to complete
-                            
-                            -- Make sure we're close to the button
-                            local button = workspace.Map["Boat Castle"].RaidSummon2.Button
-                            if button and button:FindFirstChild("Main") and button.Main:FindFirstChild("ClickDetector") then
-                                local distance = (button.Main.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                if distance <= 10 then
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Third Sea raid button")
-                                else
-                                    -- Try to teleport closer
-                                    Tween2(button.Main.CFrame)
-                                    wait(1)
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Third Sea raid button after repositioning")
-                                end
-                            end
-                        end
-                    else
-                        print("No Special Microchip found!")
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-Raids:AddToggle({
-    Name = "Auto Raids Mobs",
-    Flag = "Raids/AutoFarmNearestMob",
-    Description = "Nearest",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoNear = Value
-        if not Value then 
-            bringmob = false
-            -- Return to original position when turning off
-            wait()
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
-    end
-})
-
--- AUTO FARM NEAREST MOB LOOP
-spawn(function()
-    while task.wait() do
-        if _G.AutoNear then
-            pcall(function()
-                local Closest = nil
-                local ClosestDistance = math.huge
-                
-                -- Find the closest enemy
-                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-                        if dist < ClosestDistance then
-                            Closest = enemy
-                            ClosestDistance = dist
-                        end
-                    end
-                end
-
-                if Closest then
-                    -- Target and attack the closest mob
-                    AutoHaki()
-                    EquipTool(SelectWeapon)
-                    
-                    -- Modify mob properties for easier farming
-                    if Closest:FindFirstChild("HumanoidRootPart") then
-                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        Closest.HumanoidRootPart.Transparency = 1
-                        Closest.HumanoidRootPart.CanCollide = false
-                    end
-                    if Closest:FindFirstChild("Humanoid") then
-                        Closest.Humanoid.WalkSpeed = 0
-                        Closest.Humanoid.JumpPower = 0
-                    end
-                    
-                    -- Position above the mob
-                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                    
-                    -- Attack
-                    AttackNoCoolDown()
-                    bringmob = true
-                    
-                    -- Wait before next loop iteration
-                    wait(_G.Fast_Delay or 0.1)
-                    
-                    -- Check if mob is dead or no longer valid
-                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
-                        bringmob = false
-                        wait(0.5) -- Short wait before targeting next mob
-                    end
-                else
-                    -- No enemies found
-                    bringmob = false
-                    wait(0.5)
-                end
-            end)
-        end
-    end
-end)
-
-
-Raids:AddToggle({
-    Name = "Auto Next Island",
-    Flag = "Raids/AutoNextIsland",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        AutoNextIsland = Value
-        if not Value then
-            _G.AutoNear = false
-        end
-    end
-})
-
-spawn(function()
-    local VisitedIslands = {}
-    while task.wait() do
-        if AutoNextIsland then
-            pcall(function()
-                local char = game.Players.LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local hrp = char.HumanoidRootPart
-                    local pos = hrp.Position
-                    local Locations = workspace["_WorldOrigin"].Locations
-
-                    -- Reset tracker if teleported back to raid area
-                    if (pos - Vector3.new(-6438.735, 250.645, -4501.506)).Magnitude < 1 or
-                       (pos - Vector3.new(-5017.408, 314.844, -2823.012)).Magnitude < 1 then
-                        VisitedIslands = {}
-                    end
-
-                    if Locations:FindFirstChild("Island 1") then
-                        _G.AutoNear = true
-                    end
-
-                    for i = 2, 5 do
-                        local islandName = "Island " .. i
-                        if Locations:FindFirstChild(islandName) and not VisitedIslands[islandName] then
-                            Tween(Locations[islandName].CFrame)
-                            VisitedIslands[islandName] = true
-                            AutoNextIsland = false
-                            wait()
-                            AutoNextIsland = true
-                            break
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
 
 
 local v22 = Instance.new("ScreenGui")
@@ -2782,9 +1984,112 @@ AreaList = {
 end
 
 
+function AutoHaki()
 
+if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
 
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
 
+end
+
+end
+
+function to(v232)
+
+repeat
+
+wait(_G.Fast_Delay);
+
+game.Players.LocalPlayer.Character.Humanoid:ChangeState(15);
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
+
+task.wait();
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
+
+until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 2000
+
+end
+
+-- Auto Click Combat
+function Click()
+    if not _G.FastAttack then
+        local Module = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
+        local CombatFramework = debug.getupvalues(Module)[2]
+        local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
+        
+        CamShake:Stop()
+        CombatFramework.activeController.attacking = false
+        CombatFramework.activeController.timeToNextAttack = 0
+        CombatFramework.activeController.hitboxMagnitude = 180
+        
+        game:GetService("VirtualUser"):CaptureController()
+        game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 672))
+    end
+end
+
+-- blade hits 
+function getAllBladeHits(range)
+    local hits = {}
+    local player = game.Players.LocalPlayer
+
+    -- Get all NPCs
+    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+            if (player.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude <= range then
+                table.insert(hits, enemy.HumanoidRootPart)
+            end
+        end
+    end
+
+    -- Get all Players
+    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
+        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") and otherPlayer.Character:FindFirstChild("Humanoid") then
+            if (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude <= range then
+                table.insert(hits, otherPlayer.Character.HumanoidRootPart)
+            end
+        end
+    end
+
+    return hits
+end
+
+-- auto attack player
+function AttackFunction()
+    local ac = CombatFrameworkR.activeController
+    if ac and ac.equipped then
+        for indexincrement = 1, 1 do
+            local bladehit = getAllBladeHits(60) -- Now includes players
+            if #bladehit > 0 then
+                local AcAttack8 = debug.getupvalue(ac.attack, 5)
+                local AcAttack9 = debug.getupvalue(ac.attack, 6)
+                local AcAttack7 = debug.getupvalue(ac.attack, 4)
+                local AcAttack10 = debug.getupvalue(ac.attack, 7)
+                local NumberAc12 = (AcAttack8 * 798405 + AcAttack7 * 727595) % AcAttack9
+                local NumberAc13 = AcAttack7 * 798405
+                (function()
+                    NumberAc12 = (NumberAc12 * AcAttack9 + NumberAc13) % 1099511627776
+                    AcAttack8 = math.floor(NumberAc12 / AcAttack9)
+                    AcAttack7 = NumberAc12 - AcAttack8 * AcAttack9
+                end)()
+                AcAttack10 = AcAttack10 + 1
+                debug.setupvalue(ac.attack, 5, AcAttack8)
+                debug.setupvalue(ac.attack, 6, AcAttack9)
+                debug.setupvalue(ac.attack, 4, AcAttack7)
+                debug.setupvalue(ac.attack, 7, AcAttack10)
+                for k, v in pairs(ac.animator.anims.basic) do
+                    v:Play(0.01, 0.01, 0.01)
+                end
+                if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and ac.blades and ac.blades[1] then
+                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("weaponChange", tostring(CurrentWeapon()))
+                    game.ReplicatedStorage.Remotes.Validator:FireServer(math.floor(NumberAc12 / 1099511627776 * 16777215), AcAttack10)
+                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", bladehit, indexincrement, "")
+                end
+            end
+        end
+    end
+end
 
 
 function EquipTool()
@@ -2803,7 +2108,83 @@ end
 
 
 
+function Tween2(v204)
 
+local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
+
+local v206 = 350;
+
+if (v205 >= 350) then
+
+v206 = 350;
+
+end
+
+local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear);
+
+local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
+
+CFrame = v204
+
+});
+
+v208:Play();
+
+if _G.CancelTween2 then
+
+v208:Cancel();
+
+end
+
+_G.Clip2 = true;
+
+wait(v205 / v206);
+
+_G.Clip2 = false;
+
+end
+
+function BTPZ(v209)
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
+
+task.wait();
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
+
+end
+
+TweenSpeed = 350;
+
+function Tween(v211)
+
+local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
+
+local v213 = TweenSpeed;
+
+if (v212 >= 350) then
+
+v213 = TweenSpeed;
+
+end
+
+local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear);
+
+local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
+
+CFrame = v211
+
+});
+
+v215:Play();
+
+if _G.StopTween then
+
+v215:Cancel();
+
+end
+
+end
 
 
 
@@ -2970,84 +2351,3 @@ end)
 
 
 
-
-function Tween2(destinationCFrame)
-    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local speed = 350
-
-    if distance >= 350 then
-        speed = 350
-    end
-
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
-        CFrame = destinationCFrame
-    })
-
-    tween:Play()
-
-    if _G.CancelTween2 then
-        tween:Cancel()
-    end
-
-    _G.Clip2 = true
-    wait(distance / speed)
-    _G.Clip2 = false
-end
-
-function BTPZ(destinationCFrame)
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
-    task.wait()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
-end
-
-TweenSpeed = 350
-
-function Tween(destinationCFrame)
-    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local speed = TweenSpeed
-
-    if distance >= 350 then
-        speed = TweenSpeed
-    end
-
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
-        CFrame = destinationCFrame
-    })
-
-    tween:Play()
-
-    if _G.StopTween then
-        tween:Cancel()
-    end
-end
-
-
-function AutoHaki()
-
-if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
-
-end
-
-end
-
-function to(v232)
-
-repeat
-
-wait(_G.Fast_Delay);
-
-game.Players.LocalPlayer.Character.Humanoid:ChangeState(15);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
-
-task.wait();
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
-
-until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 2000
-
-end
