@@ -40,6 +40,12 @@ local Teleport = Window:MakeTab({
     Icon = "book",  -- Fixed the split "Icon"
 })
 
+local Setting = Window:MakeTab({
+    Title = "Settings",
+    Description = "Settings",
+    Icon = "settings",
+})
+
 
 Main:AddToggle({
     Name = "Auto Farm Level",
@@ -50,6 +56,12 @@ Main:AddToggle({
         _G.AutoLevel = Value
         if not Value then
             wait()
+            -- Ensure player is above the water level
+            local player = game:GetService("Players").LocalPlayer
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            if playerPosition.Y <= 0 then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+            end
             Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
             wait()
         end
@@ -68,6 +80,12 @@ spawn(function()
                 if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                     Tween(CFrameQ)
+
+                    -- Ensure player stays above water after tweening
+                    local playerPosition = player.Character.HumanoidRootPart.Position
+                    if playerPosition.Y <= 0 then
+                        player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                    end
 
                     if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
                         wait(0.5) -- Small delay before accepting quest
@@ -110,6 +128,13 @@ spawn(function()
                         bringmob = false
                         -- Go to mob spawn location
                         Tween(CFrameMon)
+
+                        -- Ensure player stays above water during movement
+                        local playerPosition = player.Character.HumanoidRootPart.Position
+                        if playerPosition.Y <= 0 then
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                        end
+
                         wait(0.5)
                     end
                 end
@@ -1418,11 +1443,24 @@ spawn(function()
                             enemy.HumanoidRootPart.CanCollide = false
                             enemy.Humanoid:ChangeState(11)
                             Tween(enemy.HumanoidRootPart.CFrame * Pos)
+
+                            -- Avoid falling into water by checking position
+                            local playerPosition = Player.Character.HumanoidRootPart.Position
+                            if playerPosition.Y <= 0 then
+                                -- Adjust position to stay above the ground, not below
+                                Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                            end
                         until not AutoTushita or not enemy.Parent or (enemy.Humanoid.Health <= 0)
                     end
                 end
             else
                 Tween(CFrame.new(-10238.875, 389.791, -9549.794))
+
+                -- Ensure no fall into water here
+                local playerPosition = Player.Character.HumanoidRootPart.Position
+                if playerPosition.Y <= 0 then
+                    Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                end
             end
         end
     end
@@ -1430,6 +1468,163 @@ end)
 
 
 
+Setting:AddDropdown({
+    Name = "Floating Logo Size",  -- Name of the dropdown
+    Flag = "Setting/ButtonSize",  -- Flag for internal use
+    Default = "Medium",  -- Default option
+    Options = { "Small", "Medium", "Large" },  -- Options for button size
+    Callback = function(option)
+        -- Check which option is selected and adjust button size accordingly
+        if option == "Small" then
+            v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
+        elseif option == "Medium" then
+            v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
+        elseif option == "Large" then
+            v23.Size = UDim2.new(0, 70, 0, 70)  -- Large size
+        end
+    end
+})
+
+Setting:AddSection("Other Setting");
+
+
+Setting:AddToggle({
+    Name = "No Fog",
+    Flag = "Settings/NoFog",
+    Default = false,
+    Callback = function(Value)
+        local lighting = game:GetService("Lighting")
+        getgenv().FogConnection = getgenv().FogConnection or nil
+        getgenv().OriginalFogEnd = getgenv().OriginalFogEnd or lighting.FogEnd
+        getgenv().OriginalFogStart = getgenv().OriginalFogStart or lighting.FogStart
+        getgenv().OriginalFogColor = getgenv().OriginalFogColor or lighting.FogColor
+        getgenv().OriginalAtmosphere = getgenv().OriginalAtmosphere or (lighting:FindFirstChildOfClass("Atmosphere") and lighting:FindFirstChildOfClass("Atmosphere"):Clone())
+
+        local function removeFog()
+            if lighting:FindFirstChildOfClass("Atmosphere") then
+                lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+            end
+            lighting.FogEnd = 1e6
+            lighting.FogStart = 1e6
+            getgenv().FogConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                lighting.FogEnd = 1e6
+                lighting.FogStart = 1e6
+                if lighting:FindFirstChildOfClass("Atmosphere") then
+                    lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
+                end
+            end)
+        end
+
+        local function restoreFog()
+            if getgenv().FogConnection then
+                getgenv().FogConnection:Disconnect()
+                getgenv().FogConnection = nil
+            end
+            lighting.FogEnd = getgenv().OriginalFogEnd
+            lighting.FogStart = getgenv().OriginalFogStart
+            lighting.FogColor = getgenv().OriginalFogColor
+            if getgenv().OriginalAtmosphere and not lighting:FindFirstChildOfClass("Atmosphere") then
+                local restored = getgenv().OriginalAtmosphere:Clone()
+                restored.Parent = lighting
+            end
+        end
+
+        if Value then
+            removeFog()
+        else
+            restoreFog()
+        end
+
+        game.Players.LocalPlayer.OnTeleport:Connect(function()
+            if getgenv().FogConnection then
+                getgenv().FogConnection:Disconnect()
+            end
+        end)
+    end
+})
+
+
+Setting:AddToggle({
+    Name = "Full Bright",
+    Flag = "Setting/FullBright",
+    Description = "Turned On This If It's Night Dark",
+    Default = false,
+    Callback = function(Value)
+        if getgenv().FullBrightConnection then
+            getgenv().FullBrightConnection:Disconnect()
+            getgenv().FullBrightConnection = nil
+        end
+
+        if Value then
+            getgenv().FullBrightConnection = game:GetService("RunService").Stepped:Connect(function()
+                game.Lighting.Brightness = 3
+                game.Lighting.ClockTime = 14
+                game.Lighting.FogEnd = 9e9
+                game.Lighting.GlobalShadows = false
+                game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+            end)
+        else
+            game.Lighting.Brightness = 1
+            game.Lighting.ClockTime = 12
+            game.Lighting.FogEnd = 500
+            game.Lighting.GlobalShadows = true
+            game.Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 100)
+        end
+    end
+})
+
+
+
+getgenv().FpsBoost = false
+getgenv().OriginalFpsSettings = {}
+
+Setting:AddToggle({
+    Name = "FPS Boost",
+    Flag = "Settings/FPSBoost",
+    Default = false,
+    Callback = function(Value)
+        getgenv().FpsBoost = Value
+        if Value then
+            local Lighting = game:GetService("Lighting")
+            getgenv().OriginalFpsSettings.FogEnd = Lighting.FogEnd
+            getgenv().OriginalFpsSettings.Brightness = Lighting.Brightness
+            getgenv().OriginalFpsSettings.GlobalShadows = Lighting.GlobalShadows
+            getgenv().OriginalFpsSettings.Ambient = Lighting.Ambient
+
+            Lighting.FogEnd = 100
+            Lighting.Brightness = 0
+            Lighting.GlobalShadows = false
+            Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") then
+                    obj.Material = Enum.Material.Plastic
+                    obj.Reflectance = 0
+                    obj.CastShadow = false
+                elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                    obj:Destroy()
+                end
+            end
+
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("PostEffect") then
+                    v.Enabled = false
+                end
+            end
+
+        else
+            local Lighting = game:GetService("Lighting")
+            local settings = getgenv().OriginalFpsSettings
+            Lighting.FogEnd = settings.FogEnd or 100000
+            Lighting.Brightness = settings.Brightness or 2
+            Lighting.GlobalShadows = settings.GlobalShadows ~= false
+            Lighting.Ambient = settings.Ambient or Color3.fromRGB(128, 128, 128)
+
+            -- Notify that some visuals like decals might not restore
+            warn("FPS Boost disabled - some visuals may not return without rejoin.")
+        end
+    end
+})
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
