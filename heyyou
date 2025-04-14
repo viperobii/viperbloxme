@@ -426,7 +426,62 @@ Player:AddToggle({
 
 
 
+Player:AddSection("Anti Slow");
 
+-- WalkSpeed Toggle
+Player:AddToggle({
+    Name = "Enable WalkSpeed",
+    Flag = "Player/EnableWalkSpeed",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.EnableWalkSpeed = Value
+        if not Value then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = 16
+            end
+        end
+    end,
+})
+
+-- WalkSpeed Slider
+Player:AddSlider({
+    Name = "WalkSpeed",
+    Flag = "Player/WalkSpeed",
+    Description = "",
+    Range = {16, 300},
+    Suffix = "Speed",
+    CurrentValue = 50,
+    Increment = 1,  -- Added increment for smoother slider
+    Callback = function(Value)
+        _G.CustomWalkSpeed = Value
+        -- Apply speed immediately if enabled
+        if _G.EnableWalkSpeed then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = Value
+            end
+        end
+    end,
+})
+
+-- Initialize global variables
+_G.EnableWalkSpeed = false
+_G.CustomWalkSpeed = 50
+
+-- Loop to Apply WalkSpeed continuously 
+task.spawn(function()
+    while true do  -- Changed to true for reliability
+        if _G.EnableWalkSpeed then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = _G.CustomWalkSpeed
+            end
+        end
+        task.wait(0.1)  -- Moved wait to end of loop for better flow
+    end
+end)
 
 Teleport:AddSection("Sea 1")
 
@@ -1085,110 +1140,130 @@ spawn(function()
 end)
 
 
-
-
-
--- Add a toggle for Infinite Jump (Hold to Fly)
+-- Add a toggle for Fast Attack
 Player:AddToggle({
-    Name = "Infinite Jump",
-    Flag = "Player/InfiniteJump",
-    Description = "",
-    Default = false,
+    Name = "Fast Attack",
+    Flag = "Player/FastAttack",
+    Description = "Enable or Disable Fast Attack Loop",
+    Default = true,
     Callback = function(state)
-        _G.InfiniteJump = state
+        _G.FastAttack = state
         if state then
-            -- Enable Infinite Jump
+            -- Start Fast Attack loop
             spawn(function()
-                while _G.InfiniteJump do
+                while _G.FastAttack do
                     task.wait(0.1)
-                    if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
-                        local character = game.Players.LocalPlayer.Character
-                        if character and character:FindFirstChild("HumanoidRootPart") then
-                            -- Apply upward force or constant position update to simulate flying
-                            character.HumanoidRootPart.Velocity = Vector3.new(0, 50, 0) -- Apply constant upward velocity
-                        end
-                    end
+                    pcall(_x1)  -- Calls the function
                 end
             end)
         end
     end
 })
 
--- Function to stop Infinite Jump when toggle is off
-function StopInfiniteJump()
-    local character = game.Players.LocalPlayer.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        -- Reset velocity to prevent flying when Infinite Jump is off
-        character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+-- Function to handle Fast Attack
+function _x1()
+    local _v2 = _v1.Character
+    if not _v2 then return end
+
+    -- Find the equipped weapon/tool
+    local _v3 = nil
+    for _, _v4 in ipairs(_v2:GetChildren()) do
+        if _v4:IsA("Tool") then
+            _v3 = _v4
+            break
+        end
+    end
+
+    -- Auto Equip Melee if no tool is found
+    if not _v3 then
+        for _, _v4 in ipairs(_v1.Backpack:GetChildren()) do
+            if _v4:IsA("Tool") then
+                _v3 = _v4
+                _v1.Character.Humanoid:EquipTool(_v3)
+                break
+            end
+        end
+    end
+
+    if not _v3 then return end
+
+    local function _x2(_v5)
+        return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
+    end
+
+    local function _x3(_v6)
+        local _v7 = game:GetService("Workspace").Enemies:GetChildren()
+        local _v8 = {}
+        local _v9 = _v2:GetPivot().Position
+
+        -- **Check Mobs**
+        for _, _v10 in ipairs(_v7) do
+            local _v11 = _v10:FindFirstChild("HumanoidRootPart")
+            if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
+                table.insert(_v8, _v10)
+            end
+        end
+
+        -- **Check Players (Exclude Yourself)**
+        for _, _v10 in ipairs(game:GetService("Players"):GetPlayers()) do
+            if _v10 ~= _v1 and _x2(_v10.Character) then
+                local _v11 = _v10.Character:FindFirstChild("HumanoidRootPart")
+                if _v11 and (_v11.Position - _v9).Magnitude <= _v6 then
+                    table.insert(_v8, _v10.Character)
+                end
+            end
+        end
+        return _v8
+    end
+
+    if _v3:FindFirstChild("LeftClickRemote") then
+        local _v12 = 1
+        local _v13 = _x3(60)
+
+        for _, _v14 in ipairs(_v13) do
+            local _v15 = (_v14.HumanoidRootPart.Position - _v2:GetPivot().Position).Unit
+            pcall(function()
+                _v3.LeftClickRemote:FireServer(_v15, _v12)
+            end)
+            _v12 = _v12 + 1
+            if _v12 > 1000000000 then _v12 = 1 end
+        end
+    else
+        local _v16 = {}
+        local _v17 = _x3(60)
+        local _v18 = _v2:GetPivot().Position
+        local _v19 = nil
+
+        for _, _v20 in ipairs(_v17) do
+            if _x2(_v20) then
+                local _v21 = _v20:FindFirstChild("Head")
+                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
+                    table.insert(_v16, { _v20, _v21 })
+                    _v19 = _v21
+                end
+            end
+        end
+
+        if not _v19 then return end
+
+        pcall(function()
+            local _v22 = game:GetService("ReplicatedStorage")
+            local _v23 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterAttack")
+            local _v24 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterHit")
+
+            if _v23 and _v24 then
+                _v23:FireServer(0.000000001)
+                _v24:FireServer(_v19, _v16)
+            else
+                warn("Error: RegisterAttack or RegisterHit RemoteEvent not found!")
+            end
+        end)
     end
 end
 
--- Listen for toggle off to stop the flying behavior
-FastAttackToggle:OnChanged(function(state)
-    if not _G.InfiniteJump then
-        StopInfiniteJump()  -- Ensure that the velocity is reset when the toggle is off
-    end
-end)
 
 
 
-
-Player:AddSection("Anti Slow");
-
--- WalkSpeed Toggle
-Player:AddToggle({
-    Name = "Enable WalkSpeed",
-    Flag = "Player/EnableWalkSpeed",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.EnableWalkSpeed = Value
-        if not Value then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = 16
-            end
-        end
-    end,
-})
-
--- WalkSpeed Slider
-Player:AddSlider({
-    Name = "WalkSpeed",
-    Flag = "Player/WalkSpeed",
-    Description = "",
-    Range = {16, 300},
-    Suffix = "Speed",
-    CurrentValue = 50,
-    Increment = 1,  -- Added increment for smoother slider
-    Callback = function(Value)
-        _G.CustomWalkSpeed = Value
-        -- Apply speed immediately if enabled
-        if _G.EnableWalkSpeed then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = Value
-            end
-        end
-    end,
-})
-
--- Initialize global variables
-_G.EnableWalkSpeed = false
-_G.CustomWalkSpeed = 50
-
--- Loop to Apply WalkSpeed continuously 
-task.spawn(function()
-    while true do  -- Changed to true for reliability
-        if _G.EnableWalkSpeed then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = _G.CustomWalkSpeed
-            end
-        end
-        task.wait(0.1)  -- Moved wait to end of loop for better flow
-    end
-end)
 
 
 local v22 = Instance.new("ScreenGui")
@@ -2943,113 +3018,3 @@ game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
 until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 2000
 
 end
-
-
-
-function _x1()
-    local _v2 = _v1.Character
-    if not _v2 then return end
-
-    -- Find the equipped weapon/tool
-    local _v3 = nil
-    for _, _v4 in ipairs(_v2:GetChildren()) do
-        if _v4:IsA("Tool") then
-            _v3 = _v4
-            break
-        end
-    end
-
-    -- Auto Equip Melee if no tool is found
-    if not _v3 then
-        for _, _v4 in ipairs(_v1.Backpack:GetChildren()) do
-            if _v4:IsA("Tool") then
-                _v3 = _v4
-                _v1.Character.Humanoid:EquipTool(_v3)
-                break
-            end
-        end
-    end
-
-    if not _v3 then return end
-
-    local function _x2(_v5)
-        return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
-    end
-
-    local function _x3(_v6)
-        local _v7 = game:GetService("Workspace").Enemies:GetChildren()
-        local _v8 = {}
-        local _v9 = _v2:GetPivot().Position
-
-        -- **Check Mobs**
-        for _, _v10 in ipairs(_v7) do
-            local _v11 = _v10:FindFirstChild("HumanoidRootPart")
-            if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
-                table.insert(_v8, _v10)
-            end
-        end
-
-        -- **Check Players (Exclude Yourself)**
-        for _, _v10 in ipairs(game:GetService("Players"):GetPlayers()) do
-            if _v10 ~= _v1 and _x2(_v10.Character) then
-                local _v11 = _v10.Character:FindFirstChild("HumanoidRootPart")
-                if _v11 and (_v11.Position - _v9).Magnitude <= _v6 then
-                    table.insert(_v8, _v10.Character)
-                end
-            end
-        end
-        return _v8
-    end
-
-    if _v3:FindFirstChild("LeftClickRemote") then
-        local _v12 = 1
-        local _v13 = _x3(60)
-
-        for _, _v14 in ipairs(_v13) do
-            local _v15 = (_v14.HumanoidRootPart.Position - _v2:GetPivot().Position).Unit
-            pcall(function()
-                _v3.LeftClickRemote:FireServer(_v15, _v12)
-            end)
-            _v12 = _v12 + 1
-            if _v12 > 1000000000 then _v12 = 1 end
-        end
-    else
-        local _v16 = {}
-        local _v17 = _x3(60)
-        local _v18 = _v2:GetPivot().Position
-        local _v19 = nil
-
-        for _, _v20 in ipairs(_v17) do
-            if _x2(_v20) then
-                local _v21 = _v20:FindFirstChild("Head")
-                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
-                    table.insert(_v16, { _v20, _v21 })
-                    _v19 = _v21
-                end
-            end
-        end
-
-        if not _v19 then return end
-
-        pcall(function()
-            local _v22 = game:GetService("ReplicatedStorage")
-            local _v23 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterAttack")
-            local _v24 = _v22:FindFirstChild("Modules") and _v22.Modules:FindFirstChild("Net") and _v22.Modules.Net:FindFirstChild("RE/RegisterHit")
-
-            if _v23 and _v24 then
-                _v23:FireServer(0.000000001)
-                _v24:FireServer(_v19, _v16)
-            else
-                warn("Error: RegisterAttack or RegisterHit RemoteEvent not found!")
-            end
-        end)
-    end
-end
-
--- To start the fast attack loop directly
-spawn(function()
-    while true do
-        task.wait(0.1)
-        pcall(_x1)  -- Calls the function
-    end
-end)
