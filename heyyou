@@ -1776,44 +1776,37 @@ end)
 Main:AddSection("Farm Boss Sea 1");
 
 Main:AddToggle({
-    Name = "Auto Gorilla King",
-    Flag = "Main/AutoGorillaKing",
-    Description = "",
+    Name = "Auto Farm Gorilla King",
+    Flag = "Main/AutoFarmGorillaKing",
+    Description = "Automatically farm Gorilla King boss",
     Default = false,
     Callback = function(Value)
-        _G.AutoGorillaKing = Value
-        if Value then
-            -- Go to Gorilla King island area
-            Tween(CFrame.new(-1088.75977, 8.13463783, -488.559906))
-        else
-            bringmob = false
-        end
+        _G.AutoFarmGorillaKing = Value
     end
 })
 
 spawn(function()
     while task.wait() do
-        if _G.AutoGorillaKing then
+        if _G.AutoFarmGorillaKing then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("The Gorilla King [Lv. 20] [Boss]")
-                if boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
+                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Gorilla King [Lv. 20] [Boss]")
+                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
+                    -- Setup
                     AutoHaki()
-                    EquipTool(SelectWeapon)
-
+                    EquipTool("Melee") -- Automatically equip your current melee weapon
                     boss.HumanoidRootPart.CanCollide = false
                     boss.Humanoid.WalkSpeed = 0
                     boss.Humanoid.JumpPower = 0
                     boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                     boss.HumanoidRootPart.Transparency = 1
 
+                    -- Move above the boss and attack
                     local targetPos = boss.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-
+                    Tween(CFrame.new(targetPos))
                     AttackNoCoolDown()
-                    wait(_G.Fast_Delay or 0.1)
                 else
-                    -- Go back to spawn position of Gorilla King
-                    Tween(CFrame.new(-1088.75977, 8.13463783, -488.559906))
+                    -- Go to Gorilla King spawn area if boss not found
+                    Tween(CFrame.new(-1088.76, 8.13, -488.56))
                 end
             end)
         end
