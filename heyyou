@@ -43,7 +43,7 @@ local Raids = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "tree-palm",  -- Fixed the split "Icon"
+    Icon = "book",  -- Fixed the split "Icon"
 })
 
 local Setting = Window:MakeTab({
@@ -1189,209 +1189,390 @@ Items:AddToggle({
 })
 
 spawn(function()
-
-while task.wait() do
-
-if (_G.Auto_Saber and (game.Players.LocalPlayer.Data.Level.Value >= 200)) then
-
-pcall(function()
-
-if (game:GetService("Workspace").Map.Jungle.Final.Part.Transparency == 0) then
-
-if (game:GetService("Workspace").Map.Jungle.QuestPlates.Door.Transparency == 0) then
-
-if ((CFrame.new(- 1612.55884, 36.9774132, 148.719543, 0.37091279, 3.071715e-9, - 0.928667724, 3.970995e-8, 1, 1.9167935e-8, 0.928667724, - 4.398698e-8, 0.37091279).Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100) then
-
-Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
-
-wait(1);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate1.Button.CFrame;
-
-wait(1);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate2.Button.CFrame;
-
-wait(1);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate3.Button.CFrame;
-
-wait(1);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate4.Button.CFrame;
-
-wait(1);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate5.Button.CFrame;
-
-wait(1);
-
-else
-
-Tween(CFrame.new(- 1612.55884, 36.9774132, 148.719543, 0.37091279, 3.071715e-9, - 0.928667724, 3.970995e-8, 1, 1.9167935e-8, 0.928667724, - 4.398698e-8, 0.37091279));
-
-end
-
-elseif (game:GetService("Workspace").Map.Desert.Burn.Part.Transparency == 0) then
-
-if (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Torch") or game.Players.LocalPlayer.Character:FindFirstChild("Torch")) then
-
-EquipTool("Torch");
-
-Tween(CFrame.new(1114.61475, 5.04679728, 4350.22803, - 0.648466587, - 1.2879909e-9, 0.761243105, - 5.706529e-10, 1, 1.2058454e-9, - 0.761243105, 3.4754488e-10, - 0.648466587));
-
-else
-
-Tween(CFrame.new(- 1610.00757, 11.5049858, 164.001587, 0.984807551, - 0.167722285, - 0.0449818149, 0.17364943, 0.951244235, 0.254912198, 0.00003423728, - 0.258850515, 0.965917408));
-
-end
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup");
-
-wait(0.5);
-
-EquipTool("Cup");
-
-wait(0.5);
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", game:GetService("Players").LocalPlayer.Character.Cup);
-
-wait(0);
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan");
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0) then
-
-if (game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader") or game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader")) then
-
-Tween(CFrame.new(- 2967.59521, - 4.91089821, 5328.70703, 0.342208564, - 0.0227849055, 0.939347804, 0.0251603816, 0.999569714, 0.0150796166, - 0.939287126, 0.0184739735, 0.342634559));
-
-for v1799, v1800 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-
-if (v1800.Name == "Mob Leader") then
-
-if game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader [Lv. 120] [Boss]") then
-
-if (v1800:FindFirstChild("Humanoid") and v1800:FindFirstChild("HumanoidRootPart") and (v1800.Humanoid.Health > 0)) then
-
-repeat
-
-task.wait(_G.Fast_Delay);
-
-AutoHaki();
-
-EquipTool(SelectWeapon);
-
-v1800.HumanoidRootPart.CanCollide = false;
-
-v1800.Humanoid.WalkSpeed = 0;
-
-v1800.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-
-Tween(v1800.HumanoidRootPart.CFrame * Pos);
-
-AttackNoCoolDown();
-
-until (v1800.Humanoid.Health <= 0) or not _G.Auto_Saber
-
-end
-
-end
-
-if game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader") then
-
-Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2));
-
-end
-
-end
-
-end
-
-end
-
-elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
-
-wait(0.5);
-
-EquipTool("Relic");
-
-wait(0.5);
-
-Tween(CFrame.new(- 1404.91504, 29.9773273, 3.80598116, 0.876514494, 5.6690688e-9, 0.481375456, 2.53852e-8, 1, - 5.799956e-8, - 0.481375456, 6.3057264e-8, 0.876514494));
-
-end
-
-elseif (game:GetService("Workspace").Enemies:FindFirstChild("Saber Expert") or game:GetService("ReplicatedStorage"):FindFirstChild("Saber Expert")) then
-
-for v1460, v1461 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-
-if (v1461:FindFirstChild("Humanoid") and v1461:FindFirstChild("HumanoidRootPart") and (v1461.Humanoid.Health > 0)) then
-
-if (v1461.Name == "Saber Expert") then
-
-repeat
-
-task.wait(_G.Fast_Delay);
-
-EquipTool(SelectWeapon);
-
-Tween(v1461.HumanoidRootPart.CFrame * Pos);
-
-v1461.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-
-v1461.HumanoidRootPart.Transparency = 1;
-
-v1461.Humanoid.JumpPower = 0;
-
-v1461.Humanoid.WalkSpeed = 0;
-
-v1461.HumanoidRootPart.CanCollide = false;
-
-bringmob = true;
-
-FarmPos = v1461.HumanoidRootPart.CFrame;
-
-MonFarm = v1461.Name;
-
-AttackNoCoolDown();
-
-until (v1461.Humanoid.Health <= 0) or not _G.Auto_Saber
-
-bringmob = true;
-
-if (v1461.Humanoid.Health <= 0) then
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "PlaceRelic");
-
-end
-
-end
-
-end
-
-end
-
-end
-
-end);
-
-end
-
-end
-
-end);
-
-
-
+    while task.wait() do
+        if _G.Auto_Saber and game.Players.LocalPlayer.Data.Level.Value >= 200 then
+            pcall(function()
+                -- Define Pos if not already defined
+                if not Pos then
+                    Pos = CFrame.new(0, 30, 0)
+                end
+                
+                -- Check if player already has Saber
+                if game.Players.LocalPlayer.Backpack:FindFirstChild("Saber") or game.Players.LocalPlayer.Character:FindFirstChild("Saber") then
+                    print("You already have the Saber!")
+                    return
+                end
+                
+                -- Check if the final door is open
+                if game:GetService("Workspace").Map.Jungle.Final.Part.Transparency == 0 then
+                    -- Check if the quest door is still closed
+                    if game:GetService("Workspace").Map.Jungle.QuestPlates.Door.Transparency == 0 then
+                        -- Check if near the quest location
+                        local plateLocation = CFrame.new(-1612.55884, 36.9774132, 148.719543)
+                        local distanceToLocation = (plateLocation.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        
+                        if distanceToLocation <= 100 then
+                            -- Player is near the plates, step on them in sequence
+                            local plates = {
+                                game:GetService("Workspace").Map.Jungle.QuestPlates.Plate1.Button.CFrame,
+                                game:GetService("Workspace").Map.Jungle.QuestPlates.Plate2.Button.CFrame,
+                                game:GetService("Workspace").Map.Jungle.QuestPlates.Plate3.Button.CFrame,
+                                game:GetService("Workspace").Map.Jungle.QuestPlates.Plate4.Button.CFrame,
+                                game:GetService("Workspace").Map.Jungle.QuestPlates.Plate5.Button.CFrame
+                            }
+                            
+                            for _, plateCFrame in ipairs(plates) do
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = plateCFrame
+                                wait(1.5) -- Wait longer to ensure the plate registers
+                            end
+                        else
+                            -- Teleport to the plates area
+                            Tween(plateLocation)
+                        end
+                    -- Check for the torch part
+                    elseif game:GetService("Workspace").Map.Desert.Burn.Part.Transparency == 0 then
+                        if game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Torch") or 
+                           game.Players.LocalPlayer.Character:FindFirstChild("Torch") then
+                            -- Have torch, going to use it
+                            EquipTool("Torch")
+                            wait(0.5) -- Wait for equip
+                            -- Go to fire location
+                            Tween(CFrame.new(1114.61475, 5.04679728, 4350.22803))
+                        else
+                            -- Need to get the torch
+                            Tween(CFrame.new(-1610.00757, 11.5049858, 164.001587))
+                        end
+                    -- Check sick man quest progress
+                    elseif game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0 then
+                        -- Get cup and fill it
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup")
+                        wait(1)
+                        
+                        -- Ensure cup is equipped
+                        if game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Cup") then
+                            EquipTool("Cup")
+                            wait(1)
+                        end
+                        
+                        -- Fill cup if holding it
+                        if game:GetService("Players").LocalPlayer.Character:FindFirstChild("Cup") then
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", game:GetService("Players").LocalPlayer.Character.Cup)
+                            wait(1)
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan")
+                        end
+                    -- Check rich son quest progress
+                    elseif game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil then
+                        -- Start rich son quest
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon")
+                    elseif game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0 then
+                        -- Find and defeat Mob Leader
+                        local mobLeader = game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader [Lv. 120] [Boss]")
+                        
+                        if mobLeader and mobLeader:FindFirstChild("Humanoid") and 
+                           mobLeader:FindFirstChild("HumanoidRootPart") and mobLeader.Humanoid.Health > 0 then
+                            -- Found mob leader, fight it
+                            repeat
+                                task.wait(_G.Fast_Delay)
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                
+                                mobLeader.HumanoidRootPart.CanCollide = false
+                                mobLeader.Humanoid.WalkSpeed = 0
+                                mobLeader.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                
+                                Tween(mobLeader.HumanoidRootPart.CFrame * Pos)
+                                AttackNoCoolDown()
+                            until mobLeader.Humanoid.Health <= 0 or not _G.Auto_Saber
+                        else
+                            -- Go to mob leader location
+                            Tween(CFrame.new(-2967.59521, -4.91089821, 5328.70703))
+                            
+                            -- Check if mob leader is in ReplicatedStorage (not spawned)
+                            local mobLeaderRS = game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader")
+                            if mobLeaderRS and mobLeaderRS:FindFirstChild("HumanoidRootPart") then
+                                Tween(mobLeaderRS.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                            end
+                        end
+                    elseif game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1 then
+                        -- Place the relic
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon")
+                        wait(1)
+                        
+                        if game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Relic") or
+                           game:GetService("Players").LocalPlayer.Character:FindFirstChild("Relic") then
+                            EquipTool("Relic")
+                            wait(1)
+                            Tween(CFrame.new(-1404.91504, 29.9773273, 3.80598116))
+                        end
+                    end
+                else
+                    -- Final step - defeat Saber Expert
+                    local saberExpert = nil
+                    
+                    -- Find Saber Expert in workspace
+                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if enemy.Name == "Saber Expert" and 
+                           enemy:FindFirstChild("Humanoid") and 
+                           enemy:FindFirstChild("HumanoidRootPart") and 
+                           enemy.Humanoid.Health > 0 then
+                            saberExpert = enemy
+                            break
+                        end
+                    end
+                    
+                    if saberExpert then
+                        -- Found Saber Expert, fight it
+                        repeat
+                            task.wait(_G.Fast_Delay)
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+                            
+                            saberExpert.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            saberExpert.HumanoidRootPart.Transparency = 1
+                            saberExpert.Humanoid.JumpPower = 0
+                            saberExpert.Humanoid.WalkSpeed = 0
+                            saberExpert.HumanoidRootPart.CanCollide = false
+                            
+                            FarmPos = saberExpert.HumanoidRootPart.CFrame
+                            MonFarm = saberExpert.Name
+                            
+                            Tween(saberExpert.HumanoidRootPart.CFrame * Pos)
+                            AttackNoCoolDown()
+                        until saberExpert.Humanoid.Health <= 0 or not _G.Auto_Saber
+                        
+                        if saberExpert.Humanoid.Health <= 0 then
+                            -- Place relic to complete quest
+                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "PlaceRelic")
+                        end
+                    else
+                        -- Saber Expert not found in workspace, check if in ReplicatedStorage
+                        local saberExpertRS = game:GetService("ReplicatedStorage"):FindFirstChild("Saber Expert")
+                        if saberExpertRS and saberExpertRS:FindFirstChild("HumanoidRootPart") then
+                            Tween(saberExpertRS.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                        else
+                            -- Go to Saber Expert spawn location
+                            Tween(CFrame.new(-1405.41956, 29.8519993, 5.62435055))
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+Items:AddToggle({
+    Name = "Auto Tushita",
+    Flag = "Items/AutoTushita",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoTushita = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if AutoTushita then
+            local Enemies = workspace.Enemies
+            local Player = game.Players.LocalPlayer
+            
+            if Enemies:FindFirstChild("Longma") then
+                for _, enemy in pairs(Enemies:GetChildren()) do
+                    if enemy.Name == "Longma" and enemy:IsA("Model") and 
+                       enemy:FindFirstChild("Humanoid") and 
+                       enemy:FindFirstChild("HumanoidRootPart") and 
+                       enemy.Humanoid.Health > 0 then
+                        
+                        repeat
+                            wait(_G.Fast_Delay)
+                            AttackNoCoolDown()
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+                            
+                            -- Define Pos if not already defined
+                            if not Pos then
+                                Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
+                            end
+                            
+                            -- Set farm position and modify enemy properties
+                            FarmPos = enemy.HumanoidRootPart.CFrame
+                            enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            enemy.Humanoid.JumpPower = 0
+                            enemy.Humanoid.WalkSpeed = 0
+                            enemy.HumanoidRootPart.CanCollide = false
+                            enemy.Humanoid:ChangeState(14) -- Stun state (14) instead of 11
+                            
+                            -- Move to position relative to enemy
+                            Tween(enemy.HumanoidRootPart.CFrame * Pos)
+                            
+                            -- Check for water less frequently to avoid interrupting combat
+                            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                                local playerPosition = Player.Character.HumanoidRootPart.Position
+                                if playerPosition.Y <= 0 then
+                                    Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                                end
+                            end
+                            
+                        until not AutoTushita or not enemy.Parent or enemy.Parent ~= Enemies or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0
+                    end
+                end
+            else
+                -- Tween to Longma spawn location
+                if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
+                    Tween(CFrame.new(-10238.875, 389.791, -9549.794))
+                    
+                    -- Wait a moment after teleporting to spawn area
+                    wait(1)
+                    
+                    -- Ensure no fall into water here
+                    local playerPosition = Player.Character.HumanoidRootPart.Position
+                    if playerPosition.Y <= 0 then
+                        Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                    end
+                end
+            end
+        end
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Yama",
+    Flag = "Items/AutoYama",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoYama = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoYama then
+            pcall(function()
+                -- Check if player has enough Elite Hunter progress
+                local eliteProgress = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
+                
+                if eliteProgress >= 30 then
+                    -- If player has enough progress, try to get Yama
+                    if not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Yama") and 
+                       not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Yama") then
+                        
+                        -- Check if the ClickDetector exists
+                        local clickDetector = game:GetService("Workspace").Map.Waterfall.SealedKatana.Handle.ClickDetector
+                        
+                        if clickDetector then
+                            -- Teleport to the Yama location first (optional, add if needed)
+                            local yamaPos = game:GetService("Workspace").Map.Waterfall.SealedKatana.Handle.CFrame
+                            
+                            -- You can add a teleport here if needed:
+                            -- Tween(yamaPos * CFrame.new(0, 2, 0))
+                            -- wait(1)
+                            
+                            -- Fire the click detector to get Yama
+                            fireclickdetector(clickDetector)
+                            
+                            -- Wait a bit to prevent server stress
+                            wait(1)
+                        else
+                            print("ClickDetector not found!")
+                        end
+                    else
+                        -- Player already has Yama
+                        print("You already have Yama!")
+                    end
+                else
+                    -- Not enough Elite Hunter progress
+                    print("Not enough Elite Hunter progress! Current progress: " .. eliteProgress .. "/30")
+                    
+                    -- Optional: Add code here to help get Elite Hunter progress
+                    -- For example, teleport to Elite Hunter location or find Elite enemies
+                end
+            end)
+        end
+        
+        -- Add a short wait to prevent the loop from running too frequently
+        wait(1)
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Hallow Scythe",
+    Flag = "Items/AutoHallowScythe",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoHallowScythe = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if AutoHallowScythe then
+            pcall(function()
+                local Enemies = workspace.Enemies
+                local Player = game.Players.LocalPlayer
+                local Backpack = Player.Backpack
+                local Character = Player.Character
+                
+                -- Define Pos if not already defined
+                if not Pos then
+                    Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
+                end
+
+                if Enemies:FindFirstChild("Soul Reaper") then
+                    for _, v in pairs(Enemies:GetChildren()) do
+                        if string.find(v.Name, "Soul Reaper") and 
+                           v:FindFirstChild("Humanoid") and 
+                           v:FindFirstChild("HumanoidRootPart") and 
+                           v.Humanoid.Health > 0 then
+                            
+                            repeat
+                                wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+
+                                v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                v.HumanoidRootPart.CanCollide = false
+                                v.HumanoidRootPart.Transparency = 1
+                                v.Humanoid.JumpPower = 0
+                                v.Humanoid.WalkSpeed = 0
+                                v.Humanoid:ChangeState(14)
+                                
+                                Tween(v.HumanoidRootPart.CFrame * Pos)
+
+                                sethiddenproperty(Player, "SimulationRadius", math.huge)
+                            until not v or not v.Parent or v.Humanoid.Health <= 0 or not AutoHallowScythe
+                        end
+                    end
+                elseif (Backpack:FindFirstChild("Hallow Essence") or Character:FindFirstChild("Hallow Essence")) then
+                    repeat
+                        Tween(CFrame.new(-8932.322, 146.831, 6062.550))
+                        wait(1)
+                    until (Character.HumanoidRootPart.Position - Vector3.new(-8932.322, 146.831, 6062.550)).Magnitude <= 8
+                    
+                    wait(1)
+                    EquipTool("Hallow Essence")
+                    wait(1) -- Give time for the tool to be equipped and used
+                else
+                    -- Check if Soul Reaper exists in ReplicatedStorage (not spawned yet)
+                    if game.ReplicatedStorage:FindFirstChild("Soul Reaper") then
+                        local soulReaper = game.ReplicatedStorage:FindFirstChild("Soul Reaper")
+                        if soulReaper:FindFirstChild("HumanoidRootPart") then
+                            Tween(soulReaper.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                            wait(2) -- Wait at spawn location for mob to appear
+                        end
+                    else
+                        -- If Soul Reaper is not found, go to its spawn location
+                        Tween(CFrame.new(-9570.42773, 315.952209, 6726.36963))
+                        wait(3) -- Wait at spawn location for mob to appear
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 Trial:AddSection("Temple Clock Teleport");
