@@ -1781,31 +1781,28 @@ Main:AddToggle({
     Description = "",
     Default = false,
     Callback = function(Value)
-        _G.Auto_GorillaKing = Value
+        _G.AutoGorillaKing = Value
     end
 })
 
 spawn(function()
     while task.wait() do
-        if _G.Auto_GorillaKing then
+        if _G.AutoGorillaKing then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Gorilla King [Lv. 20] [Boss]")
-
+                local boss = game:GetService("Workspace").Enemies:FindFirstChild("The Gorilla King [Lv. 20] [Boss]")
                 if boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
                     AutoHaki()
                     EquipTool(SelectWeapon)
-
                     boss.HumanoidRootPart.CanCollide = false
                     boss.Humanoid.WalkSpeed = 0
                     boss.Humanoid.JumpPower = 0
                     boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                     boss.HumanoidRootPart.Transparency = 1
-
                     Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
                     AttackNoCoolDown()
                 else
-                    -- Go to spawn area if not spawned
-                    Tween(CFrame.new(-1127, 40, 492)) -- Gorilla King spawn position
+                    -- Updated coordinates for Gorilla King spawn location
+                    Tween(CFrame.new(- 1088.75977, 8.13463783, - 488.559906, - 0.707134247, 0, 0.707079291, 0, 1, 0, - 0.707079291, 0, - 0.707134247);
                 end
             end)
         end
