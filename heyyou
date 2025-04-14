@@ -1870,11 +1870,11 @@ elseif Sea3 then
     }
 end
 
-Main:AddSection("Boss Farm Sea 1");
+Main:AddSection("Boss Farm Sea 1")
 
 Main:AddDropdown({
     Name = "Select Boss",
-    Flag = "Main/SelectBoss",
+    Flag = "Main/SelectBoss1",
     Description = "",
     Default = "The Gorilla King",
     Options = {
@@ -1887,11 +1887,11 @@ Main:AddDropdown({
     end
 })
 
-Main:AddSection("Boss Farm Sea 2");
+Main:AddSection("Boss Farm Sea 2")
 
 Main:AddDropdown({
     Name = "Select Boss",
-    Flag = "Main/SelectBoss",
+    Flag = "Main/SelectBoss2",
     Description = "",
     Default = "Diamond",
     Options = {
@@ -1907,7 +1907,7 @@ Main:AddSection("Boss Farm Sea 3")
 
 Main:AddDropdown({
     Name = "Select Boss",
-    Flag = "Main/SelectBoss",
+    Flag = "Main/SelectBoss3",
     Description = "",
     Default = "Stone",
     Options = {
