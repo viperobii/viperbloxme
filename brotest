@@ -5,7 +5,7 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "Nova.GG : Dead-Rails",
+    Title = "Nova.GG : Blox-Fruit",
     SubTitle = "by Viper x Tanny",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
@@ -35,7 +35,6 @@ local Teleport = Window:MakeTab({
 })
 
 
--- AUTO FARM LEVEL TOGGLE
 Main:AddToggle({
     Name = "Auto Farm Level",
     Flag = "Main/AutoFarmLevel",
@@ -43,115 +42,69 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoLevel = Value
-        if not Value then bringmob = false end
+        if not Value then
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end
 })
 
--- VARIABLES
-Ms = Ms or ""
-NameMon = NameMon or ""
-NameQuest = NameQuest or ""
-QuestLv = QuestLv or 1
-CFrameQ = CFrameQ or CFrame.new(0, 0, 0)
-CFrameMon = CFrameMon or CFrame.new(0, 0, 0)
-SelectWeapon = SelectWeapon or ""
-
--- FUNCTIONS
-if not CheckLevel then
-    function CheckLevel()
-        -- Your logic to set Ms, NameMon, NameQuest, QuestLv, CFrameQ, CFrameMon
-    end
-end
-
-function AutoHaki()
-    if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
-    end
-end
-
-function EquipTool(ToolName)
-    local tool = game:GetService("Players").LocalPlayer.Backpack:FindFirstChild(ToolName) or
-                 game:GetService("Players").LocalPlayer.Character:FindFirstChild(ToolName)
-    if tool then
-        game:GetService("Players").LocalPlayer.Character.Humanoid:EquipTool(tool)
-    end
-end
-
-function AttackNoCoolDown()
-    local Combat = game.Players.LocalPlayer.Character:FindFirstChild("Combat") or
-                   game.Players.LocalPlayer.Backpack:FindFirstChild("Combat")
-    if Combat then
-        Combat:Activate()
-    end
-end
-
-function Tween(Pos)
-    local TweenService = game:GetService("TweenService")
-    local player = game.Players.LocalPlayer
-    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        local dist = (hrp.Position - Pos.Position).Magnitude
-        local speed = math.clamp(dist / 325, 1, 10)
-        local tw = TweenService:Create(hrp, TweenInfo.new(speed, Enum.EasingStyle.Linear), {CFrame = Pos})
-        tw:Play()
-        return tw
-    end
-end
-
--- AUTO FARM LEVEL LOOP
 spawn(function()
     while task.wait() do
         if _G.AutoLevel then
             pcall(function()
-                local player = game.Players.LocalPlayer
-                local questGui = player.PlayerGui.Main.Quest
-
                 CheckLevel()
 
-                if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) then
-                    bringmob = false
+                local player = game:GetService("Players").LocalPlayer
+                local questGui = player.PlayerGui.Main.Quest
+
+                if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    local questTween = Tween(CFrameQ)
-                    if questTween then questTween.Completed:Wait() end
-                    task.wait(1)
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
-                    task.wait(0.5)
-                end
+                    Tween(CFrameQ)
 
-                local found = false
-                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                    if enemy.Name == Ms and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        found = true
-                        break
+                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
+                        wait(0.5) -- Small delay before accepting quest
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
                     end
-                end
-
-                if not found then
-                    Tween(CFrameMon)
-                    task.wait(1)
-                end
-
-                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                    if _G.AutoLevel and enemy.Name == Ms and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                        bringmob = true
-                        repeat
-                            if not _G.AutoLevel or not enemy.Parent then break end
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            Tween(CFrame.new(enemy.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
-                            AttackNoCoolDown()
-                            if enemy:FindFirstChild("HumanoidRootPart") then
+                else
+                    -- Check if there are mobs to farm
+                    local foundMob = false
+                    
+                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            if string.find(enemy.Name, Ms) then
+                                foundMob = true
+                                
+                                -- Target and attack the mob
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
-                                enemy.HumanoidRootPart.CanCollide = false
-                            end
-                            if enemy:FindFirstChild("Humanoid") then
-                                enemy.Humanoid.WalkSpeed = 0
                                 enemy.Humanoid.JumpPower = 0
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.HumanoidRootPart.CanCollide = false
+                                
+                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                                
+                                -- Attack
+                                AttackNoCoolDown()
+                                bringmob = true
+                                
+                                wait(0.1)
+                                break -- Focus on one mob at a time
                             end
-                            task.wait()
-                        until not _G.AutoLevel or not enemy or not enemy.Parent or enemy.Humanoid.Health <= 0
+                        end
+                    end
+                    
+                    -- If no mobs found, go to spawn location
+                    if not foundMob then
                         bringmob = false
+                        -- Go to mob spawn location
+                        Tween(CFrameMon)
+                        wait(0.5)
                     end
                 end
             end)
@@ -160,15 +113,20 @@ spawn(function()
 end)
 
 -- AUTO FARM NEAREST MOB TOGGLE
--- Auto Farm Nearest Mob with Smooth Movement
 Main:AddToggle({
     Name = "Auto Farm Nearest Mob",
     Flag = "Main/AutoFarmNearestMob",
-    Description = "Nearest Mob",
+    Description = "Nearest",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
-        if not Value then bringmob = false end
+        if not Value then 
+            bringmob = false
+            -- Return to original position when turning off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end
 })
 
@@ -179,6 +137,8 @@ spawn(function()
             pcall(function()
                 local Closest = nil
                 local ClosestDistance = math.huge
+                
+                -- Find the closest enemy
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
@@ -190,36 +150,41 @@ spawn(function()
                 end
 
                 if Closest then
-                    -- Smoothly move to nearest mob
-                    repeat
-                        task.wait(_G.Fast_Delay or 0.1)
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-
-                        -- Smooth movement with CFrame.Lerp for steady positioning
-                        local charRoot = game.Players.LocalPlayer.Character.HumanoidRootPart
-                        local targetPosition = Closest.HumanoidRootPart.Position + Vector3.new(0, 2, 0)  -- Adjust height for proper movement
-                        local moveTween = game:GetService("TweenService"):Create(
-                            charRoot, 
-                            TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1, false), 
-                            {CFrame = CFrame.new(targetPosition)}
-                        )
-                        moveTween:Play()
-
-                        -- Optionally, make mob's humanoid parts unaffected
-                        if Closest:FindFirstChild("HumanoidRootPart") then
-                            Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Closest.HumanoidRootPart.Transparency = 1
-                            Closest.HumanoidRootPart.CanCollide = false
-                        end
-                        if Closest:FindFirstChild("Humanoid") then
-                            Closest.Humanoid.WalkSpeed = 0
-                            Closest.Humanoid.JumpPower = 0
-                        end
-
-                        bringmob = true
-                    until not _G.AutoNear or Closest.Humanoid.Health <= 0 or not Closest.Parent
+                    -- Target and attack the closest mob
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    
+                    -- Modify mob properties for easier farming
+                    if Closest:FindFirstChild("HumanoidRootPart") then
+                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        Closest.HumanoidRootPart.Transparency = 1
+                        Closest.HumanoidRootPart.CanCollide = false
+                    end
+                    if Closest:FindFirstChild("Humanoid") then
+                        Closest.Humanoid.WalkSpeed = 0
+                        Closest.Humanoid.JumpPower = 0
+                    end
+                    
+                    -- Position above the mob
+                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    
+                    -- Attack
+                    AttackNoCoolDown()
+                    bringmob = true
+                    
+                    -- Wait before next loop iteration
+                    wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or no longer valid
+                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
+                        bringmob = false
+                        wait(0.5) -- Short wait before targeting next mob
+                    end
+                else
+                    -- No enemies found
                     bringmob = false
+                    wait(0.5)
                 end
             end)
         end
@@ -228,38 +193,57 @@ end)
 
 -- AUTO COLLECT CHEST TOGGLE
 Main:AddSection("Chest Farm")
+
 Main:AddToggle({
     Name = "Auto Farm Chest",
     Flag = "Main/AutoCollectChest",
-    Description = "Collect All Chest",
+    Description = "Automatically farm nearest chest",
     Default = false,
     Callback = function(Value)
         _G.AutoCollectChest = Value
+        if not Value then
+            wait()
+            Tween(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end
 })
 
+-- AUTO FARM CHEST LOOP
 spawn(function()
-    while wait() do
+    while task.wait() do
         if _G.AutoCollectChest then
             pcall(function()
-                local player = game:GetService("Players").LocalPlayer
+                local player = game.Players.LocalPlayer
                 local character = player.Character or player.CharacterAdded:Wait()
-                local rootPos = character:GetPivot().Position
+                local root = character:FindFirstChild("HumanoidRootPart")
+                if not root then return end
 
-                local chestTag = game:GetService("CollectionService"):GetTagged("_ChestTagged")
-                local closestDistance = math.huge
                 local closestChest = nil
+                local shortestDistance = math.huge
+                local chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
 
-                for _, chest in pairs(chestTag) do
-                    local dist = (chest:GetPivot().Position - rootPos).Magnitude
-                    if not chest:GetAttribute("IsDisabled") and dist < closestDistance then
-                        closestDistance = dist
-                        closestChest = chest
+                -- Find closest enabled chest
+                for _, chest in pairs(chests) do
+                    if chest:IsA("Model") and not chest:GetAttribute("IsDisabled") then
+                        local dist = (root.Position - chest:GetPivot().Position).Magnitude
+                        if dist < shortestDistance then
+                            shortestDistance = dist
+                            closestChest = chest
+                        end
                     end
                 end
 
+                -- Go to chest
                 if closestChest then
-                    Tween2(CFrame.new(closestChest:GetPivot().Position))
+                    local targetPos = closestChest:GetPivot().Position + Vector3.new(0, 5, 0)
+                    local tweenService = game:GetService("TweenService")
+                    local tweenInfo = TweenInfo.new((root.Position - targetPos).Magnitude / 350, Enum.EasingStyle.Linear)
+                    local goal = { CFrame = CFrame.new(targetPos) }
+
+                    local tween = tweenService:Create(root, tweenInfo, goal)
+                    tween:Play()
+                    tween.Completed:Wait()
                 end
             end)
         end
@@ -271,7 +255,7 @@ Main:AddSection("Bones Farm");
 Main:AddToggle({
     Name = "Auto Farm Bones",
     Flag = "Main/AutoFarmBones",
-    Description = "Farm Reborn Skeletons for Bones",
+    Description = "",
     Default = false,
     Callback = function(Value)
         _G.AutoFarmBones = Value
@@ -349,7 +333,7 @@ end)
 Main:AddToggle({
     Name = "Auto Roll Bones",
     Flag = "Main/AutoRollBones",
-    Description = "Auto Spin Bone",
+    Description = "",
     Default = false,
     Callback = function(Value)
         _G.AutoRollBones = Value
@@ -1025,15 +1009,20 @@ spawn(function()
     end
 end)
 
--- Auto Farm Nearest Mob with Smooth Movement
 Raids:AddToggle({
-    Name = "Auto Farm Nearest Mob",
+    Name = "Auto Raids Mobs",
     Flag = "Raids/AutoFarmNearestMob",
-    Description = "Nearest Mob",
+    Description = "Nearest",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
-        if not Value then bringmob = false end
+        if not Value then 
+            bringmob = false
+            -- Return to original position when turning off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end
 })
 
@@ -1044,6 +1033,8 @@ spawn(function()
             pcall(function()
                 local Closest = nil
                 local ClosestDistance = math.huge
+                
+                -- Find the closest enemy
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
@@ -1055,36 +1046,41 @@ spawn(function()
                 end
 
                 if Closest then
-                    -- Smoothly move to nearest mob
-                    repeat
-                        task.wait(_G.Fast_Delay or 0.1)
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-
-                        -- Smooth movement with CFrame.Lerp for steady positioning
-                        local charRoot = game.Players.LocalPlayer.Character.HumanoidRootPart
-                        local targetPosition = Closest.HumanoidRootPart.Position + Vector3.new(0, 2, 0)  -- Adjust height for proper movement
-                        local moveTween = game:GetService("TweenService"):Create(
-                            charRoot, 
-                            TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out, -1, false), 
-                            {CFrame = CFrame.new(targetPosition)}
-                        )
-                        moveTween:Play()
-
-                        -- Optionally, make mob's humanoid parts unaffected
-                        if Closest:FindFirstChild("HumanoidRootPart") then
-                            Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Closest.HumanoidRootPart.Transparency = 1
-                            Closest.HumanoidRootPart.CanCollide = false
-                        end
-                        if Closest:FindFirstChild("Humanoid") then
-                            Closest.Humanoid.WalkSpeed = 0
-                            Closest.Humanoid.JumpPower = 0
-                        end
-
-                        bringmob = true
-                    until not _G.AutoNear or Closest.Humanoid.Health <= 0 or not Closest.Parent
+                    -- Target and attack the closest mob
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    
+                    -- Modify mob properties for easier farming
+                    if Closest:FindFirstChild("HumanoidRootPart") then
+                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        Closest.HumanoidRootPart.Transparency = 1
+                        Closest.HumanoidRootPart.CanCollide = false
+                    end
+                    if Closest:FindFirstChild("Humanoid") then
+                        Closest.Humanoid.WalkSpeed = 0
+                        Closest.Humanoid.JumpPower = 0
+                    end
+                    
+                    -- Position above the mob
+                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    
+                    -- Attack
+                    AttackNoCoolDown()
+                    bringmob = true
+                    
+                    -- Wait before next loop iteration
+                    wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or no longer valid
+                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
+                        bringmob = false
+                        wait(0.5) -- Short wait before targeting next mob
+                    end
+                else
+                    -- No enemies found
                     bringmob = false
+                    wait(0.5)
                 end
             end)
         end
@@ -1142,6 +1138,7 @@ spawn(function()
         end
     end
 end)
+
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
@@ -2785,112 +2782,9 @@ AreaList = {
 end
 
 
-function AutoHaki()
 
-if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
 
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
 
-end
-
-end
-
-function to(v232)
-
-repeat
-
-wait(_G.Fast_Delay);
-
-game.Players.LocalPlayer.Character.Humanoid:ChangeState(15);
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
-
-task.wait();
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
-
-until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 2000
-
-end
-
--- Auto Click Combat
-function Click()
-    if not _G.FastAttack then
-        local Module = require(game.Players.LocalPlayer.PlayerScripts.CombatFramework)
-        local CombatFramework = debug.getupvalues(Module)[2]
-        local CamShake = require(game.ReplicatedStorage.Util.CameraShaker)
-        
-        CamShake:Stop()
-        CombatFramework.activeController.attacking = false
-        CombatFramework.activeController.timeToNextAttack = 0
-        CombatFramework.activeController.hitboxMagnitude = 180
-        
-        game:GetService("VirtualUser"):CaptureController()
-        game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 672))
-    end
-end
-
--- blade hits 
-function getAllBladeHits(range)
-    local hits = {}
-    local player = game.Players.LocalPlayer
-
-    -- Get all NPCs
-    for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
-        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-            if (player.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude <= range then
-                table.insert(hits, enemy.HumanoidRootPart)
-            end
-        end
-    end
-
-    -- Get all Players
-    for _, otherPlayer in pairs(game.Players:GetPlayers()) do
-        if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:FindFirstChild("HumanoidRootPart") and otherPlayer.Character:FindFirstChild("Humanoid") then
-            if (player.Character.HumanoidRootPart.Position - otherPlayer.Character.HumanoidRootPart.Position).Magnitude <= range then
-                table.insert(hits, otherPlayer.Character.HumanoidRootPart)
-            end
-        end
-    end
-
-    return hits
-end
-
--- auto attack player
-function AttackFunction()
-    local ac = CombatFrameworkR.activeController
-    if ac and ac.equipped then
-        for indexincrement = 1, 1 do
-            local bladehit = getAllBladeHits(60) -- Now includes players
-            if #bladehit > 0 then
-                local AcAttack8 = debug.getupvalue(ac.attack, 5)
-                local AcAttack9 = debug.getupvalue(ac.attack, 6)
-                local AcAttack7 = debug.getupvalue(ac.attack, 4)
-                local AcAttack10 = debug.getupvalue(ac.attack, 7)
-                local NumberAc12 = (AcAttack8 * 798405 + AcAttack7 * 727595) % AcAttack9
-                local NumberAc13 = AcAttack7 * 798405
-                (function()
-                    NumberAc12 = (NumberAc12 * AcAttack9 + NumberAc13) % 1099511627776
-                    AcAttack8 = math.floor(NumberAc12 / AcAttack9)
-                    AcAttack7 = NumberAc12 - AcAttack8 * AcAttack9
-                end)()
-                AcAttack10 = AcAttack10 + 1
-                debug.setupvalue(ac.attack, 5, AcAttack8)
-                debug.setupvalue(ac.attack, 6, AcAttack9)
-                debug.setupvalue(ac.attack, 4, AcAttack7)
-                debug.setupvalue(ac.attack, 7, AcAttack10)
-                for k, v in pairs(ac.animator.anims.basic) do
-                    v:Play(0.01, 0.01, 0.01)
-                end
-                if game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool") and ac.blades and ac.blades[1] then
-                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("weaponChange", tostring(CurrentWeapon()))
-                    game.ReplicatedStorage.Remotes.Validator:FireServer(math.floor(NumberAc12 / 1099511627776 * 16777215), AcAttack10)
-                    game:GetService("ReplicatedStorage").RigControllerEvent:FireServer("hit", bladehit, indexincrement, "")
-                end
-            end
-        end
-    end
-end
 
 
 function EquipTool()
@@ -2909,83 +2803,7 @@ end
 
 
 
-function Tween2(v204)
 
-local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
-
-local v206 = 350;
-
-if (v205 >= 350) then
-
-v206 = 350;
-
-end
-
-local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear);
-
-local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
-
-CFrame = v204
-
-});
-
-v208:Play();
-
-if _G.CancelTween2 then
-
-v208:Cancel();
-
-end
-
-_G.Clip2 = true;
-
-wait(v205 / v206);
-
-_G.Clip2 = false;
-
-end
-
-function BTPZ(v209)
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
-
-task.wait();
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
-
-end
-
-TweenSpeed = 350;
-
-function Tween(v211)
-
-local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
-
-local v213 = TweenSpeed;
-
-if (v212 >= 350) then
-
-v213 = TweenSpeed;
-
-end
-
-local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear);
-
-local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
-
-CFrame = v211
-
-});
-
-v215:Play();
-
-if _G.StopTween then
-
-v215:Cancel();
-
-end
-
-end
 
 
 
@@ -3152,3 +2970,84 @@ end)
 
 
 
+
+function Tween2(destinationCFrame)
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = 350
+
+    if distance >= 350 then
+        speed = 350
+    end
+
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
+
+    tween:Play()
+
+    if _G.CancelTween2 then
+        tween:Cancel()
+    end
+
+    _G.Clip2 = true
+    wait(distance / speed)
+    _G.Clip2 = false
+end
+
+function BTPZ(destinationCFrame)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
+    task.wait()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
+end
+
+TweenSpeed = 350
+
+function Tween(destinationCFrame)
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = TweenSpeed
+
+    if distance >= 350 then
+        speed = TweenSpeed
+    end
+
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
+
+    tween:Play()
+
+    if _G.StopTween then
+        tween:Cancel()
+    end
+end
+
+
+function AutoHaki()
+
+if not game:GetService("Players").LocalPlayer.Character:FindFirstChild("HasBuso") then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
+
+end
+
+end
+
+function to(v232)
+
+repeat
+
+wait(_G.Fast_Delay);
+
+game.Players.LocalPlayer.Character.Humanoid:ChangeState(15);
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
+
+task.wait();
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v232;
+
+until (v232.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 2000
+
+end
