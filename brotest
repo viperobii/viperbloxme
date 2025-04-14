@@ -1802,7 +1802,7 @@ spawn(function()
                     AttackNoCoolDown()
                 else
                     -- Updated coordinates for Gorilla King spawn location
-                    Tween(CFrame.new(- 1088.75977, 8.13463783, - 488.559906, - 0.707134247, 0, 0.707079291, 0, 1, 0, - 0.707079291, 0, - 0.707134247);
+                    Tween(CFrame.new(-1088.75977, 8.13463783, -488.559906, -0.707134247, 0, 0.707079291, 0, 1, 0, -0.707079291, 0, -0.707134247))
                 end
             end)
         end
