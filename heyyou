@@ -1870,66 +1870,157 @@ elseif Sea3 then
     }
 end
 
+-- Sea 1
 Main:AddSection("Boss Farm Sea 1")
 
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/SelectBoss1",
-    Description = "",
-    Default = "The Gorilla King",
     Options = {
         "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
         "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
         "Thunder God", "Cyborg", "Saber Expert"
     },
     Callback = function(option)
-        _G.SelectBoss = option
+        _G.SelectBoss1 = option
     end
 })
 
+Main:AddToggle({
+    Name = "Auto Farm Boss",
+    Flag = "Main/AutoFarmBoss1",
+    Callback = function(Value)
+        _G.AutoFarmBoss1 = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoFarmBoss1 then
+            pcall(function()
+                if game.Workspace.Enemies:FindFirstChild(_G.SelectBoss1) then
+                    for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
+                        if mob.Name == _G.SelectBoss1 and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            repeat wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                mob.HumanoidRootPart.CanCollide = false
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                Tween(mob.HumanoidRootPart.CFrame * Pos)
+                                sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                            until not _G.AutoFarmBoss1 or mob.Humanoid.Health <= 0 or not mob.Parent
+                        end
+                    end
+                elseif game.ReplicatedStorage:FindFirstChild(_G.SelectBoss1) then
+                    Tween(game.ReplicatedStorage[_G.SelectBoss1].HumanoidRootPart.CFrame * CFrame.new(5,10,7))
+                end
+            end)
+        end
+    end
+end)
+
+-- Sea 2
 Main:AddSection("Boss Farm Sea 2")
 
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/SelectBoss2",
-    Description = "",
-    Default = "Diamond",
     Options = {
         "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
         "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
     },
     Callback = function(option)
-        _G.SelectBoss = option
+        _G.SelectBoss2 = option
     end
 })
 
+Main:AddToggle({
+    Name = "Auto Farm Boss",
+    Flag = "Main/AutoFarmBoss2",
+    Callback = function(Value)
+        _G.AutoFarmBoss2 = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoFarmBoss2 then
+            pcall(function()
+                if game.Workspace.Enemies:FindFirstChild(_G.SelectBoss2) then
+                    for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
+                        if mob.Name == _G.SelectBoss2 and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            repeat wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                mob.HumanoidRootPart.CanCollide = false
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                Tween(mob.HumanoidRootPart.CFrame * Pos)
+                                sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                            until not _G.AutoFarmBoss2 or mob.Humanoid.Health <= 0 or not mob.Parent
+                        end
+                    end
+                elseif game.ReplicatedStorage:FindFirstChild(_G.SelectBoss2) then
+                    Tween(game.ReplicatedStorage[_G.SelectBoss2].HumanoidRootPart.CFrame * CFrame.new(5,10,7))
+                end
+            end)
+        end
+    end
+end)
+
+-- Sea 3
 Main:AddSection("Boss Farm Sea 3")
 
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/SelectBoss3",
-    Description = "",
-    Default = "Stone",
     Options = {
         "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant",
         "Beautiful Pirate", "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
     },
     Callback = function(option)
-        _G.SelectBoss = option
+        _G.SelectBoss3 = option
     end
 })
-
-Main:AddSection("Auto Farm Boss");
 
 Main:AddToggle({
     Name = "Auto Farm Boss",
-    Flag = "Main/AutoFarmBoss",
-    Description = "",
-    Default = false,
+    Flag = "Main/AutoFarmBoss3",
     Callback = function(Value)
-        _G.AutoBoss = Value
+        _G.AutoFarmBoss3 = Value
     end
 })
+
+spawn(function()
+    while wait() do
+        if _G.AutoFarmBoss3 then
+            pcall(function()
+                if game.Workspace.Enemies:FindFirstChild(_G.SelectBoss3) then
+                    for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
+                        if mob.Name == _G.SelectBoss3 and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            repeat wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                mob.HumanoidRootPart.CanCollide = false
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                Tween(mob.HumanoidRootPart.CFrame * Pos)
+                                sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                            until not _G.AutoFarmBoss3 or mob.Humanoid.Health <= 0 or not mob.Parent
+                        end
+                    end
+                elseif game.ReplicatedStorage:FindFirstChild(_G.SelectBoss3) then
+                    Tween(game.ReplicatedStorage[_G.SelectBoss3].HumanoidRootPart.CFrame * CFrame.new(5,10,7))
+                end
+            end)
+        end
+    end
+end)
+
 
 Setting:AddToggle({
     Name = "Full Bright",
