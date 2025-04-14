@@ -25,7 +25,7 @@ local Player = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "tree-palm",  -- Fixed the split "Icon"
+    Icon = "treepalm",  -- Fixed the split "Icon"
 })
 
 
