@@ -1909,17 +1909,17 @@ Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/SelectBoss",
     Description = "",
-    Default = "Diamond",
+    Default = "Stone",
     Options = {
-        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
-        "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant",
+        "Beautiful Pirate", "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
     },
     Callback = function(option)
         _G.SelectBoss = option
     end
 })
 
-Main:AddSlider("Auto Farm Boss")
+Main:AddSection("Auto Farm Boss");
 
 Main:AddToggle({
     Name = "Auto Farm Boss",
