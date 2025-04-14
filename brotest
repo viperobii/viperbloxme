@@ -197,35 +197,53 @@ Main:AddSection("Chest Farm")
 Main:AddToggle({
     Name = "Auto Farm Chest",
     Flag = "Main/AutoCollectChest",
-    Description = "Collect All Chest",
+    Description = "Automatically farm nearest chest",
     Default = false,
     Callback = function(Value)
         _G.AutoCollectChest = Value
+        if not Value then
+            wait()
+            Tween(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end
 })
 
+-- AUTO FARM CHEST LOOP
 spawn(function()
-    while wait() do
+    while task.wait() do
         if _G.AutoCollectChest then
             pcall(function()
-                local player = game:GetService("Players").LocalPlayer
+                local player = game.Players.LocalPlayer
                 local character = player.Character or player.CharacterAdded:Wait()
-                local rootPos = character:GetPivot().Position
+                local root = character:FindFirstChild("HumanoidRootPart")
+                if not root then return end
 
-                local chestTag = game:GetService("CollectionService"):GetTagged("_ChestTagged")
-                local closestDistance = math.huge
                 local closestChest = nil
+                local shortestDistance = math.huge
+                local chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
 
-                for _, chest in pairs(chestTag) do
-                    local dist = (chest:GetPivot().Position - rootPos).Magnitude
-                    if not chest:GetAttribute("IsDisabled") and dist < closestDistance then
-                        closestDistance = dist
-                        closestChest = chest
+                -- Find closest enabled chest
+                for _, chest in pairs(chests) do
+                    if chest:IsA("Model") and not chest:GetAttribute("IsDisabled") then
+                        local dist = (root.Position - chest:GetPivot().Position).Magnitude
+                        if dist < shortestDistance then
+                            shortestDistance = dist
+                            closestChest = chest
+                        end
                     end
                 end
 
+                -- Go to chest
                 if closestChest then
-                    Tween2(CFrame.new(closestChest:GetPivot().Position))
+                    local targetPos = closestChest:GetPivot().Position + Vector3.new(0, 5, 0)
+                    local tweenService = game:GetService("TweenService")
+                    local tweenInfo = TweenInfo.new((root.Position - targetPos).Magnitude / 350, Enum.EasingStyle.Linear)
+                    local goal = { CFrame = CFrame.new(targetPos) }
+
+                    local tween = tweenService:Create(root, tweenInfo, goal)
+                    tween:Play()
+                    tween.Completed:Wait()
                 end
             end)
         end
@@ -546,13 +564,13 @@ Teleport:AddToggle({
 local IslandCFramesSea2 = {
     ["Shank Room"] = CFrame.new(-1442.16553, 29.8788261, -28.3547478),
     ["Mob Island"] = CFrame.new(-2850.20068, 7.39224768, 5354.99268),
-    ["Frist Spot"] = CFrame.new(-11.311455726624, 29.276733398438, 2771.5224609375),
+    ["Kingdom Of Rose"] = CFrame.new(-11.311455726624, 29.276733398438, 2771.5224609375),
     ["Green Zone"] = CFrame.new(-2448.5300292969, 73.016105651855, -3210.6306152344),
     ["Factory"] = CFrame.new(424.12698364258, 211.16171264648, -427.54049682617),
     ["Colossuim"] = CFrame.new(-1503.6224365234, 219.7956237793, 1369.3101806641),
-    ["Zombie Island"] = CFrame.new(-5622.033203125, 492.19604492188, -781.78552246094),
-    ["Two Snow Mountain"] = CFrame.new(753.14288330078, 408.23559570313, -5274.6147460938),
-    ["Punk Hazard"] = CFrame.new(-6127.654296875, 15.951762199402, -5040.2861328125),
+    ["Graveyard Island"] = CFrame.new(-5622.033203125, 492.19604492188, -781.78552246094),
+    ["Snow Mountain"] = CFrame.new(753.14288330078, 408.23559570313, -5274.6147460938),
+    ["Hot & Cold"] = CFrame.new(-6127.654296875, 15.951762199402, -5040.2861328125),
     ["Ice Castle"] = CFrame.new(6148.4116210938, 294.38687133789, -6741.1166992188),
     ["Forgotten Island"] = CFrame.new(-3032.7641601563, 317.89672851563, -10075.373046875)
 }
@@ -978,14 +996,20 @@ spawn(function()
     end
 end)
 
-Main:AddToggle({
-    Name = "Auto Farm Nearest Mob",
-    Flag = "Main/AutoFarmNearestMob",
-    Description = "Nearest Mob",
+Raids:AddToggle({
+    Name = "Auto Raids Mobs",
+    Flag = "Raids/AutoFarmNearestMob",
+    Description = "Nearest",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
-        if not Value then bringmob = false end
+        if not Value then 
+            bringmob = false
+            -- Return to original position when turning off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
     end
 })
 
@@ -996,6 +1020,8 @@ spawn(function()
             pcall(function()
                 local Closest = nil
                 local ClosestDistance = math.huge
+                
+                -- Find the closest enemy
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
@@ -1007,24 +1033,41 @@ spawn(function()
                 end
 
                 if Closest then
-                    repeat
-                        task.wait(_G.Fast_Delay or 0.1)
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-                        Tween(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
-                        AttackNoCoolDown()
-                        if Closest:FindFirstChild("HumanoidRootPart") then
-                            Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Closest.HumanoidRootPart.Transparency = 1
-                            Closest.HumanoidRootPart.CanCollide = false
-                        end
-                        if Closest:FindFirstChild("Humanoid") then
-                            Closest.Humanoid.WalkSpeed = 0
-                            Closest.Humanoid.JumpPower = 0
-                        end
-                        bringmob = true
-                    until not _G.AutoNear or Closest.Humanoid.Health <= 0 or not Closest.Parent
+                    -- Target and attack the closest mob
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    
+                    -- Modify mob properties for easier farming
+                    if Closest:FindFirstChild("HumanoidRootPart") then
+                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        Closest.HumanoidRootPart.Transparency = 1
+                        Closest.HumanoidRootPart.CanCollide = false
+                    end
+                    if Closest:FindFirstChild("Humanoid") then
+                        Closest.Humanoid.WalkSpeed = 0
+                        Closest.Humanoid.JumpPower = 0
+                    end
+                    
+                    -- Position above the mob
+                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    
+                    -- Attack
+                    AttackNoCoolDown()
+                    bringmob = true
+                    
+                    -- Wait before next loop iteration
+                    wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or no longer valid
+                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
+                        bringmob = false
+                        wait(0.5) -- Short wait before targeting next mob
+                    end
+                else
+                    -- No enemies found
                     bringmob = false
+                    wait(0.5)
                 end
             end)
         end
@@ -2915,82 +2958,56 @@ end)
 
 
 
-function Tween2(v204)
+function Tween2(destinationCFrame)
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = 350
 
-local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
+    if distance >= 350 then
+        speed = 350
+    end
 
-local v206 = 350;
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
 
-if (v205 >= 350) then
+    tween:Play()
 
-v206 = 350;
+    if _G.CancelTween2 then
+        tween:Cancel()
+    end
 
+    _G.Clip2 = true
+    wait(distance / speed)
+    _G.Clip2 = false
 end
 
-local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear);
-
-local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
-
-CFrame = v204
-
-});
-
-v208:Play();
-
-if _G.CancelTween2 then
-
-v208:Cancel();
-
+function BTPZ(destinationCFrame)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
+    task.wait()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
 end
 
-_G.Clip2 = true;
+TweenSpeed = 350
 
-wait(v205 / v206);
+function Tween(destinationCFrame)
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = TweenSpeed
 
-_G.Clip2 = false;
+    if distance >= 350 then
+        speed = TweenSpeed
+    end
 
-end
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
 
-function BTPZ(v209)
+    tween:Play()
 
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
-
-task.wait();
-
-game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
-
-end
-
-TweenSpeed = 350;
-
-function Tween(v211)
-
-local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
-
-local v213 = TweenSpeed;
-
-if (v212 >= 350) then
-
-v213 = TweenSpeed;
-
-end
-
-local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear);
-
-local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
-
-CFrame = v211
-
-});
-
-v215:Play();
-
-if _G.StopTween then
-
-v215:Cancel();
-
-end
-
+    if _G.StopTween then
+        tween:Cancel()
+    end
 end
 
 
