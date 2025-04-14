@@ -1374,40 +1374,31 @@ Items:AddToggle({
 spawn(function()
     while task.wait() do
         if AutoTushita then
-            local Enemies = game:GetService("Workspace").Enemies
-            
-            -- First check: find any Longma in the workspace
-            if Enemies:FindFirstChild("Longma") then
-                -- Loop through all enemies to find and attack Longma
-                for _, v in pairs(Enemies:GetChildren()) do
-                    if v.Name == "Longma" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                        repeat
-                            task.wait(_G.Fast_Delay)
-                            AttackNoCoolDown()
-                            AutoHaki()
+            local Longma = workspace.Enemies:FindFirstChild("Longma")
 
-                            if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
-                                EquipTool(SelectWeapon)
-                            end
+            if Longma and Longma:FindFirstChild("Humanoid") and Longma:FindFirstChild("HumanoidRootPart") and Longma.Humanoid.Health > 0 then
+                repeat
+                    task.wait(_G.Fast_Delay)
+                    AttackNoCoolDown()
+                    AutoHaki()
 
-                            -- Set target properties
-                            v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            v.Humanoid.JumpPower = 0
-                            v.Humanoid.WalkSpeed = 0
-                            v.HumanoidRootPart.CanCollide = false
-                            v.Humanoid:ChangeState(11) -- Stunned state
-                            
-                            -- Move to attack position
-                            Tween(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                            
-                        until not AutoTushita or not v.Parent or v.Humanoid.Health <= 0
+                    if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
+                        EquipTool(SelectWeapon)
                     end
-                end
+
+                    FarmPos = Longma.HumanoidRootPart.CFrame
+                    Longma.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                    Longma.Humanoid.JumpPower = 0
+                    Longma.Humanoid.WalkSpeed = 0
+                    Longma.HumanoidRootPart.CanCollide = false
+                    Longma.Humanoid:ChangeState(11)
+
+                    Tween(Longma.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0)) -- Adjusted position above Longma
+
+                until not AutoTushita or not Longma.Parent or Longma.Humanoid.Health <= 0
             else
-                -- If no Longma found, teleport to spawn location
-                print("No Longma found, teleporting to spawn location")
+                -- Teleport to Longma spawn area if he’s not spawned
                 Tween(CFrame.new(-10238.875, 389.791, -9549.793))
-                task.wait(2) -- Wait a bit after teleporting before checking again
             end
         end
     end
