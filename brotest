@@ -453,20 +453,33 @@ Player:AddSlider({
     Range = {16, 300},
     Suffix = "Speed",
     CurrentValue = 50,
+    Increment = 1,  -- Added increment for smoother slider
     Callback = function(Value)
         _G.CustomWalkSpeed = Value
+        -- Apply speed immediately if enabled
+        if _G.EnableWalkSpeed then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = Value
+            end
+        end
     end,
 })
 
--- Loop to Apply WalkSpeed
+-- Initialize global variables
+_G.EnableWalkSpeed = false
+_G.CustomWalkSpeed = 50
+
+-- Loop to Apply WalkSpeed continuously 
 task.spawn(function()
-    while task.wait(0.1) do
+    while true do  -- Changed to true for reliability
         if _G.EnableWalkSpeed then
             local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") and _G.CustomWalkSpeed then
+            if char and char:FindFirstChild("Humanoid") then
                 char.Humanoid.WalkSpeed = _G.CustomWalkSpeed
             end
         end
+        task.wait(0.1)  -- Moved wait to end of loop for better flow
     end
 end)
 
