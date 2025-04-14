@@ -640,6 +640,7 @@ Teleport:AddToggle({
 
 
 
+-- Island positions in Sea 3
 local IslandCFramesSea3 = {
     ["Ussop Island"] = CFrame.new(4816.8618164063, 8.4599885940552, 2863.8195800781),
     ["Mini Sky Island"] = CFrame.new(-288.74060058594, 49326.31640625, -35248.59375),
@@ -656,7 +657,7 @@ local IslandCFramesSea3 = {
     ["Tiki Outpost"] = CFrame.new(-16542.447265625, 55.68632888793945, 1044.41650390625)
 }
 
-
+-- Special islands use portals
 local function TeleportSpecialIslandSea3(name)
     if name == "Castle On The Sea" then
         CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
@@ -667,7 +668,24 @@ local function TeleportSpecialIslandSea3(name)
     end
 end
 
-Teleport:AddSection("Sea 3");
+-- Tween function
+function Tween(destination)
+    local tweenService = game:GetService("TweenService")
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+    local hrp = character.HumanoidRootPart
+    local distance = (hrp.Position - destination.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 350, Enum.EasingStyle.Linear)
+
+    local tween = tweenService:Create(hrp, tweenInfo, { CFrame = destination })
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+-- UI Section: Sea 3 Teleport
+Teleport:AddSection("Sea 3")
 
 Teleport:AddDropdown({
     Name = "Select Island Teleport",
@@ -681,7 +699,7 @@ Teleport:AddDropdown({
     },
     Callback = function(option)
         _G.SelectedTeleportIslandSea3 = option
-        print("Selected Island (Sea 3):", _G.SelectedTeleportIslandSea3)
+        print("Selected Island (Sea 3):", option)
     end
 })
 
@@ -690,11 +708,13 @@ Teleport:AddToggle({
     Flag = "Teleport/EnableTeleportSea3",
     Default = false,
     Callback = function(Value)
-        if Value and game.PlaceId == 7449423635 then -- Sea 3 ID
-            if IslandCFrames[_G.SelectedTeleportIslandSea3] then
-                Tween2(IslandCFrames[_G.SelectedTeleportIslandSea3])
+        if Value and game.PlaceId == 7449423635 and _G.SelectedTeleportIslandSea3 then
+            local selected = _G.SelectedTeleportIslandSea3
+
+            if IslandCFramesSea3[selected] then
+                Tween(IslandCFramesSea3[selected])
             else
-                TeleportSpecialIsland(_G.SelectedTeleportIslandSea3)
+                TeleportSpecialIslandSea3(selected)
             end
         end
     end
