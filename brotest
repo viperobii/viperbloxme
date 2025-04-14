@@ -996,9 +996,9 @@ spawn(function()
     end
 end)
 
-Main:AddToggle({
-    Name = "Auto Farm Nearest Mob",
-    Flag = "Main/AutoFarmNearestMob",
+Raids:AddToggle({
+    Name = "Auto Raids Mobs",
+    Flag = "Raids/AutoFarmNearestMob",
     Description = "Nearest",
     Default = false,
     Callback = function(Value)
