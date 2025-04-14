@@ -43,7 +43,7 @@ local Raids = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "tree-palm",  -- Fixed the split "Icon"
+    Icon = "book",  -- Fixed the split "Icon"
 })
 
 local Setting = Window:MakeTab({
@@ -1361,7 +1361,191 @@ spawn(function()
 end)
 
 
+Items:AddToggle({
+    Name = "Auto Tushita",
+    Flag = "Items/AutoTushita",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoTushita = Value
+    end
+})
 
+spawn(function()
+    while wait() do
+        if AutoTushita then
+            if game:GetService("Workspace").Enemies:FindFirstChild("Longma") then
+                for _, v1341 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if (v1341.Name == "Longma" and v1341.Humanoid.Health > 0 
+                        and v1341:IsA("Model") and v1341:FindFirstChild("Humanoid") 
+                        and v1341:FindFirstChild("HumanoidRootPart")) then
+                        
+                        repeat
+                            wait(_G.Fast_Delay)
+                            AttackNoCoolDown()
+                            AutoHaki()
+                            
+                            if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
+                                wait()
+                                EquipTool(SelectWeapon)
+                            end
+                            
+                            local FarmPos = v1341.HumanoidRootPart.CFrame
+                            v1341.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            v1341.Humanoid.JumpPower = 0
+                            v1341.Humanoid.WalkSpeed = 0
+                            v1341.HumanoidRootPart.CanCollide = false
+                            v1341.Humanoid:ChangeState(11)
+                            
+                            Tween(v1341.HumanoidRootPart.CFrame * Pos)
+                            
+                        until not AutoTushita or not v1341.Parent or v1341.Humanoid.Health <= 0
+                    end
+                end
+            else
+                Tween(CFrame.new(-10238.875976563, 389.7912902832, -9549.7939453125))
+            end
+        end
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Yama",
+    Flag = "Items/AutoYama",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoYama = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoYama then
+            pcall(function()
+                -- Check if player has enough Elite Hunter progress
+                local eliteProgress = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
+                
+                if eliteProgress >= 30 then
+                    -- If player has enough progress, try to get Yama
+                    if not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Yama") and 
+                       not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Yama") then
+                        
+                        -- Check if the ClickDetector exists
+                        local clickDetector = game:GetService("Workspace").Map.Waterfall.SealedKatana.Handle.ClickDetector
+                        
+                        if clickDetector then
+                            -- Teleport to the Yama location first (optional, add if needed)
+                            local yamaPos = game:GetService("Workspace").Map.Waterfall.SealedKatana.Handle.CFrame
+                            
+                            -- You can add a teleport here if needed:
+                            -- Tween(yamaPos * CFrame.new(0, 2, 0))
+                            -- wait(1)
+                            
+                            -- Fire the click detector to get Yama
+                            fireclickdetector(clickDetector)
+                            
+                            -- Wait a bit to prevent server stress
+                            wait(1)
+                        else
+                            print("ClickDetector not found!")
+                        end
+                    else
+                        -- Player already has Yama
+                        print("You already have Yama!")
+                    end
+                else
+                    -- Not enough Elite Hunter progress
+                    print("Not enough Elite Hunter progress! Current progress: " .. eliteProgress .. "/30")
+                    
+                    -- Optional: Add code here to help get Elite Hunter progress
+                    -- For example, teleport to Elite Hunter location or find Elite enemies
+                end
+            end)
+        end
+        
+        -- Add a short wait to prevent the loop from running too frequently
+        wait(1)
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Hallow Scythe",
+    Flag = "Items/AutoHallowScythe",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoHallowScythe = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if AutoHallowScythe then
+            pcall(function()
+                local Enemies = workspace.Enemies
+                local Player = game.Players.LocalPlayer
+                local Backpack = Player.Backpack
+                local Character = Player.Character
+                
+                -- Define Pos if not already defined
+                if not Pos then
+                    Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
+                end
+
+                if Enemies:FindFirstChild("Soul Reaper") then
+                    for _, v in pairs(Enemies:GetChildren()) do
+                        if string.find(v.Name, "Soul Reaper") and 
+                           v:FindFirstChild("Humanoid") and 
+                           v:FindFirstChild("HumanoidRootPart") and 
+                           v.Humanoid.Health > 0 then
+                            
+                            repeat
+                                wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+
+                                v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                v.HumanoidRootPart.CanCollide = false
+                                v.HumanoidRootPart.Transparency = 1
+                                v.Humanoid.JumpPower = 0
+                                v.Humanoid.WalkSpeed = 0
+                                v.Humanoid:ChangeState(14)
+                                
+                                Tween(v.HumanoidRootPart.CFrame * Pos)
+
+                                sethiddenproperty(Player, "SimulationRadius", math.huge)
+                            until not v or not v.Parent or v.Humanoid.Health <= 0 or not AutoHallowScythe
+                        end
+                    end
+                elseif (Backpack:FindFirstChild("Hallow Essence") or Character:FindFirstChild("Hallow Essence")) then
+                    repeat
+                        Tween(CFrame.new(-8932.322, 146.831, 6062.550))
+                        wait(1)
+                    until (Character.HumanoidRootPart.Position - Vector3.new(-8932.322, 146.831, 6062.550)).Magnitude <= 8
+                    
+                    wait(1)
+                    EquipTool("Hallow Essence")
+                    wait(1) -- Give time for the tool to be equipped and used
+                else
+                    -- Check if Soul Reaper exists in ReplicatedStorage (not spawned yet)
+                    if game.ReplicatedStorage:FindFirstChild("Soul Reaper") then
+                        local soulReaper = game.ReplicatedStorage:FindFirstChild("Soul Reaper")
+                        if soulReaper:FindFirstChild("HumanoidRootPart") then
+                            Tween(soulReaper.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                            wait(2) -- Wait at spawn location for mob to appear
+                        end
+                    else
+                        -- If Soul Reaper is not found, go to its spawn location
+                        Tween(CFrame.new(-9570.42773, 315.952209, 6726.36963))
+                        wait(3) -- Wait at spawn location for mob to appear
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 Trial:AddSection("Temple Clock Teleport");
