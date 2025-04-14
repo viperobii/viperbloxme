@@ -1372,69 +1372,65 @@ Items:AddToggle({
 })
 
 spawn(function()
-    while wait() do
-        if AutoTushita then
-            local Enemies = workspace.Enemies
-            local Player = game.Players.LocalPlayer
-            
-            if Enemies:FindFirstChild("Longma") then
-                for _, enemy in pairs(Enemies:GetChildren()) do
-                    if enemy.Name == "Longma" and enemy:IsA("Model") and 
-                       enemy:FindFirstChild("Humanoid") and 
-                       enemy:FindFirstChild("HumanoidRootPart") and 
-                       enemy.Humanoid.Health > 0 then
-                        
-                        repeat
-                            wait(_G.Fast_Delay)
-                            AttackNoCoolDown()
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            
-                            -- Define Pos if not already defined
-                            if not Pos then
-                                Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
-                            end
-                            
-                            -- Set farm position and modify enemy properties
-                            FarmPos = enemy.HumanoidRootPart.CFrame
-                            enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            enemy.Humanoid.JumpPower = 0
-                            enemy.Humanoid.WalkSpeed = 0
-                            enemy.HumanoidRootPart.CanCollide = false
-                            enemy.Humanoid:ChangeState(14) -- Stun state (14) instead of 11
-                            
-                            -- Move to position relative to enemy
-                            Tween(enemy.HumanoidRootPart.CFrame * Pos)
-                            
-                            -- Check for water less frequently to avoid interrupting combat
-                            if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                                local playerPosition = Player.Character.HumanoidRootPart.Position
-                                if playerPosition.Y <= 0 then
-                                    Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                                end
-                            end
-                            
-                        until not AutoTushita or not enemy.Parent or enemy.Parent ~= Enemies or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0
-                    end
-                end
-            else
-                -- Tween to Longma spawn location
-                if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                    Tween(CFrame.new(-10238.875, 389.791, -9549.794))
-                    
-                    -- Wait a moment after teleporting to spawn area
-                    wait(1)
-                    
-                    -- Ensure no fall into water here
-                    local playerPosition = Player.Character.HumanoidRootPart.Position
-                    if playerPosition.Y <= 0 then
-                        Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                    end
-                end
-            end
-        end
-    end
-end)
+
+while wait() do
+
+if AutoTushita then
+
+if game:GetService("Workspace").Enemies:FindFirstChild("Longma") then
+
+for v1340, v1341 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if ((v1341.Name == ("Longma" or (v1341.Name == "Longma"))) and (v1341.Humanoid.Health > 0) and v1341:IsA("Model") and v1341:FindFirstChild("Humanoid") and v1341:FindFirstChild("HumanoidRootPart")) then
+
+repeat
+
+wait(_G.Fast_Delay);
+
+AttackNoCoolDown();
+
+AutoHaki();
+
+if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
+
+wait();
+
+EquipTool(SelectWeapon);
+
+end
+
+FarmPos = v1341.HumanoidRootPart.CFrame;
+
+v1341.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v1341.Humanoid.JumpPower = 0;
+
+v1341.Humanoid.WalkSpeed = 0;
+
+v1341.HumanoidRootPart.CanCollide = false;
+
+v1341.Humanoid:ChangeState(11);
+
+Tween(v1341.HumanoidRootPart.CFrame * Pos);
+
+until not AutoTushita or not v1341.Parent or (v1341.Humanoid.Health <= 0)
+
+end
+
+end
+
+else
+
+Tween(CFrame.new(- 10238.875976563, 389.7912902832, - 9549.7939453125));
+
+end
+
+end
+
+end
+
+end);
+
 
 Items:AddToggle({
     Name = "Auto Yama",
