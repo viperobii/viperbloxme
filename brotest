@@ -25,7 +25,7 @@ local Player = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "treepalm",  -- Fixed the split "Icon"
+    Icon = "book",  -- Fixed the split "Icon"
 })
 
 
@@ -553,6 +553,70 @@ Teleport:AddToggle({
     end
 })
 
+
+
+local IslandCFramesSea2 = {
+    ["Shank Room"] = CFrame.new(-1442.16553, 29.8788261, -28.3547478),
+    ["Mob Island"] = CFrame.new(-2850.20068, 7.39224768, 5354.99268),
+    ["Frist Spot"] = CFrame.new(-11.311455726624, 29.276733398438, 2771.5224609375),
+    ["Green Zone"] = CFrame.new(-2448.5300292969, 73.016105651855, -3210.6306152344),
+    ["Factory"] = CFrame.new(424.12698364258, 211.16171264648, -427.54049682617),
+    ["Colossuim"] = CFrame.new(-1503.6224365234, 219.7956237793, 1369.3101806641),
+    ["Zombie Island"] = CFrame.new(-5622.033203125, 492.19604492188, -781.78552246094),
+    ["Two Snow Mountain"] = CFrame.new(753.14288330078, 408.23559570313, -5274.6147460938),
+    ["Punk Hazard"] = CFrame.new(-6127.654296875, 15.951762199402, -5040.2861328125),
+    ["Ice Castle"] = CFrame.new(6148.4116210938, 294.38687133789, -6741.1166992188),
+    ["Forgotten Island"] = CFrame.new(-3032.7641601563, 317.89672851563, -10075.373046875)
+}
+
+
+
+local function TeleportSpecialIslandSea2(name)
+    if name == "The Cafe" or name == "Flamingo Mansion" then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-281.93707275390625, 306.130615234375, 609.280029296875))
+        wait()
+        if name == "The Cafe" then
+            Tween2(CFrame.new(-380.47927856445, 77.220390319824, 255.82550048828))
+        end
+    elseif name == "Flamingo Room" then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(2284.912109375, 15.152034759521484, 905.48291015625))
+    elseif name == "Cursed Ship" then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(923.40197753906, 125.05712890625, 32885.875))
+    end
+end
+
+
+
+Teleport:AddDropdown({
+    Name = "Select Island Teleport (Sea 2)",
+    Flag = "Teleport/IslandSelectionSea2",
+    Default = "The Cafe",
+    Options = {
+        "The Cafe", "Shank Room", "Mob Island", "Frist Spot", "Flamingo Mansion", "Flamingo Room", "Green Zone",
+        "Factory", "Colossuim", "Zombie Island", "Two Snow Mountain", "Punk Hazard", "Cursed Ship", "Ice Castle", "Forgotten Island"
+    },
+    Callback = function(option)
+        _G.SelectedTeleportIslandSea2 = option
+        print("Selected Sea 2 Island:", _G.SelectedTeleportIslandSea2)
+    end
+})
+
+
+
+Teleport:AddToggle({
+    Name = "Teleport To Island (Sea 2)",
+    Flag = "Teleport/EnableTeleportSea2",
+    Default = false,
+    Callback = function(Value)
+        if Value and game.PlaceId == 4442272183 then -- Second Sea
+            if IslandCFramesSea2[_G.SelectedTeleportIslandSea2] then
+                Tween2(IslandCFramesSea2[_G.SelectedTeleportIslandSea2])
+            else
+                TeleportSpecialIslandSea2(_G.SelectedTeleportIslandSea2)
+            end
+        end
+    end
+})
 
 Teleport:AddSection("Sea World");
 
