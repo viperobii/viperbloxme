@@ -668,20 +668,6 @@ Teleport:AddDropdown({
     end
 })
 
-Teleport:AddSection("Sea World");
-
-Teleport:AddToggle({
-    Name = "Teleport To Sea 1",
-    Flag = "Teleport/ToSea1",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
-            task.wait(0.2)
-            getgenv().Flags["Teleport/ToSea1"] = false
-        end
-    end
-})
 
 
 Teleport:AddToggle({
@@ -698,6 +684,24 @@ Teleport:AddToggle({
         end
     end
 })
+
+Teleport:AddSection("Sea World");
+
+Teleport:AddToggle({
+    Name = "Teleport To Sea 1",
+    Flag = "Teleport/ToSea1",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("TravelMain")
+            task.wait(0.2)
+            getgenv().Flags["Teleport/ToSea1"] = false
+        end
+    end
+})
+
+
+
 
 Teleport:AddToggle({
     Name = "Teleport To Sea 2",
