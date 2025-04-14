@@ -464,7 +464,7 @@ task.spawn(function()
     end
 end)
 
-Teleport:AddSection("Teleportation")
+Teleport:AddSection("Sea 1")
 
 -- Required Services
 local TweenService = game:GetService("TweenService")
@@ -554,6 +554,8 @@ Teleport:AddToggle({
 })
 
 
+Teleport:AddSection("Sea World");
+
 Teleport:AddToggle({
     Name = "Teleport To Sea 1",
     Flag = "Teleport/ToSea1",
@@ -592,6 +594,127 @@ Teleport:AddToggle({
         end
     end
 })
+
+
+Main:AddSection("Cakes Farm");
+
+Main:AddToggle({
+    Name = "Auto Farm Cake Commander",
+    Flag = "Main/AutoFarmCakeCommander",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.CakePrince = Value
+        if Value then
+            -- Initial teleport to cake area
+            local cakeArea = CFrame.new(-2003.932861328125, 380.4824523925781, -12561.0185546875)
+            Tween(cakeArea)
+        else
+            -- Return to original position when turned off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+            bringmob = false
+        end
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.CakePrince then
+            pcall(function()
+                -- Priority 1: Farm Cake Prince if available
+                if game:GetService("Workspace").Enemies:FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]") then
+                    local prince = game:GetService("Workspace").Enemies:FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]")
+                    if prince and prince:FindFirstChild("Humanoid") and prince:FindFirstChild("HumanoidRootPart") and prince.Humanoid.Health > 0 then
+                        -- Setup for combat
+                        AutoHaki()
+                        EquipTool(SelectWeapon)
+                        
+                        -- Modify boss for easier combat
+                        prince.HumanoidRootPart.CanCollide = false
+                        prince.Humanoid.WalkSpeed = 0
+                        prince.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        
+                        -- Position and attack
+                        local targetPos = prince.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                        AttackNoCoolDown()
+                        
+                        wait(_G.Fast_Delay or 0.1)
+                    end
+                -- Priority 2: Move to Cake Prince in ReplicatedStorage if visible
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]") then
+                    local princeRS = game:GetService("ReplicatedStorage"):FindFirstChild("Cake Prince [Lv. 2300] [Raid Boss]")
+                    if princeRS:FindFirstChild("HumanoidRootPart") then
+                        Tween(princeRS.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    end
+                -- Priority 3: Farm minions when mirror is transparent (means boss can be spawned)
+                elseif game:GetService("Workspace").Map.CakeLoaf.BigMirror.Other.Transparency == 1 then
+                    local targets = {
+                        "Cookie Crafter",
+                        "Cake Guard",
+                        "Baking Staff",
+                        "Head Baker"
+                    }
+                    
+                    local foundTarget = false
+                    for _, target in pairs(targets) do
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if enemy.Name == target and enemy:FindFirstChild("Humanoid") and 
+                               enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                
+                                foundTarget = true
+                                
+                                -- Setup for combat
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                bringmob = true
+                                
+                                -- Modify enemy for easier combat
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                if enemy:FindFirstChild("Head") then
+                                    enemy.Head.CanCollide = false
+                                end
+                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                
+                                -- Set farm variables
+                                FarmPos = enemy.HumanoidRootPart.CFrame
+                                MonFarm = enemy.Name
+                                
+                                -- Position and attack
+                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                                AttackNoCoolDown()
+                                
+                                wait(_G.Fast_Delay or 0.1)
+                                break
+                            end
+                        end
+                        
+                        if foundTarget then break end
+                    end
+                    
+                    if not foundTarget then
+                        bringmob = false
+                        -- Move to the center area to find minions if none are visible
+                        local centerArea = CFrame.new(-2003.932861328125, 380.4824523925781, -12561.0185546875)
+                        Tween(centerArea)
+                        wait(1)
+                    end
+                else
+                    -- If mirror is not transparent and no other conditions are met
+                    bringmob = false
+                    -- Move to the center area
+                    local centerArea = CFrame.new(-2003.932861328125, 380.4824523925781, -12561.0185546875)
+                    Tween(centerArea)
+                    wait(1)
+                end
+            end)
+        end
+    end
+end)
 
 
 
