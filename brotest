@@ -1492,12 +1492,13 @@ spawn(function()
 end)
 
 
+Trial:AddSection("Temple Clock Teleport");
 
 Trial:AddToggle({
     Name = "Teleport Temple Of Time",
     Flag = "Trial/TeleportTempleOfTime",
     Description = "Enable or Disable teleport to Temple Of Time",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
@@ -1509,7 +1510,7 @@ Trial:AddToggle({
     Name = "Teleport To Pull Lever",
     Flag = "Trial/TeleportPullLever",
     Description = "Enable or Disable teleport to Pull Lever",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
@@ -1522,7 +1523,7 @@ Trial:AddToggle({
     Name = "Teleport To Ancient One",
     Flag = "Trial/TeleportAncientOne",
     Description = "Enable or Disable teleport to Ancient One",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
@@ -1535,7 +1536,7 @@ Trial:AddToggle({
     Name = "Teleport To TempleClock",
     Flag = "Trial/TeleportTempleClock",
     Description = "Enable or Disable teleport to TempleClock (Only works at Temple of Time)",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(29536.826171875, 15068.751953125, -86.30783081054688))
@@ -1548,7 +1549,7 @@ Trial:AddToggle({
     Name = "Teleport To Race Door",
     Flag = "Trial/TeleportRaceDoor",
     Description = "Enable or Disable teleport to Race Door",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
@@ -1569,9 +1570,234 @@ Trial:AddToggle({
     end
 })
 
+Trial:AddSection("Trials");
+
+-- Add toggle for Auto Trial
+Trial:AddToggle({
+    Name = "Auto Trial",
+    Flag = "Trial/AutoTrial",
+    Description = "For Ghoul Trial, Double Jump First And Turn On Auto Trial (Instant Kill Mobs)",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoQuestRace = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoQuestRace then
+            pcall(function()
+                local Player = game:GetService("Players").LocalPlayer
+                local PlayerRace = Player.Data.Race.Value
+                
+                if PlayerRace == "Human" then
+                    -- Human Trial
+                    for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
+                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            pcall(function()
+                                repeat
+                                    wait()
+                                    mob.Humanoid.Health = 0
+                                    mob.HumanoidRootPart.CanCollide = false
+                                    sethiddenproperty(Player, "SimulationRadius", math.huge)
+                                until not _G.AutoQuestRace or not mob.Parent or mob.Humanoid.Health <= 0
+                            end)
+                        end
+                    end
+                    
+                elseif PlayerRace == "Skypiea" then
+                    -- Skypiea Trial
+                    for _, part in pairs(game:GetService("Workspace").Map.SkyTrial.Model:GetDescendants()) do
+                        if part.Name == "snowisland_Cylinder.081" then
+                            BTPZ(part.CFrame * CFrame.new(0, 0, 0))
+                        end
+                    end
+                    
+                elseif PlayerRace == "Fishman" then
+                    -- Fishman Trial
+                    for _, part in pairs(game:GetService("Workspace").SeaBeasts.SeaBeast1:GetDescendants()) do
+                        if part.Name == "HumanoidRootPart" then
+                            -- Define Pos if not already defined
+                            if not Pos then
+                                Pos = CFrame.new(0, 30, 0)
+                            end
+                            
+                            Tween(part.CFrame * Pos)
+                            
+                            -- Use all weapon types for attack sequence
+                            local weaponTypes = {"Melee", "Blox Fruit", "Sword", "Gun"}
+                            
+                            for _, weaponType in pairs(weaponTypes) do
+                                -- Equip appropriate weapon
+                                for _, tool in pairs(Player.Backpack:GetChildren()) do
+                                    if tool:IsA("Tool") and tool.ToolTip == weaponType then
+                                        Player.Character.Humanoid:EquipTool(tool)
+                                        break
+                                    end
+                                end
+                                
+                                -- Attack sequence with each weapon (Z, X, C)
+                                local keys = {122, 120, 99} -- Z, X, C in ASCII
+                                for _, key in pairs(keys) do
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, Player.Character.HumanoidRootPart)
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, Player.Character.HumanoidRootPart)
+                                    wait(0.2)
+                                end
+                                
+                                wait(0.5) -- Wait before switching weapons
+                            end
+                        end
+                    end
+                    
+                elseif PlayerRace == "Cyborg" then
+                    -- Cyborg Trial
+                    Tween(CFrame.new(28654, 14898.7832, -30))
+                    
+                elseif PlayerRace == "Ghoul" then
+                    -- Ghoul Trial
+                    for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
+                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            pcall(function()
+                                repeat
+                                    wait()
+                                    mob.Humanoid.Health = 0
+                                    mob.HumanoidRootPart.CanCollide = false
+                                    sethiddenproperty(Player, "SimulationRadius", math.huge)
+                                until not _G.AutoQuestRace or not mob.Parent or mob.Humanoid.Health <= 0
+                            end)
+                        end
+                    end
+                    
+                elseif PlayerRace == "Mink" then
+                    -- Mink Trial
+                    for _, object in pairs(game:GetService("Workspace"):GetDescendants()) do
+                        if object.Name == "StartPoint" then
+                            Tween(object.CFrame * CFrame.new(0, 10, 0))
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
+Trial:AddToggle({
+    Name = "Auto Trial Ghoul / Human",
+    Flag = "Trial/AutoFarmNearestMob",
+    Description = "Smooth Version",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoNear = Value
+        if not Value then 
+            bringmob = false
+            -- Return to original position when turning off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
+    end
+})
 
+-- AUTO FARM NEAREST MOB LOOP
+spawn(function()
+    while task.wait() do
+        if _G.AutoNear then
+            pcall(function()
+                local Closest = nil
+                local ClosestDistance = math.huge
+                
+                -- Find the closest enemy
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                        if dist < ClosestDistance then
+                            Closest = enemy
+                            ClosestDistance = dist
+                        end
+                    end
+                end
+
+                if Closest then
+                    -- Target and attack the closest mob
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    
+                    -- Modify mob properties for easier farming
+                    if Closest:FindFirstChild("HumanoidRootPart") then
+                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        Closest.HumanoidRootPart.Transparency = 1
+                        Closest.HumanoidRootPart.CanCollide = false
+                    end
+                    if Closest:FindFirstChild("Humanoid") then
+                        Closest.Humanoid.WalkSpeed = 0
+                        Closest.Humanoid.JumpPower = 0
+                    end
+                    
+                    -- Position above the mob
+                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    
+                    -- Attack
+                    AttackNoCoolDown()
+                    bringmob = true
+                    
+                    -- Wait before next loop iteration
+                    wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or no longer valid
+                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
+                        bringmob = false
+                        wait(0.5) -- Short wait before targeting next mob
+                    end
+                else
+                    -- No enemies found
+                    bringmob = false
+                    wait(0.5)
+                end
+            end)
+        end
+    end
+end)
+
+
+Setting:AddInput({
+    Name = "Job ID",
+    Flag = "Setting/JobID",
+    Placeholder = "Input Job ID",
+    Default = "",
+    Callback = function(Value)
+        _G.Job = Value
+    end
+})
+
+Setting:AddButton({
+    Name = "Join Job ID",
+    Flag = "Setting/JoinJobID",
+    Callback = function()
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, _G.Job, game.Players.LocalPlayer)
+    end
+})
+
+Setting:AddButton({
+    Name = "Copy Job ID",
+    Flag = "Setting/CopyJobID",
+    Callback = function()
+        setclipboard(tostring(game.JobId))
+    end
+})
+
+
+Setting:AddToggle({
+    Name = "Spam Join Job ID",
+    Flag = "Setting/SpamJoinJobID",
+    Default = false,
+    Callback = function(Value)
+        _G.Join = Value
+    end
+})
+
+Setting:AddSection("Logo Size");
 
 Setting:AddDropdown({
     Name = "Floating Logo Size",  -- Name of the dropdown
