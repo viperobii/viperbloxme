@@ -1870,28 +1870,87 @@ elseif Sea3 then
     }
 end
 
-Main:AddSection("Boss Farm");
+_G.SelectBoss1 = "The Gorilla King"
+_G.SelectBoss2 = "Diamond"
+_G.SelectBoss3 = "Stone"
+_G.AutoBoss = false
+
+
+Main:AddSection("Boss Farm Sea 1");
 
 Main:AddDropdown({
     Name = "Select Boss",
-    Flag = "Main/SelectBoss",
-    Description = "",
-    Default = tableBoss[1],
-    Options = tableBoss,
+    Flag = "Main/SelectBoss1",
+    Default = _G.SelectBoss1,
+    Options = {
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
+        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
+        "Thunder God", "Cyborg", "Saber Expert"
+    },
     Callback = function(option)
-        _G.SelectBoss = option
+        _G.SelectBoss1 = option
     end
 })
+
+Main:AddSection("Boss Farm Sea 2");
+
+Main:AddDropdown({
+    Name = "Select Boss",
+    Flag = "Main/SelectBoss2",
+    Default = _G.SelectBoss2,
+    Options = {
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
+        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+    },
+    Callback = function(option)
+        _G.SelectBoss2 = option
+    end
+})
+
+Main:AddSection("Boss Farm Sea 3");
+
+Main:AddDropdown({
+    Name = "Select Boss",
+    Flag = "Main/SelectBoss3",
+    Default = _G.SelectBoss3,
+    Options = {
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant",
+        "Beautiful Pirate", "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
+    },
+    Callback = function(option)
+        _G.SelectBoss3 = option
+    end
+})
+
+Main:AddSection("Auto Farm Boss");
+
 
 Main:AddToggle({
     Name = "Auto Farm Boss",
     Flag = "Main/AutoFarmBoss",
-    Description = "",
     Default = false,
     Callback = function(Value)
         _G.AutoBoss = Value
     end
 })
+
+task.spawn(function()
+    while task.wait() do
+        if _G.AutoBoss then
+            if Sea1 then
+                _G.SelectBoss = _G.SelectBoss1
+            elseif Sea2 then
+                _G.SelectBoss = _G.SelectBoss2
+            elseif Sea3 then
+                _G.SelectBoss = _G.SelectBoss3
+            end
+
+            -- Run your boss farming function using _G.SelectBoss
+            -- Example:
+            FarmBoss(_G.SelectBoss)
+        end
+    end
+end)
 
 Setting:AddToggle({
     Name = "Full Bright",
