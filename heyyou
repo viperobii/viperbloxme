@@ -1782,6 +1782,12 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoGorillaKing = Value
+        if Value then
+            -- Go to Gorilla King island area
+            Tween(CFrame.new(-1088.75977, 8.13463783, -488.559906))
+        else
+            bringmob = false
+        end
     end
 })
 
@@ -1793,21 +1799,21 @@ spawn(function()
                 if boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
                     AutoHaki()
                     EquipTool(SelectWeapon)
+
                     boss.HumanoidRootPart.CanCollide = false
                     boss.Humanoid.WalkSpeed = 0
                     boss.Humanoid.JumpPower = 0
                     boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                     boss.HumanoidRootPart.Transparency = 1
-                    Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+
+                    local targetPos = boss.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+
                     AttackNoCoolDown()
+                    wait(_G.Fast_Delay or 0.1)
                 else
-                    local gorillaKingSpawnCFrame = CFrame.new(
-                        -1088.75977, 8.13463783, -488.559906, 
-                        -0.707134247, 0, 0.707079291, 
-                        0, 1, 0, 
-                        -0.707079291, 0, -0.707134247
-                    )
-                    Tween(gorillaKingSpawnCFrame)
+                    -- Go back to spawn position of Gorilla King
+                    Tween(CFrame.new(-1088.75977, 8.13463783, -488.559906))
                 end
             end)
         end
