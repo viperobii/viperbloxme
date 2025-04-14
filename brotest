@@ -871,6 +871,8 @@ local RaidChips = {
     "Dough"
 }
 
+Raids:AddSection("Setting Raids");
+
 Raids:AddDropdown({
     Name = "Select Raid",
     Flag = "Raids/SelectChip",
@@ -987,6 +989,136 @@ spawn(function()
                         end
                     else
                         print("No Special Microchip found!")
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+Main:AddToggle({
+    Name = "Auto Farm Nearest Mob",
+    Flag = "Main/AutoFarmNearestMob",
+    Description = "Nearest",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoNear = Value
+        if not Value then 
+            bringmob = false
+            -- Return to original position when turning off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
+    end
+})
+
+-- AUTO FARM NEAREST MOB LOOP
+spawn(function()
+    while task.wait() do
+        if _G.AutoNear then
+            pcall(function()
+                local Closest = nil
+                local ClosestDistance = math.huge
+                
+                -- Find the closest enemy
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                        if dist < ClosestDistance then
+                            Closest = enemy
+                            ClosestDistance = dist
+                        end
+                    end
+                end
+
+                if Closest then
+                    -- Target and attack the closest mob
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    
+                    -- Modify mob properties for easier farming
+                    if Closest:FindFirstChild("HumanoidRootPart") then
+                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        Closest.HumanoidRootPart.Transparency = 1
+                        Closest.HumanoidRootPart.CanCollide = false
+                    end
+                    if Closest:FindFirstChild("Humanoid") then
+                        Closest.Humanoid.WalkSpeed = 0
+                        Closest.Humanoid.JumpPower = 0
+                    end
+                    
+                    -- Position above the mob
+                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    
+                    -- Attack
+                    AttackNoCoolDown()
+                    bringmob = true
+                    
+                    -- Wait before next loop iteration
+                    wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or no longer valid
+                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
+                        bringmob = false
+                        wait(0.5) -- Short wait before targeting next mob
+                    end
+                else
+                    -- No enemies found
+                    bringmob = false
+                    wait(0.5)
+                end
+            end)
+        end
+    end
+end)
+
+
+Raids:AddToggle({
+    Name = "Auto Next Island",
+    Flag = "Raids/AutoNextIsland",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoNextIsland = Value
+        if not Value then
+            _G.AutoNear = false
+        end
+    end
+})
+
+spawn(function()
+    local VisitedIslands = {}
+    while task.wait() do
+        if AutoNextIsland then
+            pcall(function()
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local hrp = char.HumanoidRootPart
+                    local pos = hrp.Position
+                    local Locations = workspace["_WorldOrigin"].Locations
+
+                    -- Reset tracker if teleported back to raid area
+                    if (pos - Vector3.new(-6438.735, 250.645, -4501.506)).Magnitude < 1 or
+                       (pos - Vector3.new(-5017.408, 314.844, -2823.012)).Magnitude < 1 then
+                        VisitedIslands = {}
+                    end
+
+                    if Locations:FindFirstChild("Island 1") then
+                        _G.AutoNear = true
+                    end
+
+                    for i = 2, 5 do
+                        local islandName = "Island " .. i
+                        if Locations:FindFirstChild(islandName) and not VisitedIslands[islandName] then
+                            Tween(Locations[islandName].CFrame)
+                            VisitedIslands[islandName] = true
+                            AutoNextIsland = false
+                            wait()
+                            AutoNextIsland = true
+                            break
+                        end
                     end
                 end
             end)
