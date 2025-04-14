@@ -425,7 +425,7 @@ Player:AddToggle({
     Name = "NoClip",
     Flag = "Player/NoClip",
     Description = "Walk through walls",
-    Default = false,
+    Default = true,
     Callback = function(Value)
         _G.NoClip = Value
 
@@ -1372,64 +1372,47 @@ Items:AddToggle({
 })
 
 spawn(function()
+    while task.wait() do
+        if AutoTushita then
+            local Enemies = game:GetService("Workspace").Enemies
+            
+            -- First check: find any Longma in the workspace
+            if Enemies:FindFirstChild("Longma") then
+                -- Loop through all enemies to find and attack Longma
+                for _, v in pairs(Enemies:GetChildren()) do
+                    if v.Name == "Longma" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait(_G.Fast_Delay)
+                            AttackNoCoolDown()
+                            AutoHaki()
 
-while wait() do
+                            if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
+                                EquipTool(SelectWeapon)
+                            end
 
-if AutoTushita then
+                            -- Set target properties
+                            v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            v.Humanoid.JumpPower = 0
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid:ChangeState(11) -- Stunned state
+                            
+                            -- Move to attack position
+                            Tween(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            
+                        until not AutoTushita or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            else
+                -- If no Longma found, teleport to spawn location
+                print("No Longma found, teleporting to spawn location")
+                Tween(CFrame.new(-10238.875, 389.791, -9549.793))
+                task.wait(2) -- Wait a bit after teleporting before checking again
+            end
+        end
+    end
+end)
 
-if game:GetService("Workspace").Enemies:FindFirstChild("Longma") then
-
-for v1340, v1341 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-
-if ((v1341.Name == ("Longma" or (v1341.Name == "Longma"))) and (v1341.Humanoid.Health > 0) and v1341:IsA("Model") and v1341:FindFirstChild("Humanoid") and v1341:FindFirstChild("HumanoidRootPart")) then
-
-repeat
-
-wait(_G.Fast_Delay);
-
-AttackNoCoolDown();
-
-AutoHaki();
-
-if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
-
-wait();
-
-EquipTool(SelectWeapon);
-
-end
-
-FarmPos = v1341.HumanoidRootPart.CFrame;
-
-v1341.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-
-v1341.Humanoid.JumpPower = 0;
-
-v1341.Humanoid.WalkSpeed = 0;
-
-v1341.HumanoidRootPart.CanCollide = false;
-
-v1341.Humanoid:ChangeState(11);
-
-Tween(v1341.HumanoidRootPart.CFrame * Pos);
-
-until not AutoTushita or not v1341.Parent or (v1341.Humanoid.Health <= 0)
-
-end
-
-end
-
-else
-
-Tween(CFrame.new(- 10238.875976563, 389.7912902832, - 9549.7939453125));
-
-end
-
-end
-
-end
-
-end);
 
 
 Items:AddToggle({
