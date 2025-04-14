@@ -1773,6 +1773,44 @@ spawn(function()
 end)
 
 
+Main:AddSection("Farm Boss Sea 1");
+
+Main:AddToggle({
+    Name = "Auto Gorilla King",
+    Flag = "Main/AutoGorillaKing",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_GorillaKing = Value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.Auto_GorillaKing then
+            pcall(function()
+                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Gorilla King [Lv. 20] [Boss]")
+
+                if boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+
+                    boss.HumanoidRootPart.CanCollide = false
+                    boss.Humanoid.WalkSpeed = 0
+                    boss.Humanoid.JumpPower = 0
+                    boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                    boss.HumanoidRootPart.Transparency = 1
+
+                    Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
+                    AttackNoCoolDown()
+                else
+                    -- Go to spawn area if not spawned
+                    Tween(CFrame.new(-1127, 40, 492)) -- Gorilla King spawn position
+                end
+            end)
+        end
+    end
+end)
 
 
 Setting:AddDropdown({
@@ -1850,182 +1888,7 @@ Setting:AddToggle({
     end
 })
 
-local tableBoss = {}
 
-if Sea1 then
-    tableBoss = {
-        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
-        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
-        "Thunder God", "Cyborg", "Saber Expert"
-    }
-elseif Sea2 then
-    tableBoss = {
-        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
-        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
-    }
-elseif Sea3 then
-    tableBoss = {
-        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
-        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
-    }
-end
-
--- Sea 1
-Main:AddSection("Boss Farm Sea 1")
-
-Main:AddDropdown({
-    Name = "Select Boss",
-    Flag = "Main/SelectBoss1",
-    Options = {
-        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
-        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
-        "Thunder God", "Cyborg", "Saber Expert"
-    },
-    Callback = function(option)
-        _G.SelectBoss1 = option
-    end
-})
-
-Main:AddToggle({
-    Name = "Auto Farm Boss",
-    Flag = "Main/AutoFarmBoss1",
-    Callback = function(Value)
-        _G.AutoFarmBoss1 = Value
-    end
-})
-
-spawn(function()
-    while task.wait() do
-        if _G.AutoFarmBoss1 and _G.SelectBoss1 then
-            pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss1)
-                if not boss then
-                    local bossInRep = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss1)
-                    if bossInRep then
-                        Tween(bossInRep.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0))
-                    end
-                else
-                    repeat task.wait()
-                        if boss and boss:FindFirstChild("HumanoidRootPart") then
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            AttackNoCoolDown()
-                            boss.HumanoidRootPart.CanCollide = false
-                            boss.Humanoid.WalkSpeed = 0
-                            boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        end
-                    until not _G.AutoFarmBoss1 or not boss or boss.Humanoid.Health <= 0
-                end
-            end)
-        end
-    end
-end)
-
--- Sea 2
-Main:AddSection("Boss Farm Sea 2")
-
-Main:AddDropdown({
-    Name = "Select Boss",
-    Flag = "Main/SelectBoss2",
-    Options = {
-        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
-        "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
-    },
-    Callback = function(option)
-        _G.SelectBoss2 = option
-    end
-})
-
-Main:AddToggle({
-    Name = "Auto Farm Boss",
-    Flag = "Main/AutoFarmBoss2",
-    Callback = function(Value)
-        _G.AutoFarmBoss2 = Value
-    end
-})
-
-spawn(function()
-    while task.wait() do
-        if _G.AutoFarmBoss2 and _G.SelectBoss2 then
-            pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss2)
-                if not boss then
-                    local bossInRep = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss2)
-                    if bossInRep then
-                        Tween(bossInRep.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0))
-                    end
-                else
-                    repeat task.wait()
-                        if boss and boss:FindFirstChild("HumanoidRootPart") then
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            AttackNoCoolDown()
-                            boss.HumanoidRootPart.CanCollide = false
-                            boss.Humanoid.WalkSpeed = 0
-                            boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        end
-                    until not _G.AutoFarmBoss2 or not boss or boss.Humanoid.Health <= 0
-                end
-            end)
-        end
-    end
-end)
-
--- Sea 3
-Main:AddSection("Boss Farm Sea 3")
-
-Main:AddDropdown({
-    Name = "Select Boss",
-    Flag = "Main/SelectBoss3",
-    Options = {
-        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant",
-        "Beautiful Pirate", "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
-    },
-    Callback = function(option)
-        _G.SelectBoss3 = option
-    end
-})
-
-Main:AddToggle({
-    Name = "Auto Farm Boss",
-    Flag = "Main/AutoFarmBoss3",
-    Callback = function(Value)
-        _G.AutoFarmBoss3 = Value
-    end
-})
-
-spawn(function()
-    while task.wait() do
-        if _G.AutoFarmBoss3 and _G.SelectBoss3 then
-            pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss3)
-                if not boss then
-                    local bossInRep = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss3)
-                    if bossInRep then
-                        Tween(bossInRep.HumanoidRootPart.CFrame * CFrame.new(0, 50, 0))
-                    end
-                else
-                    repeat task.wait()
-                        if boss and boss:FindFirstChild("HumanoidRootPart") then
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            AttackNoCoolDown()
-                            boss.HumanoidRootPart.CanCollide = false
-                            boss.Humanoid.WalkSpeed = 0
-                            boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        end
-                    until not _G.AutoFarmBoss3 or not boss or boss.Humanoid.Health <= 0
-                end
-            end)
-        end
-    end
-end)
 
 
 Setting:AddToggle({
