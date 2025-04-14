@@ -1789,7 +1789,7 @@ spawn(function()
     while task.wait() do
         if _G.AutoGorillaKing then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Gorilla King [Lv. 20] [Boss]")
+                local boss = game:GetService("Workspace").Enemies:FindFirstChild("The Gorilla King [Lv. 20] [Boss]")
                 if boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
                     AutoHaki()
                     EquipTool(SelectWeapon)
@@ -1801,8 +1801,13 @@ spawn(function()
                     Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
                     AttackNoCoolDown()
                 else
-                    -- Updated coordinates for Gorilla King spawn location
-                    Tween(CFrame.new(-1199, 19, 499)) -- Updated Gorilla King spawn position
+                    local gorillaKingSpawnCFrame = CFrame.new(
+                        -1088.75977, 8.13463783, -488.559906, 
+                        -0.707134247, 0, 0.707079291, 
+                        0, 1, 0, 
+                        -0.707079291, 0, -0.707134247
+                    )
+                    Tween(gorillaKingSpawnCFrame)
                 end
             end)
         end
