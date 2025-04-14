@@ -1361,49 +1361,7 @@ spawn(function()
 end)
 
 
-Items:AddToggle({
-    Name = "Auto Tushita",
-    Flag = "Items/AutoTushita",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        AutoTushita = Value
-    end
-})
 
-spawn(function()
-    while task.wait() do
-        if AutoTushita then
-            local Enemies = game:GetService("Workspace").Enemies
-            local Longma = Enemies:FindFirstChild("Longma")
-
-            if Longma and Longma:FindFirstChild("Humanoid") and Longma:FindFirstChild("HumanoidRootPart") and Longma.Humanoid.Health > 0 then
-                repeat
-                    task.wait(_G.Fast_Delay)
-                    AttackNoCoolDown()
-                    AutoHaki()
-
-                    if not game.Players.LocalPlayer.Character:FindFirstChild(SelectWeapon) then
-                        EquipTool(SelectWeapon)
-                    end
-
-                    FarmPos = Longma.HumanoidRootPart.CFrame
-                    Longma.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                    Longma.Humanoid.JumpPower = 0
-                    Longma.Humanoid.WalkSpeed = 0
-                    Longma.HumanoidRootPart.CanCollide = false
-                    Longma.Humanoid:ChangeState(11)
-
-                    Tween(Longma.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0)) -- You were missing a valid "Pos"
-
-                until not AutoTushita or not Longma.Parent or Longma.Humanoid.Health <= 0
-            else
-                -- Teleport to Longma's spawn location if he's not found
-                Tween(CFrame.new(-10238.875, 389.791, -9549.793))
-            end
-        end
-    end
-end)
 
 
 
@@ -1892,6 +1850,48 @@ Setting:AddToggle({
     end
 })
 
+local tableBoss = {}
+
+if Sea1 then
+    tableBoss = {
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
+        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
+        "Thunder God", "Cyborg", "Saber Expert"
+    }
+elseif Sea2 then
+    tableBoss = {
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
+        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+    }
+elseif Sea3 then
+    tableBoss = {
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
+        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
+    }
+end
+
+Main:AddSection("Boss Farm");
+
+Main:AddDropdown({
+    Name = "Select Boss",
+    Flag = "Main/SelectBoss",
+    Description = "",
+    Default = tableBoss[1],
+    Options = tableBoss,
+    Callback = function(option)
+        _G.SelectBoss = option
+    end
+})
+
+Main:AddToggle({
+    Name = "Auto Farm Boss",
+    Flag = "Main/AutoFarmBoss",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoBoss = Value
+    end
+})
 
 Setting:AddToggle({
     Name = "Full Bright",
