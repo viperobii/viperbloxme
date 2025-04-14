@@ -1189,112 +1189,206 @@ Items:AddToggle({
 })
 
 spawn(function()
-    while task.wait() do
-        if _G.Auto_Saber and game.Players.LocalPlayer.Data.Level.Value >= 200 then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
 
-                -- Plates Puzzle
-                if Workspace.Map.Jungle.Final.Part.Transparency == 0 and Workspace.Map.Jungle.QuestPlates.Door.Transparency == 0 then
-                    local junglePos = CFrame.new(-1612.55, 36.97, 148.71)
-                    if (junglePos.Position - hrp.Position).Magnitude <= 100 then
-                        Tween(hrp.CFrame)
-                        task.wait(1)
-                        for i = 1, 5 do
-                            local plate = Workspace.Map.Jungle.QuestPlates["Plate" .. i].Button
-                            if plate then
-                                hrp.CFrame = plate.CFrame
-                                task.wait(1)
-                            end
-                        end
-                    else
-                        Tween(junglePos)
-                    end
+while task.wait() do
 
-                -- Torch Puzzle
-                elseif Workspace.Map.Desert.Burn.Part.Transparency == 0 then
-                    if player.Backpack:FindFirstChild("Torch") or player.Character:FindFirstChild("Torch") then
-                        EquipTool("Torch")
-                        Tween(CFrame.new(1114.61, 5.04, 4350.22)) -- Burn place
-                    else
-                        Tween(CFrame.new(-1610, 11.5, 164)) -- Torch spawn
-                    end
+if (_G.Auto_Saber and (game.Players.LocalPlayer.Data.Level.Value >= 200)) then
 
-                -- SickMan Quest
-                elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0 then
-                    if not player.Backpack:FindFirstChild("Cup") and not player.Character:FindFirstChild("Cup") then
-                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup")
-                        task.wait(0.5)
-                    end
+pcall(function()
 
-                    EquipTool("Cup")
-                    task.wait(0.5)
+if (game:GetService("Workspace").Map.Jungle.Final.Part.Transparency == 0) then
 
-                    if player.Character:FindFirstChild("Cup") then
-                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", player.Character.Cup)
-                        task.wait(0.5)
-                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan")
-                    end
+if (game:GetService("Workspace").Map.Jungle.QuestPlates.Door.Transparency == 0) then
 
-                -- RichSon Quest (Start)
-                elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil then
-                    ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon")
+if ((CFrame.new(- 1612.55884, 36.9774132, 148.719543, 0.37091279, 3.071715e-9, - 0.928667724, 3.970995e-8, 1, 1.9167935e-8, 0.928667724, - 4.398698e-8, 0.37091279).Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100) then
 
-                -- Mob Leader Fight
-                elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0 then
-                    local boss = Workspace.Enemies:FindFirstChild("Mob Leader")
-                    if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") then
-                        Tween(CFrame.new(-2967.59, -4.91, 5328.7)) -- Boss spawn
-                        repeat
-                            task.wait(_G.Fast_Delay)
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            boss.Humanoid.WalkSpeed = 0
-                            boss.Humanoid.JumpPower = 0
-                            boss.HumanoidRootPart.CanCollide = false
-                            boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Tween(boss.HumanoidRootPart.CFrame * Pos)
-                            AttackNoCoolDown()
-                        until boss.Humanoid.Health <= 0 or not _G.Auto_Saber
-                    end
+Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
 
-                -- Place Relic
-                elseif ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1 then
-                    EquipTool("Relic")
-                    task.wait(0.5)
-                    Tween(CFrame.new(-1404.91, 29.97, 3.8)) -- Relic place
+wait(1);
 
-                -- Saber Expert Fight
-                end
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate1.Button.CFrame;
 
-                local saber = Workspace.Enemies:FindFirstChild("Saber Expert")
-                if saber and saber:FindFirstChild("Humanoid") and saber:FindFirstChild("HumanoidRootPart") and saber.Humanoid.Health > 0 then
-                    repeat
-                        task.wait(_G.Fast_Delay)
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-                        saber.Humanoid.WalkSpeed = 0
-                        saber.Humanoid.JumpPower = 0
-                        saber.HumanoidRootPart.CanCollide = false
-                        saber.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        saber.HumanoidRootPart.Transparency = 1
-                        Tween(saber.HumanoidRootPart.CFrame * Pos)
-                        bringmob = true
-                        FarmPos = saber.HumanoidRootPart.CFrame
-                        MonFarm = saber.Name
-                        AttackNoCoolDown()
-                    until saber.Humanoid.Health <= 0 or not _G.Auto_Saber
+wait(1);
 
-                    if saber.Humanoid.Health <= 0 then
-                        ReplicatedStorage.Remotes.CommF_:InvokeServer("ProQuestProgress", "PlaceRelic")
-                    end
-                end
-            end)
-        end
-    end
-end)
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate2.Button.CFrame;
+
+wait(1);
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate3.Button.CFrame;
+
+wait(1);
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate4.Button.CFrame;
+
+wait(1);
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Workspace").Map.Jungle.QuestPlates.Plate5.Button.CFrame;
+
+wait(1);
+
+else
+
+Tween(CFrame.new(- 1612.55884, 36.9774132, 148.719543, 0.37091279, 3.071715e-9, - 0.928667724, 3.970995e-8, 1, 1.9167935e-8, 0.928667724, - 4.398698e-8, 0.37091279));
+
+end
+
+elseif (game:GetService("Workspace").Map.Desert.Burn.Part.Transparency == 0) then
+
+if (game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Torch") or game.Players.LocalPlayer.Character:FindFirstChild("Torch")) then
+
+EquipTool("Torch");
+
+Tween(CFrame.new(1114.61475, 5.04679728, 4350.22803, - 0.648466587, - 1.2879909e-9, 0.761243105, - 5.706529e-10, 1, 1.2058454e-9, - 0.761243105, 3.4754488e-10, - 0.648466587));
+
+else
+
+Tween(CFrame.new(- 1610.00757, 11.5049858, 164.001587, 0.984807551, - 0.167722285, - 0.0449818149, 0.17364943, 0.951244235, 0.254912198, 0.00003423728, - 0.258850515, 0.965917408));
+
+end
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan") ~= 0) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "GetCup");
+
+wait(0.5);
+
+EquipTool("Cup");
+
+wait(0.5);
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "FillCup", game:GetService("Players").LocalPlayer.Character.Cup);
+
+wait(0);
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "SickMan");
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == nil) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 0) then
+
+if (game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader") or game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader")) then
+
+Tween(CFrame.new(- 2967.59521, - 4.91089821, 5328.70703, 0.342208564, - 0.0227849055, 0.939347804, 0.0251603816, 0.999569714, 0.0150796166, - 0.939287126, 0.0184739735, 0.342634559));
+
+for v1799, v1800 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (v1800.Name == "Mob Leader") then
+
+if game:GetService("Workspace").Enemies:FindFirstChild("Mob Leader [Lv. 120] [Boss]") then
+
+if (v1800:FindFirstChild("Humanoid") and v1800:FindFirstChild("HumanoidRootPart") and (v1800.Humanoid.Health > 0)) then
+
+repeat
+
+task.wait(_G.Fast_Delay);
+
+AutoHaki();
+
+EquipTool(SelectWeapon);
+
+v1800.HumanoidRootPart.CanCollide = false;
+
+v1800.Humanoid.WalkSpeed = 0;
+
+v1800.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+Tween(v1800.HumanoidRootPart.CFrame * Pos);
+
+AttackNoCoolDown();
+
+until (v1800.Humanoid.Health <= 0) or not _G.Auto_Saber
+
+end
+
+end
+
+if game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader") then
+
+Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Mob Leader").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2));
+
+end
+
+end
+
+end
+
+end
+
+elseif (game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon") == 1) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "RichSon");
+
+wait(0.5);
+
+EquipTool("Relic");
+
+wait(0.5);
+
+Tween(CFrame.new(- 1404.91504, 29.9773273, 3.80598116, 0.876514494, 5.6690688e-9, 0.481375456, 2.53852e-8, 1, - 5.799956e-8, - 0.481375456, 6.3057264e-8, 0.876514494));
+
+end
+
+elseif (game:GetService("Workspace").Enemies:FindFirstChild("Saber Expert") or game:GetService("ReplicatedStorage"):FindFirstChild("Saber Expert")) then
+
+for v1460, v1461 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+
+if (v1461:FindFirstChild("Humanoid") and v1461:FindFirstChild("HumanoidRootPart") and (v1461.Humanoid.Health > 0)) then
+
+if (v1461.Name == "Saber Expert") then
+
+repeat
+
+task.wait(_G.Fast_Delay);
+
+EquipTool(SelectWeapon);
+
+Tween(v1461.HumanoidRootPart.CFrame * Pos);
+
+v1461.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
+
+v1461.HumanoidRootPart.Transparency = 1;
+
+v1461.Humanoid.JumpPower = 0;
+
+v1461.Humanoid.WalkSpeed = 0;
+
+v1461.HumanoidRootPart.CanCollide = false;
+
+bringmob = true;
+
+FarmPos = v1461.HumanoidRootPart.CFrame;
+
+MonFarm = v1461.Name;
+
+AttackNoCoolDown();
+
+until (v1461.Humanoid.Health <= 0) or not _G.Auto_Saber
+
+bringmob = true;
+
+if (v1461.Humanoid.Health <= 0) then
+
+game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("ProQuestProgress", "PlaceRelic");
+
+end
+
+end
+
+end
+
+end
+
+end
+
+end);
+
+end
+
+end
+
+end);
 
 
 
