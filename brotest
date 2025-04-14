@@ -1572,114 +1572,8 @@ Trial:AddToggle({
 
 Trial:AddSection("Trials");
 
--- Add toggle for Auto Trial
-Trial:AddToggle({
-    Name = "Auto Trial",
-    Flag = "Trial/AutoTrial",
-    Description = "For Ghoul Trial, Double Jump First And Turn On Auto Trial (Instant Kill Mobs)",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoQuestRace = Value
-    end
-})
 
-spawn(function()
-    while wait() do
-        if _G.AutoQuestRace then
-            pcall(function()
-                local Player = game:GetService("Players").LocalPlayer
-                local PlayerRace = Player.Data.Race.Value
-                
-                if PlayerRace == "Human" then
-                    -- Human Trial
-                    for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
-                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                            pcall(function()
-                                repeat
-                                    wait()
-                                    mob.Humanoid.Health = 0
-                                    mob.HumanoidRootPart.CanCollide = false
-                                    sethiddenproperty(Player, "SimulationRadius", math.huge)
-                                until not _G.AutoQuestRace or not mob.Parent or mob.Humanoid.Health <= 0
-                            end)
-                        end
-                    end
-                    
-                elseif PlayerRace == "Skypiea" then
-                    -- Skypiea Trial
-                    for _, part in pairs(game:GetService("Workspace").Map.SkyTrial.Model:GetDescendants()) do
-                        if part.Name == "snowisland_Cylinder.081" then
-                            BTPZ(part.CFrame * CFrame.new(0, 0, 0))
-                        end
-                    end
-                    
-                elseif PlayerRace == "Fishman" then
-                    -- Fishman Trial
-                    for _, part in pairs(game:GetService("Workspace").SeaBeasts.SeaBeast1:GetDescendants()) do
-                        if part.Name == "HumanoidRootPart" then
-                            -- Define Pos if not already defined
-                            if not Pos then
-                                Pos = CFrame.new(0, 30, 0)
-                            end
-                            
-                            Tween(part.CFrame * Pos)
-                            
-                            -- Use all weapon types for attack sequence
-                            local weaponTypes = {"Melee", "Blox Fruit", "Sword", "Gun"}
-                            
-                            for _, weaponType in pairs(weaponTypes) do
-                                -- Equip appropriate weapon
-                                for _, tool in pairs(Player.Backpack:GetChildren()) do
-                                    if tool:IsA("Tool") and tool.ToolTip == weaponType then
-                                        Player.Character.Humanoid:EquipTool(tool)
-                                        break
-                                    end
-                                end
-                                
-                                -- Attack sequence with each weapon (Z, X, C)
-                                local keys = {122, 120, 99} -- Z, X, C in ASCII
-                                for _, key in pairs(keys) do
-                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, Player.Character.HumanoidRootPart)
-                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, Player.Character.HumanoidRootPart)
-                                    wait(0.2)
-                                end
-                                
-                                wait(0.5) -- Wait before switching weapons
-                            end
-                        end
-                    end
-                    
-                elseif PlayerRace == "Cyborg" then
-                    -- Cyborg Trial
-                    Tween(CFrame.new(28654, 14898.7832, -30))
-                    
-                elseif PlayerRace == "Ghoul" then
-                    -- Ghoul Trial
-                    for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
-                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                            pcall(function()
-                                repeat
-                                    wait()
-                                    mob.Humanoid.Health = 0
-                                    mob.HumanoidRootPart.CanCollide = false
-                                    sethiddenproperty(Player, "SimulationRadius", math.huge)
-                                until not _G.AutoQuestRace or not mob.Parent or mob.Humanoid.Health <= 0
-                            end)
-                        end
-                    end
-                    
-                elseif PlayerRace == "Mink" then
-                    -- Mink Trial
-                    for _, object in pairs(game:GetService("Workspace"):GetDescendants()) do
-                        if object.Name == "StartPoint" then
-                            Tween(object.CFrame * CFrame.new(0, 10, 0))
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
+
 
 
 Trial:AddToggle({
@@ -1760,7 +1654,15 @@ spawn(function()
     end
 end)
 
-
+Setting:AddInput({
+    Name = "Job ID",
+    Flag = "Setting/JobID",
+    Placeholder = "Input Job ID",
+    Default = "",
+    Callback = function(Value)
+        _G.Job = Value
+    end
+})
 
 
 Setting:AddDropdown({
