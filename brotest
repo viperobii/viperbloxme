@@ -801,7 +801,7 @@ spawn(function()
     end
 end)
 
-Sea:AddSection("Sea Mobs");
+
 
 Sea:AddToggle({
     Name = "Auto Kill Piranha",
