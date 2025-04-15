@@ -228,15 +228,7 @@ spawn(function()
     end
 end)
 
-Main:AddTextbox({
-    Name = "Boss Name",
-    Flag = "Main/BossTextbox",
-    Placeholder = "Enter boss name...",
-    Callback = function(text)
-        print("Selected boss:", text)
-        _G.SelectBoss = text
-    end
-})
+
 
 Main:AddSection("Bones Farm");
 
@@ -1804,7 +1796,17 @@ spawn(function()
     end
 end)
 
-
+Main:AddTextBox({
+    Name = "Job ID",  -- Title of the input box
+    Flag = "Main/JobID",  -- Unique identifier for the input field
+    Placeholder = "Input Job ID",  -- Placeholder text when the input is empty
+    Default = "",  -- Default value
+    Numeric = false,  -- Set to false since it's not a numeric input
+    Finished = false,  -- Whether the input is finished or not
+    Callback = function(v301)  -- Callback when the input is finished
+        _G.Job = v301  -- Store the value in a global variable _G.Job
+    end
+})
 
 
 Setting:AddSection("Other Setting");
