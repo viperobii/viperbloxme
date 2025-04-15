@@ -1775,9 +1775,8 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
-local tableBoss = {}
-
-local function getSea()
+-- Detect the current sea by position
+local function getCurrentSea()
     local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
     if pos.X <= -5000 then
         return 1
@@ -1788,37 +1787,31 @@ local function getSea()
     end
 end
 
-local currentSea = getSea()
+-- Define boss list based on sea
+local currentSea = getCurrentSea()
 
-if currentSea == 1 then
-    tableBoss = {
-        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
-        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
-        "Thunder God", "Cyborg", "Saber Expert"
-    }
-elseif currentSea == 2 then
-    tableBoss = {
-        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
-        "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
-    }
-elseif currentSea == 3 then
-    tableBoss = {
-        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
-        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
-    }
-end
-
+-- Boss options directly inside the dropdown
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/BossFarmName",
-    Default = tableBoss[1],
-    Options = tableBoss,
+    Default = "", -- Default to nothing
+    Options = currentSea == 1 and {
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
+        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
+        "Thunder God", "Cyborg", "Saber Expert"
+    } or currentSea == 2 and {
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
+        "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+    } or {
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
+        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
+    },
     Callback = function(option)
         _G.SelectBoss = option
     end
 })
 
-
+-- Auto farm toggle for the selected boss
 Main:AddToggle({
     Name = "Auto Farm Boss",
     Flag = "Main/AutoFarmBoss",
@@ -1829,23 +1822,20 @@ Main:AddToggle({
             task.spawn(function()
                 while _G.AutoBoss do
                     pcall(function()
-                        if game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss) then
-                            for _, v1035 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                                if v1035.Name == _G.SelectBoss then
-                                    if v1035:FindFirstChild("Humanoid") and v1035:FindFirstChild("HumanoidRootPart") and v1035.Humanoid.Health > 0 then
-                                        repeat
-                                            task.wait(_G.Fast_Delay)
-                                            AttackNoCoolDown()
-                                            AutoHaki()
-                                            EquipTool(SelectWeapon)
-                                            v1035.HumanoidRootPart.CanCollide = false
-                                            v1035.Humanoid.WalkSpeed = 0
-                                            v1035.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                            Tween(v1035.HumanoidRootPart.CFrame * Pos)
-                                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
-                                        until not _G.AutoBoss or not v1035.Parent or v1035.Humanoid.Health <= 0
-                                    end
-                                end
+                        local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
+                        if enemy then
+                            if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                repeat
+                                    task.wait(_G.Fast_Delay)
+                                    AttackNoCoolDown()
+                                    AutoHaki()
+                                    EquipTool(SelectWeapon)
+                                    enemy.HumanoidRootPart.CanCollide = false
+                                    enemy.Humanoid.WalkSpeed = 0
+                                    enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                    Tween(enemy.HumanoidRootPart.CFrame * Pos)
+                                    sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                                until not _G.AutoBoss or not enemy.Parent or enemy.Humanoid.Health <= 0
                             end
                         elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
                             Tween(game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss).HumanoidRootPart.CFrame * CFrame.new(5, 10, 7))
@@ -1857,6 +1847,9 @@ Main:AddToggle({
         end
     end
 })
+
+
+
 
 Setting:AddDropdown({
     Name = "Floating Logo Size",
