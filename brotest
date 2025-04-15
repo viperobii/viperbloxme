@@ -5,8 +5,8 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "Nova.GG : Blox-Fruit",
-    SubTitle = "by Viper x Tanny",
+    Title = "viper Hub (NOVA) : Blox-Fruit",
+    SubTitle = "by Viper",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
 
@@ -61,7 +61,7 @@ local Teleport = Window:MakeTab({
 local Misc = Window:MakeTab({
     Title = "Miscellaneous",
     Description = "nega",
-    Icon = "code-xml",  -- Fixed the split "Icon"
+    Icon = "cloudy",  -- Fixed the split "Icon"
 })
 
 local Setting = Window:MakeTab({
@@ -1903,43 +1903,7 @@ Misc:AddButton({
     end
 })
 
-Setting:AddToggle({
-    Name = "Bring Mobs",
-    Flag = "Setting/BringMobs",
-    Description = "Bring The Mobs",
-    Callback = function(value)
-        getgenv().BringMob = value
-        if value then
-            spawn(function()
-                while getgenv().BringMob do
-                    pcall(function()
-                        for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if bringmob and mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                                local root = mob:FindFirstChild("HumanoidRootPart")
-                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1000 then
-                                    root.CFrame = FarmPos
-                                    root.Size = Vector3.new(60, 60, 60)
-                                    root.Transparency = 1
-                                    root.CanCollide = false
-                                    mob.Head.CanCollide = false
-                                    mob.Humanoid.JumpPower = 0
-                                    mob.Humanoid.WalkSpeed = 0
-                                    if mob.Humanoid:FindFirstChild("Animator") then
-                                        mob.Humanoid.Animator:Destroy()
-                                    end
-                                    mob.Humanoid:ChangeState(11)
-                                    mob.Humanoid:ChangeState(14)
-                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                                end
-                            end
-                        end
-                    end)
-                    wait()
-                end
-            end)
-        end
-    end
-})
+
 
 Misc:AddToggle({
     Name = "Enable Remove Notifications",
@@ -1961,7 +1925,44 @@ Misc:AddToggle({
 })
 
 
+Misc:AddToggle({
+    Name = "Auto Activate Race V3",
+    Flag = "Misc/AutoActivateRaceV3",
+    Callback = function(value)
+        getgenv().AutoT = value
+        if value then
+            spawn(function()
+                while getgenv().AutoT do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("ActivateAbility")
+                    end)
+                    wait()
+                end
+            end)
+        end
+    end
+})
 
+Misc:AddToggle({
+    Name = "Auto Activate V4",
+    Flag = "Misc/AutoActivateV4",
+    Callback = function(value)
+        getgenv().AutoY = value
+        if value then
+            spawn(function()
+                while getgenv().AutoY do
+                    pcall(function()
+                        local vim = game:GetService("VirtualInputManager")
+                        vim:SendKeyEvent(true, "Y", false, game)
+                        wait(0.1)
+                        vim:SendKeyEvent(false, "Y", false, game)
+                    end)
+                    wait(0.5)
+                end
+            end)
+        end
+    end
+})
 
 
 Items:AddSection("Setting Stats");
@@ -2711,6 +2712,47 @@ Setting:AddToggle({
         end
     end
 })
+
+
+
+Setting:AddToggle({
+    Name = "Bring Mobs",
+    Flag = "Setting/BringMobs",
+    Description = "Bring The Mobs",
+    Callback = function(value)
+        getgenv().BringMob = value
+        if value then
+            spawn(function()
+                while getgenv().BringMob do
+                    pcall(function()
+                        for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if bringmob and mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                local root = mob:FindFirstChild("HumanoidRootPart")
+                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1000 then
+                                    root.CFrame = FarmPos
+                                    root.Size = Vector3.new(60, 60, 60)
+                                    root.Transparency = 1
+                                    root.CanCollide = false
+                                    mob.Head.CanCollide = false
+                                    mob.Humanoid.JumpPower = 0
+                                    mob.Humanoid.WalkSpeed = 0
+                                    if mob.Humanoid:FindFirstChild("Animator") then
+                                        mob.Humanoid.Animator:Destroy()
+                                    end
+                                    mob.Humanoid:ChangeState(11)
+                                    mob.Humanoid:ChangeState(14)
+                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                end
+                            end
+                        end
+                    end)
+                    wait()
+                end
+            end)
+        end
+    end
+})
+
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
