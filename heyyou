@@ -11,10 +11,10 @@ local Window = redzlib:MakeWindow({
 })
 
 
-local Main = Window:MakeTab({
+local Info = Window:MakeTab({
     Title = "Information",
     Description = "Info",
-    Icon = "circle-alert    ",  -- Fixed the split "Icon"
+    Icon = "circle-alert",  -- Fixed the split "Icon"
 })
 
 local Main = Window:MakeTab({
@@ -78,12 +78,24 @@ local Setting = Window:MakeTab({
 })
 
 
-Info:AddDiscordInvite({
-    Name = "Diacord Server",
-    Invite = "https://discord.gg/qx9rKaC35f", -- just the code, not full link
-    Description = "Join our server for updates and support!",
-    UseDirectLink = false
+Info:AddParagraph("discord_invite", [[
+https://discord.gg/qx9rKaC35f
+]])
+
+Info:AddButton({
+    Name = "Join",
+    Description = "Opens the invite in your browser",
+    Callback = function()
+        game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/qx9rKaC35f")
+    end
 })
+
+
+Info:AddParagraph("honors", [[
+Mentions:
+Honorable Mention: Tanny
+Honorable Mention 2: ViperIsPinoy
+]])
 
 
 
