@@ -28,6 +28,12 @@ local Items = Window:MakeTab({
     Icon = "shopping-cart",  -- Fixed the split "Icon"
 })
 
+local Visual = Window:MakeTab({
+    Title = "Visual ESP",
+    Description = "Info",
+    Icon = "box",  -- Fixed the split "Icon"
+})
+
 local Trial = Window:MakeTab({
     Title = "Trial V4",
     Description = "Info",
@@ -362,13 +368,7 @@ Main:AddToggle({
 })
 
 
-function AutoHaki()
-    if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
-    end
-end
-
-function Tween2(destinationCFrame)
+function SmoothFollow(targetCFrame)
     local player = game.Players.LocalPlayer
     local character = player.Character
     local hrp = character and character:FindFirstChild("HumanoidRootPart")
@@ -376,33 +376,22 @@ function Tween2(destinationCFrame)
     if not hrp then return end
 
     local tweenService = game:GetService("TweenService")
+    local distance = (targetCFrame.Position - hrp.Position).Magnitude
+    local speed = 350
+    local time = distance / speed
 
-    local function tweenTo(cframe)
-        local distance = (cframe.Position - hrp.Position).Magnitude
-        local time = distance / 350
-        local tween = tweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = cframe})
-        tween:Play()
-        tween.Completed:Wait()
+    -- Slight Y offset to stay above ground
+    local adjustedCFrame = targetCFrame + Vector3.new(0, 5, 0)
+
+    local tween = tweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = adjustedCFrame})
+    tween:Play()
+end
+
+-- Auto Haki function
+function AutoHaki()
+    if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
     end
-
-    local distanceToTarget = (hrp.Position - destinationCFrame.Position).Magnitude
-    if distanceToTarget < 5 then return end -- Prevents constant moving if already close
-
-    local original = hrp.CFrame
-    local target = destinationCFrame
-
-    -- Step 1: Go up vertically
-    local height = 100
-    local upCFrame = CFrame.new(original.Position.X, original.Position.Y + height, original.Position.Z)
-    tweenTo(upCFrame)
-
-    -- Step 2: Move horizontally at high Y
-    local airTarget = CFrame.new(target.Position.X, upCFrame.Position.Y, target.Position.Z)
-    tweenTo(airTarget)
-
-    -- Step 3: Go down to the final position (with +10 to avoid clipping in floor)
-    local downCFrame = CFrame.new(target.Position.X, target.Position.Y + 10, target.Position.Z)
-    tweenTo(downCFrame)
 end
 
 -- Dropdown for selecting player
@@ -432,16 +421,18 @@ Player:AddToggle({
     end
 })
 
--- Auto Kill Loop
+-- Smooth follow loop (real-time)
 spawn(function()
-    while task.wait(1) do
-        if _G.TeleportPly and _G.SelectPly and game.Players:FindFirstChild(_G.SelectPly) then
-            AutoHaki()
-            local target = game.Players[_G.SelectPly]
-            if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                Tween2(target.Character.HumanoidRootPart.CFrame)
+    while task.wait(0.1) do
+        pcall(function()
+            if _G.TeleportPly and _G.SelectPly and game.Players:FindFirstChild(_G.SelectPly) then
+                local target = game.Players[_G.SelectPly]
+                if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    AutoHaki()
+                    SmoothFollow(target.Character.HumanoidRootPart.CFrame)
+                end
             end
-        end
+        end)
     end
 end)
 
@@ -586,6 +577,60 @@ spawn(function()
     end
 end)
 
+
+Visual:AddToggle({
+    Name = "Esp Players",
+    Flag = "Visual/ToggleEspPlayer",
+    Description = "",
+    Default = false,
+    Callback = function(value)
+        ESPPlayer = value
+        UpdatePlayerChams()
+    end
+})
+
+function UpdatePlayerChams()
+    for v427, v428 in pairs(game:GetService("Players"):GetChildren()) do
+        pcall(function()
+            if not isnil(v428.Character) then
+                if ESPPlayer then
+                    if (not isnil(v428.Character.Head) and not v428.Character.Head:FindFirstChild("NameEsp" .. Number)) then
+                        local cham = Instance.new("BillboardGui", v428.Character.Head)
+                        cham.Name = "NameEsp" .. Number
+                        cham.ExtentsOffset = Vector3.new(0, 1, 0)
+                        cham.Size = UDim2.new(1, 200, 1, 30)
+                        cham.Adornee = v428.Character.Head
+                        cham.AlwaysOnTop = true
+
+                        local text = Instance.new("TextLabel", cham)
+                        text.Font = Enum.Font.GothamSemibold
+                        text.FontSize = "Size10"
+                        text.TextWrapped = true
+                        text.Text = v428.Name .. " \n" .. v20((game:GetService("Players").LocalPlayer.Character.Head.Position - v428.Character.Head.Position).Magnitude / 3) .. " Distance"
+                        text.Size = UDim2.new(1, 0, 1, 0)
+                        text.TextYAlignment = "Top"
+                        text.BackgroundTransparency = 1
+                        text.TextStrokeTransparency = 0.5
+
+                        if v428.Team == game.Players.LocalPlayer.Team then
+                            text.TextColor3 = Color3.new(0, 0, 254)
+                        else
+                            text.TextColor3 = Color3.new(255, 0, 0)
+                        end
+                    else
+                        v428.Character.Head["NameEsp" .. Number].TextLabel.Text =
+                            v428.Name .. " | " ..
+                            v20((game:GetService("Players").LocalPlayer.Character.Head.Position - v428.Character.Head.Position).Magnitude / 3) ..
+                            " Distance\nHealth : " ..
+                            v20((v428.Character.Humanoid.Health * 100) / v428.Character.Humanoid.MaxHealth) .. "%"
+                    end
+                elseif v428.Character.Head:FindFirstChild("NameEsp" .. Number) then
+                    v428.Character.Head:FindFirstChild("NameEsp" .. Number):Destroy()
+                end
+            end
+        end)
+    end
+end
 
 
 
