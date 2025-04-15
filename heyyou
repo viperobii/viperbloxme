@@ -1775,81 +1775,93 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
+if Sea1 then
+    tableBoss = {
+        "The Gorilla King",
+        "Bobby",
+        "Yeti",
+        "Mob Leader",
+        "Vice Admiral",
+        "Warden",
+        "Chief Warden",
+        "Swan",
+        "Magma Admiral",
+        "Fishman Lord",
+        "Wysper",
+        "Thunder God",
+        "Cyborg",
+        "Saber Expert"
+    }
+elseif Sea2 then
+    tableBoss = {
+        "Diamond",
+        "Jeremy",
+        "Fajita",
+        "Don Swan",
+        "Smoke Admiral",
+        "Cursed Captain",
+        "Darkbeard",
+        "Order",
+        "Awakened Ice Admiral",
+        "Tide Keeper"
+    }
+elseif Sea3 then
+    tableBoss = {
+        "Stone",
+        "Hydra Leader",
+        "Kilo Admiral",
+        "Captain Elephant",
+        "Beautiful Pirate",
+        "rip_indra True Form",
+        "Longma",
+        "Soul Reaper",
+        "Cake Queen"
+    }
+end
+
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/BossFarmName",
-    Default = "",
-    Options = { "Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden", "Chief Warden", "Swan" },
+    Default = _G.SelectBoss or "",
+    Options = tableBoss,
     Callback = function(option)
-        _G.SelectedBoss = option
+        _G.SelectBoss = option
     end
 })
-
 
 Main:AddToggle({
     Name = "Auto Farm Boss",
     Flag = "Main/AutoFarmBoss",
     Default = false,
     Callback = function(Value)
-        _G.AutoFarmBoss = Value
+        _G.AutoBoss = Value
         if Value then
             task.spawn(function()
-                while _G.AutoFarmBoss do
-                    local bossFound = false
-                    
-                    -- Check if a boss is selected
-                    if not _G.SelectedBoss or _G.SelectedBoss == "" then
-                        print("Please select a boss from the dropdown menu")
-                        task.wait(2)
-                        continue
-                    end
-                    
-                    -- Look for the selected boss
-                    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                        if enemy.Name == _G.SelectedBoss and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                            bossFound = true
-                            AutoHaki()
-                            EquipTool(SelectWeapon)
-                            
-                            -- Make sure HumanoidRootPart exists before tweening
-                            local hrp = enemy:FindFirstChild("HumanoidRootPart")
-                            if not hrp then
-                                print("HumanoidRootPart not found for", _G.SelectedBoss)
-                                break
-                            end
-                            
-                            Tween(hrp.CFrame * CFrame.new(0, 20, 0))
-                            AttackNoCoolDown()
-                            
-                            -- Widen hitbox
-                            hrp.Size = Vector3.new(60, 60, 60)
-                            hrp.Transparency = 1
-                            hrp.CanCollide = false
-                            
-                            -- Freeze boss
-                            local hum = enemy:FindFirstChild("Humanoid")
-                            if hum then
-                                hum.WalkSpeed = 0
-                                hum.JumpPower = 0
-                            end
-                            
-                            -- Wait until the boss is defeated or the toggle is turned off
-                            repeat 
-                                task.wait() 
-                                if not enemy or not enemy.Parent or not enemy:FindFirstChild("Humanoid") then
-                                    break
+                while _G.AutoBoss do
+                    pcall(function()
+                        if game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss) then
+                            for _, v1035 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                                if v1035.Name == _G.SelectBoss then
+                                    if v1035:FindFirstChild("Humanoid") and v1035:FindFirstChild("HumanoidRootPart") and v1035.Humanoid.Health > 0 then
+                                        repeat
+                                            task.wait(_G.Fast_Delay)
+                                            AttackNoCoolDown()
+                                            AutoHaki()
+                                            EquipTool(SelectWeapon)
+                                            v1035.HumanoidRootPart.CanCollide = false
+                                            v1035.Humanoid.WalkSpeed = 0
+                                            v1035.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                            Tween(v1035.HumanoidRootPart.CFrame * Pos)
+                                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                                        until not _G.AutoBoss or not v1035.Parent or v1035.Humanoid.Health <= 0
+                                    end
                                 end
-                            until not _G.AutoFarmBoss or enemy.Humanoid.Health <= 0
-                            
-                            break -- Break the loop after handling one boss
+                            end
+                        elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
+                            Tween(game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss).HumanoidRootPart.CFrame * CFrame.new(5, 10, 7))
                         end
-                    end
-                    
-                    -- Handle case when boss isn't found
-                    if not bossFound then
-                        print(_G.SelectedBoss .. " not found. Waiting for boss to spawn...")
-                        task.wait(2) -- Wait a bit before looking again
-                    end
+                    end)
+                    task.wait()
                 end
             end)
         end
@@ -1857,18 +1869,18 @@ Main:AddToggle({
 })
 
 Setting:AddDropdown({
-    Name = "Floating Logo Size",  -- Name of the dropdown
-    Flag = "Setting/ButtonSize",  -- Flag for internal use
-    Default = "Medium",  -- Default option
-    Options = { "Small", "Medium", "Large" },  -- Options for button size
+    Name = "Floating Logo Size",
+    Flag = "Setting/ButtonSize",
+    Default = "Medium",
+    Options = { "Small", "Medium", "Large" },
     Callback = function(option)
-        -- Check which option is selected and adjust button size accordingly
-        if option == "Small" then
-            v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
-        elseif option == "Medium" then
-            v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
-        elseif option == "Large" then
-            v23.Size = UDim2.new(0, 70, 0, 70)  -- Large size
+        local size = {
+            Small = UDim2.new(0, 30, 0, 30),
+            Medium = UDim2.new(0, 50, 0, 50),
+            Large = UDim2.new(0, 70, 0, 70)
+        }
+        if v23 and v23:IsA("GuiObject") then
+            v23.Size = size[option] or UDim2.new(0, 50, 0, 50)
         end
     end
 })
