@@ -1808,14 +1808,21 @@ Setting:AddTextBox({
     end
 })
 
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
 Setting:AddToggle({
     Name = "Join Job ID",
-    Flag = "Status/JoinJobID",
+    Flag = "Setting/JoinJobID",
     Default = false,
     Callback = function(state)
         _G.Join = state
-        if _G.Join and _G.Job then
-            game:GetService("TeleportService"):TeleportToPlaceInstance(game.placeId, _G.Job, game.Players.LocalPlayer)
+
+        if _G.Join and _G.Job and _G.Job ~= "" then
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, _G.Job, player)
+            end)
         end
     end
 })
