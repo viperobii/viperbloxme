@@ -801,9 +801,9 @@ spawn(function()
     end
 end)
 
-Volcano:AddToggle({
+Sea:AddToggle({
     Name = "Auto Drive Boat",
-    Flag = "Volcano/AutoFindPrehistoricIsland",
+    Flag = "Sea/AutoFindPrehistoricIsland",
     Default = false,
     Callback = function(Value)
         _G.AutoFindPrehistoric = Value
