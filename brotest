@@ -385,11 +385,14 @@ function Tween2(destinationCFrame)
         tween.Completed:Wait()
     end
 
+    local distanceToTarget = (hrp.Position - destinationCFrame.Position).Magnitude
+    if distanceToTarget < 5 then return end -- Prevents constant moving if already close
+
     local original = hrp.CFrame
     local target = destinationCFrame
 
     -- Step 1: Go up vertically
-    local height = 100 -- You can increase if needed
+    local height = 100
     local upCFrame = CFrame.new(original.Position.X, original.Position.Y + height, original.Position.Z)
     tweenTo(upCFrame)
 
@@ -402,7 +405,7 @@ function Tween2(destinationCFrame)
     tweenTo(downCFrame)
 end
 
--- Rest of your original code remains the same
+-- Dropdown for selecting player
 local playerList = {}
 for _, player in pairs(game:GetService("Players"):GetPlayers()) do
     table.insert(playerList, player.Name)
@@ -418,6 +421,7 @@ Player:AddDropdown({
     end
 })
 
+-- Toggle for Auto Kill Player
 Player:AddToggle({
     Name = "Auto Kill Player",
     Flag = "Player/AutoKillPlayer",
@@ -425,16 +429,14 @@ Player:AddToggle({
     Default = false,
     Callback = function(value)
         _G.TeleportPly = value
-        if not value then
-            AutoHaki()
-        end
     end
 })
 
+-- Auto Kill Loop
 spawn(function()
-    while task.wait() do
+    while task.wait(1) do
         if _G.TeleportPly and _G.SelectPly and game.Players:FindFirstChild(_G.SelectPly) then
-            AutoHaki() 
+            AutoHaki()
             local target = game.Players[_G.SelectPly]
             if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                 Tween2(target.Character.HumanoidRootPart.CFrame)
@@ -1996,44 +1998,6 @@ spawn(function()
                     wait(0.5)
                 end
             end)
-        end
-    end
-end)
-
-
-Trial:AddToggle({
-    Name = "Auto Training Race",
-    Flag = "Trial/AutoTraining",
-    Description = "Automatically trains your race",
-    Default = false,
-    Callback = function(value)
-        _G.AutoTrainRace = value
-        
-        if not value then
-            _G.AutoBoneNoQuest = false
-        end
-    end
-})
-
--- Create the Auto Training Race function
-spawn(function()
-    while wait() do
-        if _G.AutoTrainRace then
-            pcall(function()
-                if game.Players.LocalPlayer.Character:FindFirstChild("RaceTransformed") then
-                    if game.Players.LocalPlayer.Character.RaceTransformed.Value == true then
-                        _G.AutoBoneNoQuest = false
-                        Tween(CFrame.new(-9698.4736328125, 445.09442138671875, 6545.8525390625))
-                    elseif game.Players.LocalPlayer.Character.RaceTransformed.Value == false then
-                        _G.AutoBoneNoQuest = true
-                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game)
-                        wait()
-                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game)
-                    end
-                end
-            end)
-        else
-            _G.AutoBoneNoQuest = false
         end
     end
 end)
