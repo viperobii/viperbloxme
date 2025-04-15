@@ -667,18 +667,46 @@ spawn(function()
     end
 end)
 
+-- Initialize the BoatSeats table first
+local BoatSeats = {}
+local selectedBoat = "Beast Hunter"  -- Default boat selection
+
+-- Define Tween2 function if it's not already defined
+function Tween2(targetCFrame)
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    
+    if humanoid and humanoidRootPart then
+        local tweenService = game:GetService("TweenService")
+        local distance = (targetCFrame.Position - humanoidRootPart.Position).Magnitude
+        local speed = math.clamp(distance/120, 2, 10)
+        
+        local tweenInfo = TweenInfo.new(
+            speed,
+            Enum.EasingStyle.Linear
+        )
+        
+        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+        tween:Play()
+        
+        return tween
+    end
+end
+
+-- Fly to Boat Dealer Toggle
 Sea:AddToggle({
     Name = "Fly To BoatDealer Tiki Outpost",
     Flag = "Sea/FlyToBoatDealerTiki",
     Description = "",
     Default = false,
     Callback = function(Value)
+        _G.FlyToBoatDealer = Value
+        
         if Value then
             Tween2(CFrame.new(-16917.154296875, 7.757596015930176, 511.8203125))
         end
     end
 })
-
 
 -- Dropdown for Selecting Boats
 Sea:AddDropdown({
@@ -706,6 +734,7 @@ Sea:AddButton({
     end
 })
 
+-- Button to Fly to Boat
 Sea:AddButton({
     Name = "Fly To Boat",
     Flag = "Sea/FlyToBoat",
@@ -715,41 +744,67 @@ Sea:AddButton({
     end
 })
 
--- Boat handling functions (unchanged, but renamed for clarity)
+-- Improved Boat handling functions
 function BuyBoat(boatName)
     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBoat", boatName)
-    task.delay(2, function()
-        for _, model in pairs(workspace.Boats:GetChildren()) do
-            if model:IsA("Model") and model.Name == boatName then
-                local seat = model:FindFirstChild("VehicleSeat")
-                if seat and not seat.Occupant then
-                    BoatSeats[boatName] = seat
-                end
+    print("Attempting to buy boat: " .. boatName)
+    
+    -- Clear previous boat entries
+    BoatSeats = {}
+    
+    -- Give time for the boat to spawn
+    task.wait(3)
+    
+    -- Search for the boat in workspace
+    RefreshBoats()
+end
+
+function RefreshBoats()
+    BoatSeats = {}
+    for _, model in pairs(workspace.Boats:GetChildren()) do
+        if model:IsA("Model") then
+            local seat = model:FindFirstChild("VehicleSeat")
+            if seat and not seat.Occupant then
+                print("Found boat: " .. model.Name)
+                BoatSeats[model.Name] = seat
             end
         end
-    end)
+    end
 end
 
 function FlyToBoatSeat()
-    for _, seat in pairs(BoatSeats) do
-        if seat and seat.Parent and seat.Name == "VehicleSeat" and not seat.Occupant then
+    print("Attempting to fly to boat seat")
+    -- First refresh to make sure we have the latest boats
+    RefreshBoats()
+    
+    -- Try to find the selected boat first
+    if selectedBoat and BoatSeats[selectedBoat] then
+        local seat = BoatSeats[selectedBoat]
+        if seat and seat.Parent and not seat.Occupant then
+            print("Flying to selected boat: " .. selectedBoat)
             Tween2(seat.CFrame)
+            return
         end
     end
+    
+    -- If selected boat not found, try any available boat
+    for boatName, seat in pairs(BoatSeats) do
+        if seat and seat.Parent and not seat.Occupant then
+            print("Flying to available boat: " .. boatName)
+            Tween2(seat.CFrame)
+            return
+        end
+    end
+    
+    print("No available boat seats found")
 end
 
--- Live update for available seats
-game:GetService("RunService").RenderStepped:Connect(function()
-    for name, seat in pairs(BoatSeats) do
-        if seat and seat.Parent and seat.Name == "VehicleSeat" and not seat.Occupant then
-            BoatSeats[name] = seat
-        end
+-- Create a refresh loop for available boats
+spawn(function()
+    while wait(3) do
+        RefreshBoats()
     end
 end)
-
--- BoatSeats table
-BoatSeats = {}
-selectedBoat = "Beast Hunter"
 
 
 
