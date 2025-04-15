@@ -1775,54 +1775,41 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
--- Function to determine the current sea based on player's position
-local function getCurrentSea()
-    local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-    -- Sea detection logic based on X position
-    if pos.X <= -5000 then
-        return 1 -- Sea 1
-    elseif pos.X <= 12000 then
-        return 2 -- Sea 2
-    else
-        return 3 -- Sea 3
-    end
-end
+local Sea1ID = 2753915549
+local Sea2ID = 4442272183
+local Sea3ID = 7449423635
 
--- Set the current sea based on player position
-local currentSea = getCurrentSea()
-
--- Boss list based on the sea the player is in
+local currentPlace = game.PlaceId
 local tableBoss = {}
 
--- Define bosses for each sea
-if currentSea == 1 then
+if currentPlace == Sea1ID then
     tableBoss = {
         "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
         "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper", "Thunder God",
         "Cyborg", "Saber Expert"
     }
-elseif currentSea == 2 then
+elseif currentPlace == Sea2ID then
     tableBoss = {
         "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
         "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
     }
-elseif currentSea == 3 then
+elseif currentPlace == Sea3ID then
     tableBoss = {
         "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
         "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
     }
 end
 
--- Add dropdown for selecting the boss
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/BossFarmName",
-    Default = "", -- Default to no boss selected
-    Options = tableBoss, -- Dynamically populated boss list
+    Default = "",
+    Options = tableBoss,
     Callback = function(option)
         _G.SelectBoss = option
     end
 })
+
 
 -- Auto farm boss toggle
 Main:AddToggle({
