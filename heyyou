@@ -86,7 +86,7 @@ Info:AddButton({
     end
 })
 
-Info:AddParagraph("https://discord.gg/qx9rKaC35f")
+Info:AddLabel("Discord: https://discord.gg/qx9rKaC35f")
 
 
 
