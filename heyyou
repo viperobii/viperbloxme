@@ -14,7 +14,7 @@ local Window = redzlib:MakeWindow({
 local Info = Window:MakeTab({
     Title = "Information",
     Description = "Info",
-    Icon = "circle-alert",  -- Fixed the split "Icon"
+    Icon = "alert",  -- Fixed the split "Icon"
 })
 
 local Main = Window:MakeTab({
@@ -79,21 +79,48 @@ local Setting = Window:MakeTab({
 
 
 Info:AddButton({
-    Name = "Join Discord",
+    Name = "Join Discord Updates",
     Description = "Tap to open Discord invite in browser",
     Callback = function()
         game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/qx9rKaC35f")
     end
 })
 
-Info:AddParagraph("Mentions", [[
-Honorable Mention: Tanny
-Honorable Mention 2: Viper
-]], {
-    Flag = "Mentions/Names"
+
+Main:AddDropdown({
+    Name = "Select Weapons",
+    Flag = "Main/SelectWeapon",
+    Description = "",
+    Default = "Melee",
+    Options = {
+        "Melee",
+        "Sword",
+        "Blox Fruits"
+    },
+    Callback = function(option)
+        getgenv().ChooseWeapon = option
+    end
 })
 
+getgenv().ChooseWeapon = "Melee"
+getgenv().SelectWeapon = nil
 
+task.spawn(function()
+    while task.wait() do
+        pcall(function()
+            local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
+            for _, tool in pairs(backpack) do
+                if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
+                    getgenv().SelectWeapon = tool.Name
+                elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
+                    getgenv().SelectWeapon = tool.Name
+                elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
+                    getgenv().SelectWeapon = tool.Name
+                end
+            end
+        end)
+    end
+end)
 
 
 
@@ -2397,6 +2424,15 @@ Trial:AddToggle({
     end
 })
 
+
+Trial:AddButton({
+    Name = "Viper Fly Character",
+    Flag = "Trial/ViperFly",
+    Description = "Use For Draco Trial And Normal Trial Ez Win",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/cokka"))()
+    end
+})
 
 
 Main:AddSection("Farm Boss Sea 1");
