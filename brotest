@@ -46,6 +46,12 @@ local Raids = Window:MakeTab({
     Icon = "cherry",  -- Fixed the split "Icon"
 })
 
+local Sea = Window:MakeTab({
+    Title = "Sea Events",
+    Description = "Info",
+    Icon = "waves",  -- Fixed the split "Icon"
+})
+
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
@@ -661,6 +667,89 @@ spawn(function()
     end
 end)
 
+Sea:AddToggle({
+    Name = "Fly To BoatDealer Tiki Outpost",
+    Flag = "Sea/FlyToBoatDealerTiki",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            Tween2(CFrame.new(-16917.154296875, 7.757596015930176, 511.8203125))
+        end
+    end
+})
+
+
+-- Dropdown for Selecting Boats
+Sea:AddDropdown({
+    Name = "Select Boat",
+    Flag = "Sea/SelectBoat",
+    Description = "",
+    Default = "Beast Hunter",
+    Options = {
+        "Beast Hunter", "Sleigh", "Miracle", "The Sentinel", "Guardian",
+        "Lantern", "Dinghy", "PirateSloop", "PirateBrigade",
+        "PirateGrandBrigade", "MarineGrandBrigade", "MarineBrigade", "MarineSloop"
+    },
+    Callback = function(option)
+        selectedBoat = option
+    end
+})
+
+-- Button to Buy Selected Boat
+Sea:AddButton({
+    Name = "Buy Selected Boat",
+    Flag = "Sea/BuyBoat",
+    Description = "Buy the boat selected from the dropdown",
+    Callback = function()
+        BuyBoat(selectedBoat)
+    end
+})
+
+Sea:AddButton({
+    Name = "Fly To Boat",
+    Flag = "Sea/FlyToBoat",
+    Description = "Fly to the boat you bought",
+    Callback = function()
+        FlyToBoatSeat()
+    end
+})
+
+-- Boat handling functions (unchanged, but renamed for clarity)
+function BuyBoat(boatName)
+    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBoat", boatName)
+    task.delay(2, function()
+        for _, model in pairs(workspace.Boats:GetChildren()) do
+            if model:IsA("Model") and model.Name == boatName then
+                local seat = model:FindFirstChild("VehicleSeat")
+                if seat and not seat.Occupant then
+                    BoatSeats[boatName] = seat
+                end
+            end
+        end
+    end)
+end
+
+function FlyToBoatSeat()
+    for _, seat in pairs(BoatSeats) do
+        if seat and seat.Parent and seat.Name == "VehicleSeat" and not seat.Occupant then
+            Tween2(seat.CFrame)
+        end
+    end
+end
+
+-- Live update for available seats
+game:GetService("RunService").RenderStepped:Connect(function()
+    for name, seat in pairs(BoatSeats) do
+        if seat and seat.Parent and seat.Name == "VehicleSeat" and not seat.Occupant then
+            BoatSeats[name] = seat
+        end
+    end
+end)
+
+-- BoatSeats table
+BoatSeats = {}
+selectedBoat = "Beast Hunter"
 
 
 
