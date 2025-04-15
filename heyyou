@@ -87,6 +87,7 @@ Info:AddButton({
 })
 
 
+
 Main:AddDropdown({
     Name = "Select Weapons",
     Flag = "Main/SelectWeapon",
@@ -104,19 +105,57 @@ Main:AddDropdown({
 
 getgenv().ChooseWeapon = "Melee"
 getgenv().SelectWeapon = nil
+local lastEquipped = nil
 
 task.spawn(function()
     while task.wait() do
         pcall(function()
-            local backpack = game.Players.LocalPlayer.Backpack:GetChildren()
-            for _, tool in pairs(backpack) do
-                if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                    getgenv().SelectWeapon = tool.Name
-                elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                    getgenv().SelectWeapon = tool.Name
-                elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                    getgenv().SelectWeapon = tool.Name
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            local backpack = player.Backpack
+            if not character or not backpack then return end
+
+            local foundWeapon = nil
+
+            -- Check backpack
+            for _, tool in pairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") and tool.ToolTip then
+                    if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
+                        foundWeapon = tool
+                        break
+                    elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
+                        foundWeapon = tool
+                        break
+                    elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
+                        foundWeapon = tool
+                        break
+                    end
                 end
+            end
+
+            -- If not in backpack, check equipped
+            if not foundWeapon then
+                for _, tool in pairs(character:GetChildren()) do
+                    if tool:IsA("Tool") and tool.ToolTip then
+                        if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
+                            foundWeapon = tool
+                            break
+                        elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
+                            foundWeapon = tool
+                            break
+                        elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
+                            foundWeapon = tool
+                            break
+                        end
+                    end
+                end
+            end
+
+            -- Equip only if not already equipped
+            if foundWeapon and foundWeapon.Parent == backpack and lastEquipped ~= foundWeapon.Name then
+                foundWeapon.Parent = character
+                getgenv().SelectWeapon = foundWeapon.Name
+                lastEquipped = foundWeapon.Name
             end
         end)
     end
