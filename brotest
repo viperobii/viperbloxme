@@ -577,6 +577,10 @@ spawn(function()
     end
 end)
 
+-- Add this function to format numbers (replacement for v20)
+function FormatNumber(number)
+    return math.floor(number + 0.5)
+end
 
 Visual:AddToggle({
     Name = "Esp Players",
@@ -609,18 +613,36 @@ function UpdatePlayerChams()
                         text.Font = Enum.Font.GothamSemibold
                         text.TextSize = 14
                         text.TextWrapped = true
-                        text.Text = plr.Name .. " \n" .. v20((game.Players.LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3) .. " Distance"
+                        
+                        -- Calculate distance safely
+                        local distance = 0
+                        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Head") then
+                            distance = (game.Players.LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3
+                        end
+                        
+                        text.Text = plr.Name .. " \n" .. FormatNumber(distance) .. " Distance"
                         text.Size = UDim2.new(1, 0, 1, 0)
                         text.TextYAlignment = Enum.TextYAlignment.Top
                         text.BackgroundTransparency = 1
                         text.TextStrokeTransparency = 0.5
                         text.TextColor3 = (plr.Team == game.Players.LocalPlayer.Team) and Color3.new(0, 0, 1) or Color3.new(1, 0, 0)
                     else
-                        tag.TextLabel.Text =
-                            plr.Name ..
-                            " | " .. v20((game.Players.LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3) ..
-                            " Distance\nHealth : " ..
-                            v20((plr.Character.Humanoid.Health * 100) / plr.Character.Humanoid.MaxHealth) .. "%"
+                        -- Calculate distance safely
+                        local distance = 0
+                        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Head") then
+                            distance = (game.Players.LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3
+                        end
+                        
+                        -- Calculate health percentage safely
+                        local healthPercent = 0
+                        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                            healthPercent = (plr.Character.Humanoid.Health * 100) / plr.Character.Humanoid.MaxHealth
+                        end
+                        
+                        tag.TextLabel.Text = plr.Name .. 
+                            " | " .. FormatNumber(distance) .. 
+                            " Distance\nHealth : " .. 
+                            FormatNumber(healthPercent) .. "%"
                     end
                 elseif tag then
                     tag:Destroy()
@@ -629,6 +651,16 @@ function UpdatePlayerChams()
         end)
     end
 end
+
+-- Add this to continuously update ESP information
+spawn(function()
+    while wait(0.5) do
+        if ESPPlayer then
+            UpdatePlayerChams()
+        end
+    end
+end)
+
 
 
 
@@ -1534,143 +1566,7 @@ end)
 
 
 
-Items:AddToggle({
-    Name = "Auto Yama",
-    Flag = "Items/AutoYama",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoYama = Value
-    end
-})
 
-spawn(function()
-    while wait() do
-        if _G.AutoYama then
-            pcall(function()
-                -- Check if player has enough Elite Hunter progress
-                local eliteProgress = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter", "Progress")
-                
-                if eliteProgress >= 30 then
-                    -- If player has enough progress, try to get Yama
-                    if not game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Yama") and 
-                       not game:GetService("Players").LocalPlayer.Character:FindFirstChild("Yama") then
-                        
-                        -- Check if the ClickDetector exists
-                        local clickDetector = game:GetService("Workspace").Map.Waterfall.SealedKatana.Handle.ClickDetector
-                        
-                        if clickDetector then
-                            -- Teleport to the Yama location first (optional, add if needed)
-                            local yamaPos = game:GetService("Workspace").Map.Waterfall.SealedKatana.Handle.CFrame
-                            
-                            -- You can add a teleport here if needed:
-                            -- Tween(yamaPos * CFrame.new(0, 2, 0))
-                            -- wait(1)
-                            
-                            -- Fire the click detector to get Yama
-                            fireclickdetector(clickDetector)
-                            
-                            -- Wait a bit to prevent server stress
-                            wait(1)
-                        else
-                            print("ClickDetector not found!")
-                        end
-                    else
-                        -- Player already has Yama
-                        print("You already have Yama!")
-                    end
-                else
-                    -- Not enough Elite Hunter progress
-                    print("Not enough Elite Hunter progress! Current progress: " .. eliteProgress .. "/30")
-                    
-                    -- Optional: Add code here to help get Elite Hunter progress
-                    -- For example, teleport to Elite Hunter location or find Elite enemies
-                end
-            end)
-        end
-        
-        -- Add a short wait to prevent the loop from running too frequently
-        wait(1)
-    end
-end)
-
-Items:AddToggle({
-    Name = "Auto Hallow Scythe",
-    Flag = "Items/AutoHallowScythe",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        AutoHallowScythe = Value
-    end
-})
-
-spawn(function()
-    while wait() do
-        if AutoHallowScythe then
-            pcall(function()
-                local Enemies = workspace.Enemies
-                local Player = game.Players.LocalPlayer
-                local Backpack = Player.Backpack
-                local Character = Player.Character
-                
-                -- Define Pos if not already defined
-                if not Pos then
-                    Pos = CFrame.new(0, 30, 0) -- Attack from 30 studs above
-                end
-
-                if Enemies:FindFirstChild("Soul Reaper") then
-                    for _, v in pairs(Enemies:GetChildren()) do
-                        if string.find(v.Name, "Soul Reaper") and 
-                           v:FindFirstChild("Humanoid") and 
-                           v:FindFirstChild("HumanoidRootPart") and 
-                           v.Humanoid.Health > 0 then
-                            
-                            repeat
-                                wait(_G.Fast_Delay)
-                                AttackNoCoolDown()
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-
-                                v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                v.HumanoidRootPart.CanCollide = false
-                                v.HumanoidRootPart.Transparency = 1
-                                v.Humanoid.JumpPower = 0
-                                v.Humanoid.WalkSpeed = 0
-                                v.Humanoid:ChangeState(14)
-                                
-                                Tween(v.HumanoidRootPart.CFrame * Pos)
-
-                                sethiddenproperty(Player, "SimulationRadius", math.huge)
-                            until not v or not v.Parent or v.Humanoid.Health <= 0 or not AutoHallowScythe
-                        end
-                    end
-                elseif (Backpack:FindFirstChild("Hallow Essence") or Character:FindFirstChild("Hallow Essence")) then
-                    repeat
-                        Tween(CFrame.new(-8932.322, 146.831, 6062.550))
-                        wait(1)
-                    until (Character.HumanoidRootPart.Position - Vector3.new(-8932.322, 146.831, 6062.550)).Magnitude <= 8
-                    
-                    wait(1)
-                    EquipTool("Hallow Essence")
-                    wait(1) -- Give time for the tool to be equipped and used
-                else
-                    -- Check if Soul Reaper exists in ReplicatedStorage (not spawned yet)
-                    if game.ReplicatedStorage:FindFirstChild("Soul Reaper") then
-                        local soulReaper = game.ReplicatedStorage:FindFirstChild("Soul Reaper")
-                        if soulReaper:FindFirstChild("HumanoidRootPart") then
-                            Tween(soulReaper.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
-                            wait(2) -- Wait at spawn location for mob to appear
-                        end
-                    else
-                        -- If Soul Reaper is not found, go to its spawn location
-                        Tween(CFrame.new(-9570.42773, 315.952209, 6726.36963))
-                        wait(3) -- Wait at spawn location for mob to appear
-                    end
-                end
-            end)
-        end
-    end
-end)
 
 Items:AddSection("Setting Stats");
 
@@ -2046,6 +1942,8 @@ spawn(function()
 end)
 
 
+
+
 Main:AddSection("Farm Boss Sea 1");
 
 Main:AddToggle({
@@ -2125,6 +2023,89 @@ spawn(function()
         end
     end
 end)
+
+
+Main:AddSection("Farm Boss Sea 3");
+
+Main:AddToggle({
+    Name = "Auto Farm Soul Reaper",
+    Flag = "Main/AutoFarmSoulReaper",
+    Description = "Farm Soul Reaper Boss",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarmSoulReaper = Value
+        if not Value then bringmob = false end
+    end
+})
+
+-- Auto Farm Soul Reaper
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarmSoulReaper then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local questGui = player.PlayerGui.Main.Quest
+
+                Ms = "Soul Reaper"
+                NameMon = "Soul Reaper"
+                NameQuest = "" -- Soul Reaper doesn't require a quest
+                QuestLv = 1
+                CFrameQ = CFrame.new(0, 0, 0) -- Not used since there's no quest
+                CFrameMon = CFrame.new(-9524.7890625, 315.80429077148, 6655.7192382813)
+                SelectWeapon = "Combat" -- change this to your preferred melee name if needed
+
+                if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) then
+                    bringmob = false
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+                    local questTween = Tween(CFrameQ)
+                    if questTween then questTween.Completed:Wait() end
+                    task.wait(1)
+                    -- No quest to start
+                    task.wait(0.5)
+                end
+
+                local found = false
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy.Name == Ms and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        found = true
+                        break
+                    end
+                end
+
+                if not found then
+                    Tween(CFrameMon)
+                    task.wait(1)
+                end
+
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if _G.AutoFarmSoulReaper and enemy.Name == Ms and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                        bringmob = true
+                        repeat
+                            if not _G.AutoFarmSoulReaper or not enemy.Parent then break end
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+                            Tween(CFrame.new(enemy.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                            AttackNoCoolDown()
+                            if enemy:FindFirstChild("HumanoidRootPart") then
+                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                enemy.HumanoidRootPart.Transparency = 1
+                                enemy.HumanoidRootPart.CanCollide = false
+                            end
+                            if enemy:FindFirstChild("Humanoid") then
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.Humanoid.JumpPower = 0
+                            end
+                            task.wait()
+                        until not _G.AutoFarmSoulReaper or not enemy or not enemy.Parent or enemy.Humanoid.Health <= 0
+                        bringmob = false
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
 
 Setting:AddTextBox({
     Name = "Job ID",  -- Title of the input box
