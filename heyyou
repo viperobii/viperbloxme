@@ -1775,10 +1775,10 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
--- Accurate Sea Detection Based on Position (X and Z)
+-- Function to determine the current sea based on player's position
 local function getCurrentSea()
     local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-    -- Adjust X and Z thresholds for more precise sea detection
+    -- Sea detection logic based on X position
     if pos.X <= -5000 then
         return 1 -- Sea 1
     elseif pos.X <= 12000 then
@@ -1788,31 +1788,43 @@ local function getCurrentSea()
     end
 end
 
--- Define boss list based on the player's sea
+-- Set the current sea based on player position
 local currentSea = getCurrentSea()
 
--- Boss options directly inside the dropdown
+-- Boss list based on the sea the player is in
+local tableBoss = {}
+
+-- Define bosses for each sea
+if currentSea == 1 then
+    tableBoss = {
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
+        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper", "Thunder God",
+        "Cyborg", "Saber Expert"
+    }
+elseif currentSea == 2 then
+    tableBoss = {
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
+        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+    }
+elseif currentSea == 3 then
+    tableBoss = {
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
+        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
+    }
+end
+
+-- Add dropdown for selecting the boss
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/BossFarmName",
-    Default = "", -- Default to nothing
-    Options = currentSea == 1 and {
-        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
-        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
-        "Thunder God", "Cyborg", "Saber Expert"
-    } or currentSea == 2 and {
-        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
-        "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
-    } or {
-        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
-        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
-    },
+    Default = "", -- Default to no boss selected
+    Options = tableBoss, -- Dynamically populated boss list
     Callback = function(option)
         _G.SelectBoss = option
     end
 })
 
--- Auto Farm toggle for the selected boss
+-- Auto farm boss toggle
 Main:AddToggle({
     Name = "Auto Farm Boss",
     Flag = "Main/AutoFarmBoss",
@@ -1833,7 +1845,7 @@ Main:AddToggle({
                                     AttackNoCoolDown()
                                     AutoHaki()
                                     EquipTool(SelectWeapon)
-                                    
+
                                     -- Tween above the boss and keep the distance steady
                                     local bossPos = enemy.HumanoidRootPart.Position
                                     local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
