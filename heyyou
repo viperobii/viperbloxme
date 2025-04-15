@@ -5,8 +5,8 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "Nova.GG : Blox-Fruit",
-    SubTitle = "by Viper x Tanny",
+    Title = "viper Hub (NOVA) : Blox-Fruit",
+    SubTitle = "by Viper",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
 
@@ -31,7 +31,7 @@ local Items = Window:MakeTab({
 local Visual = Window:MakeTab({
     Title = "Visual ESP",
     Description = "Info",
-    Icon = "box",  -- Fixed the split "Icon"
+    Icon = "users",  -- Fixed the split "Icon"
 })
 
 local Trial = Window:MakeTab({
@@ -55,13 +55,13 @@ local Sea = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "book",  -- Fixed the split "Icon"
+    Icon = "map-pin",  -- Fixed the split "Icon"
 })
 
 local Misc = Window:MakeTab({
     Title = "Miscellaneous",
-    Description = "code-xml",
-    Icon = "book",  -- Fixed the split "Icon"
+    Description = "nega",
+    Icon = "cloudy",  -- Fixed the split "Icon"
 })
 
 local Setting = Window:MakeTab({
@@ -1903,43 +1903,7 @@ Misc:AddButton({
     end
 })
 
-Setting:AddToggle({
-    Name = "Bring Mobs",
-    Flag = "Setting/BringMobs",
-    Description = "Bring The Mobs",
-    Callback = function(value)
-        getgenv().BringMob = value
-        if value then
-            spawn(function()
-                while getgenv().BringMob do
-                    pcall(function()
-                        for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if bringmob and mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                                local root = mob:FindFirstChild("HumanoidRootPart")
-                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1000 then
-                                    root.CFrame = FarmPos
-                                    root.Size = Vector3.new(60, 60, 60)
-                                    root.Transparency = 1
-                                    root.CanCollide = false
-                                    mob.Head.CanCollide = false
-                                    mob.Humanoid.JumpPower = 0
-                                    mob.Humanoid.WalkSpeed = 0
-                                    if mob.Humanoid:FindFirstChild("Animator") then
-                                        mob.Humanoid.Animator:Destroy()
-                                    end
-                                    mob.Humanoid:ChangeState(11)
-                                    mob.Humanoid:ChangeState(14)
-                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                                end
-                            end
-                        end
-                    end)
-                    wait()
-                end
-            end)
-        end
-    end
-})
+
 
 Misc:AddToggle({
     Name = "Enable Remove Notifications",
@@ -1961,7 +1925,44 @@ Misc:AddToggle({
 })
 
 
+Misc:AddToggle({
+    Name = "Auto Activate Race V3",
+    Flag = "Misc/AutoActivateRaceV3",
+    Callback = function(value)
+        getgenv().AutoT = value
+        if value then
+            spawn(function()
+                while getgenv().AutoT do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("ActivateAbility")
+                    end)
+                    wait()
+                end
+            end)
+        end
+    end
+})
 
+Misc:AddToggle({
+    Name = "Auto Activate V4",
+    Flag = "Misc/AutoActivateV4",
+    Callback = function(value)
+        getgenv().AutoY = value
+        if value then
+            spawn(function()
+                while getgenv().AutoY do
+                    pcall(function()
+                        local vim = game:GetService("VirtualInputManager")
+                        vim:SendKeyEvent(true, "Y", false, game)
+                        wait(0.1)
+                        vim:SendKeyEvent(false, "Y", false, game)
+                    end)
+                    wait(0.5)
+                end
+            end)
+        end
+    end
+})
 
 
 Items:AddSection("Setting Stats");
@@ -2337,6 +2338,38 @@ spawn(function()
     end
 end)
 
+Trial:AddToggle({
+    Name = "Auto Kill Players In Trial",
+    Flag = "Trial/AutoKillTrial",
+    Description = "Manual Use Skill To Win Only Melee Skills",
+    Default = false,
+    Callback = function(value)
+        getgenv().AutoKillTrial = value
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if getgenv().AutoKillTrial then
+                        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                            if player.Name ~= game.Players.LocalPlayer.Name and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+                                if (player.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100 and player.Character.Humanoid.Health > 0 then
+                                    repeat
+                                        wait(getgenv().Fast_Delay or 0.1)
+                                        EquipTool(SelectWeapon)
+                                        AutoHaki()
+                                        Tween(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
+                                        player.Character.HumanoidRootPart.CanCollide = false
+                                        player.Character.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                        AttackNoCoolDown()
+                                    until not getgenv().AutoKillTrial or not player.Parent or player.Character.Humanoid.Health <= 0
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
 
 
 
@@ -2711,6 +2744,47 @@ Setting:AddToggle({
         end
     end
 })
+
+
+
+Setting:AddToggle({
+    Name = "Bring Mobs",
+    Flag = "Setting/BringMobs",
+    Description = "Bring The Mobs",
+    Callback = function(value)
+        getgenv().BringMob = value
+        if value then
+            spawn(function()
+                while getgenv().BringMob do
+                    pcall(function()
+                        for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if bringmob and mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                local root = mob:FindFirstChild("HumanoidRootPart")
+                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1000 then
+                                    root.CFrame = FarmPos
+                                    root.Size = Vector3.new(60, 60, 60)
+                                    root.Transparency = 1
+                                    root.CanCollide = false
+                                    mob.Head.CanCollide = false
+                                    mob.Humanoid.JumpPower = 0
+                                    mob.Humanoid.WalkSpeed = 0
+                                    if mob.Humanoid:FindFirstChild("Animator") then
+                                        mob.Humanoid.Animator:Destroy()
+                                    end
+                                    mob.Humanoid:ChangeState(11)
+                                    mob.Humanoid:ChangeState(14)
+                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                end
+                            end
+                        end
+                    end)
+                    wait()
+                end
+            end)
+        end
+    end
+})
+
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
@@ -4882,162 +4956,118 @@ end
 -- Auto Attack Function
 local _v1 = game.Players.LocalPlayer
 
+-- Use getgenv() to make variables accessible across scripts
+getgenv().FastAttack = true
+
 function _x1()
-
     local _v2 = _v1.Character
-
     if not _v2 then return end
 
     local _v3 = nil
-
     for _, _v4 in ipairs(_v2:GetChildren()) do
-
         if _v4:IsA("Tool") then
-
             _v3 = _v4
-
             break
-
         end
-
     end
-
     if not _v3 then return end
 
     local function _x2(_v5)
-
         return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
-
     end
 
+    -- Modified function to get both enemies and players
     local function _x3(_v6)
-
-        local _v7 = game:GetService("Workspace").Enemies:GetChildren()
-
-        local _v8 = {}
-
+        local targets = {}
         local _v9 = _v2:GetPivot().Position
-
-        for _, _v10 in ipairs(_v7) do
-
-            local _v11 = _v10:FindFirstChild("HumanoidRootPart")
-
-            if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
-
-                table.insert(_v8, _v10)
-
+        
+        -- Get enemies
+        if workspace:FindFirstChild("Enemies") then
+            local _v7 = workspace.Enemies:GetChildren()
+            for _, _v10 in ipairs(_v7) do
+                local _v11 = _v10:FindFirstChild("HumanoidRootPart")
+                if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
+                    table.insert(targets, _v10)
+                end
             end
-
         end
-
-        return _v8
-
+        
+        -- Get players (excluding yourself)
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= _v1 and player.Character then
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                if hrp and _x2(player.Character) and (hrp.Position - _v9).Magnitude <= _v6 then
+                    table.insert(targets, player.Character)
+                end
+            end
+        end
+        
+        return targets
     end
 
     if _v3:FindFirstChild("LeftClickRemote") then
-
         local _v12 = 1  
-
         local _v13 = _x3(60)
-
         for _, _v14 in ipairs(_v13) do
-
-            local _v15 = (_v14.HumanoidRootPart.Position - _v2:GetPivot().Position).Unit
-
-            pcall(function()
-
-                _v3.LeftClickRemote:FireServer(_v15, _v12)
-
-            end)
-
-            _v12 = _v12 + 1
-
-            if _v12 > 1000000000 then _v12 = 1 end
-
-        end
-
-    else
-
-        local _v16 = {}
-
-        local _v17 = game:GetService("Workspace").Enemies:GetChildren()
-
-        local _v18 = _v2:GetPivot().Position
-
-        local _v19 = nil
-
-        for _, _v20 in ipairs(_v17) do
-
-            if not _v20:GetAttribute("IsBoat") and _x2(_v20) then
-
-                local _v21 = _v20:FindFirstChild("Head")
-
-                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
-
-                    table.insert(_v16, { _v20, _v21 })
-
-                    _v19 = _v21
-
-                end
-
+            local hrp = _v14:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local _v15 = (hrp.Position - _v2:GetPivot().Position).Unit
+                pcall(function()
+                    _v3.LeftClickRemote:FireServer(_v15, _v12)
+                end)
+                _v12 = _v12 + 1
+                if _v12 > 1000000000 then _v12 = 1 end
             end
-
+        end
+    else
+        local _v16 = {}
+        local _v18 = _v2:GetPivot().Position
+        local _v19 = nil
+        
+        -- Get both enemies and players as targets
+        local _v13 = _x3(60)
+        
+        for _, _v20 in ipairs(_v13) do
+            -- Skip boats if in enemies folder
+            if not _v20:GetAttribute("IsBoat") and _x2(_v20) then
+                local _v21 = _v20:FindFirstChild("Head")
+                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
+                    table.insert(_v16, { _v20, _v21 })
+                    _v19 = _v21
+                end
+            end
         end
 
         if not _v19 then return end
 
         pcall(function()
-
             local _v22 = game:GetService("ReplicatedStorage")
-
             local _v23 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterAttack")
-
             local _v24 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit")
-
+            
             if #_v16 > 0 then
-
                 _v23:FireServer(0.000000001)
-
                 _v24:FireServer(_v19, _v16)
-
             else
-
                 task.wait(0.000000001)
-
             end
-
         end)
-
     end
-
 end
 
-
-
-_G.FastAttack = true
-
-
+-- Using getgenv() for global access
+getgenv().FastAttack = true
 
 spawn(function()
-
     while wait(.1) do
-
-        if _G.FastAttack then
-
+        if getgenv().FastAttack then
             pcall(function()
-
-                repeat task.wait(000.1)
-
+                repeat task.wait(0.1)
                     _x1()
-
-                until not _G.FastAttack
-
+                until not getgenv().FastAttack
             end)
-
         end
-
     end
-
 end)
 
 
