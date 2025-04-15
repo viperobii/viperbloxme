@@ -86,6 +86,12 @@ Info:AddButton({
     end
 })
 
+Info:AddParagraph({
+    Name = "Tip",
+    Flag = "Info/Tip",
+    Content = "https://discord.gg/qx9rKaC35f"
+})
+
 
 
 Main:AddDropdown({
@@ -231,7 +237,9 @@ spawn(function()
                                 
                                 -- Target and attack the mob
                                 AutoHaki()
-                                EquipTool(SelectWeapon)
+                                if getgenv().SelectWeapon then
+    EquipTool(getgenv().SelectWeapon)
+end
                                 
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
@@ -312,7 +320,9 @@ spawn(function()
                 if Closest then
                     -- Target and attack the closest mob
                     AutoHaki()
-                    EquipTool(SelectWeapon)
+                    if getgenv().SelectWeapon then
+    EquipTool(getgenv().SelectWeapon)
+end
                     
                     -- Modify mob properties for easier farming
                     if Closest:FindFirstChild("HumanoidRootPart") then
