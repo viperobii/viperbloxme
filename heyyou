@@ -1775,19 +1775,20 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
--- Detect the current sea by position
+-- Accurate Sea Detection Based on Position (X and Z)
 local function getCurrentSea()
     local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    -- Adjust X and Z thresholds for more precise sea detection
     if pos.X <= -5000 then
-        return 1
+        return 1 -- Sea 1
     elseif pos.X <= 12000 then
-        return 2
+        return 2 -- Sea 2
     else
-        return 3
+        return 3 -- Sea 3
     end
 end
 
--- Define boss list based on sea
+-- Define boss list based on the player's sea
 local currentSea = getCurrentSea()
 
 -- Boss options directly inside the dropdown
@@ -1811,7 +1812,7 @@ Main:AddDropdown({
     end
 })
 
--- Auto farm toggle for the selected boss
+-- Auto Farm toggle for the selected boss
 Main:AddToggle({
     Name = "Auto Farm Boss",
     Flag = "Main/AutoFarmBoss",
@@ -1825,20 +1826,36 @@ Main:AddToggle({
                         local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
                         if enemy then
                             if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                -- Set a fixed height above the boss, adjust the Y value to avoid water
+                                local heightAboveBoss = 20
                                 repeat
                                     task.wait(_G.Fast_Delay)
                                     AttackNoCoolDown()
                                     AutoHaki()
                                     EquipTool(SelectWeapon)
+                                    
+                                    -- Tween above the boss and keep the distance steady
+                                    local bossPos = enemy.HumanoidRootPart.Position
+                                    local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
+                                    Tween(newPos)
+
+                                    -- Set humanoid properties to prevent unwanted interactions
                                     enemy.HumanoidRootPart.CanCollide = false
                                     enemy.Humanoid.WalkSpeed = 0
                                     enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                    Tween(enemy.HumanoidRootPart.CFrame * Pos)
+
+                                    -- Keep following the boss if it moves
                                     sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
                                 until not _G.AutoBoss or not enemy.Parent or enemy.Humanoid.Health <= 0
                             end
                         elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
-                            Tween(game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss).HumanoidRootPart.CFrame * CFrame.new(5, 10, 7))
+                            -- In case the boss is in ReplicatedStorage, handle the movement and follow
+                            local bossStorage = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
+                            if bossStorage then
+                                local bossPos = bossStorage.HumanoidRootPart.Position
+                                local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
+                                Tween(newPos)
+                            end
                         end
                     end)
                     task.wait()
