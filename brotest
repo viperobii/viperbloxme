@@ -393,6 +393,35 @@ Player:AddToggle({
     end
 })
 
+Player:AddToggle({
+    Name = "Auto Kill Player",
+    Flag = "Player/AutoKillPlayer",
+    Description = "Target Selected Player And Manual Use Your Skills",
+    Default = false,
+    Callback = function(v311)
+        _G.TeleportPly = v311
+
+        if not v311 then
+            wait()
+            AutoHaki()
+            Tween2(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+        end
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.TeleportPly and _G.SelectPly then
+            pcall(function()
+                local target = game.Players:FindFirstChild(_G.SelectPly)
+                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    Tween2(target.Character.HumanoidRootPart.CFrame)
+                end
+            end)
+        end
+    end
+end)
 
 _G.Spectating = false
 _G.SelectPly = nil
@@ -4368,165 +4397,121 @@ end
 
 
 
--- Auto Attack Function
-local _v1 = game.Players.LocalPlayer
+local LocalPlayer = game.Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local RS = game:GetService("ReplicatedStorage")
+local EnemiesFolder = workspace:FindFirstChild("Enemies")
+local PlayersFolder = game:GetService("Players")
 
-function _x1()
+-- Weapons to auto-equip (Add all melee names here)
+local MeleeWeapons = {
+    "Dragon Talon", "Electric Claw", "Sanguine Art", "Godhuman", "Superhuman",
+    "Electric", "Dragon Breath"
+}
 
-    local _v2 = _v1.Character
-
-    if not _v2 then return end
-
-    local _v3 = nil
-
-    for _, _v4 in ipairs(_v2:GetChildren()) do
-
-        if _v4:IsA("Tool") then
-
-            _v3 = _v4
-
+-- Function to auto equip melee
+function AutoEquipMelee()
+    for _, tool in ipairs(LocalPlayer.Backpack:GetChildren()) do
+        if table.find(MeleeWeapons, tool.Name) then
+            LocalPlayer.Character.Humanoid:EquipTool(tool)
             break
-
         end
-
     end
-
-    if not _v3 then return end
-
-    local function _x2(_v5)
-
-        return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
-
-    end
-
-    local function _x3(_v6)
-
-        local _v7 = game:GetService("Workspace").Enemies:GetChildren()
-
-        local _v8 = {}
-
-        local _v9 = _v2:GetPivot().Position
-
-        for _, _v10 in ipairs(_v7) do
-
-            local _v11 = _v10:FindFirstChild("HumanoidRootPart")
-
-            if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
-
-                table.insert(_v8, _v10)
-
-            end
-
-        end
-
-        return _v8
-
-    end
-
-    if _v3:FindFirstChild("LeftClickRemote") then
-
-        local _v12 = 1  
-
-        local _v13 = _x3(60)
-
-        for _, _v14 in ipairs(_v13) do
-
-            local _v15 = (_v14.HumanoidRootPart.Position - _v2:GetPivot().Position).Unit
-
-            pcall(function()
-
-                _v3.LeftClickRemote:FireServer(_v15, _v12)
-
-            end)
-
-            _v12 = _v12 + 1
-
-            if _v12 > 1000000000 then _v12 = 1 end
-
-        end
-
-    else
-
-        local _v16 = {}
-
-        local _v17 = game:GetService("Workspace").Enemies:GetChildren()
-
-        local _v18 = _v2:GetPivot().Position
-
-        local _v19 = nil
-
-        for _, _v20 in ipairs(_v17) do
-
-            if not _v20:GetAttribute("IsBoat") and _x2(_v20) then
-
-                local _v21 = _v20:FindFirstChild("Head")
-
-                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
-
-                    table.insert(_v16, { _v20, _v21 })
-
-                    _v19 = _v21
-
-                end
-
-            end
-
-        end
-
-        if not _v19 then return end
-
-        pcall(function()
-
-            local _v22 = game:GetService("ReplicatedStorage")
-
-            local _v23 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterAttack")
-
-            local _v24 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit")
-
-            if #_v16 > 0 then
-
-                _v23:FireServer(0.000000001)
-
-                _v24:FireServer(_v19, _v16)
-
-            else
-
-                task.wait(0.000000001)
-
-            end
-
-        end)
-
-    end
-
 end
 
+-- Check if target is valid (mob or player)
+function IsTargetValid(target)
+    return target
+        and target:FindFirstChild("Humanoid")
+        and target.Humanoid.Health > 0
+        and target:FindFirstChild("HumanoidRootPart")
+end
 
+-- Get nearby valid targets (mobs + players)
+function GetNearbyTargets(range)
+    local targets = {}
 
-_G.FastAttack = true
-
-
-
-spawn(function()
-
-    while wait(.1) do
-
-        if _G.FastAttack then
-
-            pcall(function()
-
-                repeat task.wait(000.1)
-
-                    _x1()
-
-                until not _G.FastAttack
-
-            end)
-
+    -- Mobs
+    if EnemiesFolder then
+        for _, mob in ipairs(EnemiesFolder:GetChildren()) do
+            if IsTargetValid(mob) and (mob.HumanoidRootPart.Position - Character:GetPivot().Position).Magnitude <= range then
+                table.insert(targets, mob)
+            end
         end
-
     end
 
+    -- Players (excluding self)
+    for _, ply in ipairs(PlayersFolder:GetPlayers()) do
+        if ply ~= LocalPlayer and IsTargetValid(ply.Character) then
+            local hrp = ply.Character:FindFirstChild("HumanoidRootPart")
+            if hrp and (hrp.Position - Character:GetPivot().Position).Magnitude <= range then
+                table.insert(targets, ply.Character)
+            end
+        end
+    end
+
+    return targets
+end
+
+-- Attack Logic
+function DoAutoAttack()
+    AutoEquipMelee()
+    Character = LocalPlayer.Character
+    if not Character then return end
+
+    local tool = nil
+    for _, v in ipairs(Character:GetChildren()) do
+        if v:IsA("Tool") then
+            tool = v
+            break
+        end
+    end
+
+    if not tool then return end
+
+    local targets = GetNearbyTargets(60)
+
+    if tool:FindFirstChild("LeftClickRemote") then
+        local count = 1
+        for _, enemy in ipairs(targets) do
+            local direction = (enemy.HumanoidRootPart.Position - Character:GetPivot().Position).Unit
+            pcall(function()
+                tool.LeftClickRemote:FireServer(direction, count)
+            end)
+            count = count + 1
+            if count > 1000000000 then count = 1 end
+        end
+    else
+        local hitData = {}
+        local hitPart = nil
+        for _, target in ipairs(targets) do
+            local head = target:FindFirstChild("Head")
+            if head then
+                table.insert(hitData, { target, head })
+                hitPart = head
+            end
+        end
+
+        if hitPart then
+            pcall(function()
+                local registerAttack = RS.Modules.Net.RE:WaitForChild("RegisterAttack")
+                local registerHit = RS.Modules.Net.RE:WaitForChild("RegisterHit")
+
+                registerAttack:FireServer(0.000000001)
+                registerHit:FireServer(hitPart, hitData)
+            end)
+        end
+    end
+end
+
+-- Auto Attack Toggle
+_G.FastAttack = true
+spawn(function()
+    while task.wait(0.1) do
+        if _G.FastAttack then
+            pcall(DoAutoAttack)
+        end
+    end
 end)
 
 
