@@ -58,6 +58,12 @@ local Teleport = Window:MakeTab({
     Icon = "book",  -- Fixed the split "Icon"
 })
 
+local Misc = Window:MakeTab({
+    Title = "Miscellaneous",
+    Description = "code-xml",
+    Icon = "book",  -- Fixed the split "Icon"
+})
+
 local Setting = Window:MakeTab({
     Title = "Settings",
     Description = "Settings",
@@ -1739,10 +1745,409 @@ spawn(function()
 end)
 
 
+Items:AddSection("Buy Melee");
+
+Items:AddToggle({
+    Name = "Black Leg",
+    Flag = "Items/BlackLeg",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBlackLeg")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Electro",
+    Flag = "Items/Electro",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectro")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Fishman Karate",
+    Flag = "Items/FishmanKarate",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyFishmanKarate")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Dragon Claw",
+    Flag = "Items/DragonClaw",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "1")
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Superhuman",
+    Flag = "Items/Superhuman",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySuperhuman")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Death Step",
+    Flag = "Items/DeathStep",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDeathStep")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Sharkman Karate",
+    Flag = "Items/SharkmanKarate",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate", true)
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Electric Claw",
+    Flag = "Items/ElectricClaw",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectricClaw")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Dragon Talon",
+    Flag = "Items/DragonTalon",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDragonTalon")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Godhuman",
+    Flag = "Items/Godhuman",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyGodhuman")
+        end
+    end
+})
+
+Items:AddToggle({
+    Name = "Sanguine Art",
+    Flag = "Items/SanguineArt",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySanguineArt")
+        end
+    end
+})
 
 
+Misc:AddToggle({
+    Name = "Resets Stats",
+    Flag = "Misc/ResetsStats",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "1")
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "2")
+        end
+    end
+})
+
+Misc:AddToggle({
+    Name = "Roll Race",
+    Flag = "Misc/RollRace",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "1")
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "2")
+        end
+    end
+})
+
+Misc:AddToggle({
+    Name = "Change To Ghoul Race",
+    Flag = "Misc/GhoulRace",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            local args = {
+                [1] = "Ectoplasm",
+                [2] = "Change",
+                [3] = 4
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+})
+
+Misc:AddToggle({
+    Name = "Change To Cyborg Race",
+    Flag = "Misc/CyborgRace",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            local args = {
+                [1] = "CyborgTrainer",
+                [2] = "Buy"
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+})
+
+Misc:AddToggle({
+    Name = "Change To Draco Race",
+    Description = "Only in Sea 3",
+    Flag = "Misc/DracoRace",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, -334.9649963378906))
+            Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938))
+            local target = Vector3.new(5814.42724609375, 1208.3267822265625, 884.5785522460938)
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            repeat wait() until (character.HumanoidRootPart.Position - target).Magnitude < 1
+            local args = {
+                [1] = {
+                    NPC = "Dragon Wizard",
+                    Command = "DragonRace"
+                }
+            }
+            game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/InteractDragonQuest"):InvokeServer(unpack(args))
+        end
+    end
+})
 
 
+Misc:AddToggle({
+    Name = "Auto Rejoin Server",
+    Description = "Rejoins server if lag is detected",
+    Flag = "Misc/AutoRejoinServer",
+    Default = false,
+    Callback = function(Value)
+        getgenv().AutoRejoin = Value
+        if Value then
+            task.spawn(function()
+                while getgenv().AutoRejoin do
+                    if game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue() > 500 then
+                        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+                    end
+                    task.wait(5)
+                end
+            end)
+        end
+    end
+})
+
+Misc:AddToggle({
+    Name = "Hop Change Server",
+    Description = "Auto hops to low population server",
+    Flag = "Misc/HopChangeServer",
+    Default = false,
+    Callback = function(Value)
+        getgenv().HopChanging = Value
+        if Value then
+            task.spawn(function()
+                while getgenv().HopChanging do
+                    pcall(function()
+                        local PlaceId = game.PlaceId
+                        local ServerHistory = {}
+                        local Cursor = ""
+
+                        local function TPReturner()
+                            local Servers
+                            if Cursor == "" then
+                                Servers = game.HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+                            else
+                                Servers = game.HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100&cursor=" .. Cursor))
+                            end
+
+                            if Servers.nextPageCursor then
+                                Cursor = Servers.nextPageCursor
+                            end
+
+                            for _, server in pairs(Servers.data) do
+                                if tonumber(server.playing) < tonumber(server.maxPlayers) then
+                                    local ID = tostring(server.id)
+                                    if not table.find(ServerHistory, ID) then
+                                        table.insert(ServerHistory, ID)
+                                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceId, ID, game.Players.LocalPlayer)
+                                        return
+                                    end
+                                end
+                            end
+                        end
+
+                        TPReturner()
+                        task.wait(1)
+                    end)
+                    task.wait(5)
+                end
+            end)
+        end
+    end
+})
+
+
+v16.Misc:AddToggle({
+    Name = "Change Pirate Team",
+    Flag = "Misc/ChangePirateTeam",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Pirates");
+        end
+    end
+})
+
+v16.Misc:AddToggle({
+    Name = "Change Marine Team",
+    Flag = "Misc/ChangeMarineTeam",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines");
+        end
+    end
+})
+
+
+Setting:AddToggle({
+    Name = "Auto Activate Race V3",
+    Flag = "Setting/AutoActivateRaceV3",
+    Callback = function(value)
+        _G.AutoT = value
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if _G.AutoT then
+                        game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("ActivateAbility")
+                    end
+                end)
+            end
+        end)
+    end
+});
+
+Setting:AddToggle({
+    Name = "Auto Activate V4",
+    Flag = "Setting/AutoActivateV4",
+    Callback = function(value)
+        _G.AutoY = value
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if _G.AutoY then
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game)
+                        wait(0.1) -- Short press
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game)
+                        wait(0.5) -- Wait between presses to avoid input flooding
+                    end
+                end)
+            end
+        end)
+    end
+});
+
+Setting:AddToggle({
+    Name = "Bring Mobs",
+    Flag = "Setting/BringMobs",
+    Description = "Bring The Mobs",
+    Callback = function(value)
+        _G.BringMob = value
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if _G.BringMob and bringmob then
+                            if mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                if mob.Name == "Factory Staff" then
+                                    if (mob.HumanoidRootPart.Position - FarmPos.Position).Magnitude <= 1000000000 then
+                                        mob.Head.CanCollide = false
+                                        mob.HumanoidRootPart.CanCollide = false
+                                        mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                        mob.HumanoidRootPart.CFrame = FarmPos
+                                        if mob.Humanoid:FindFirstChild("Animator") then
+                                            mob.Humanoid.Animator:Destroy()
+                                        end
+                                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                    end
+                                else
+                                    if (mob.HumanoidRootPart.Position - FarmPos.Position).Magnitude <= 1000000000 then
+                                        mob.HumanoidRootPart.CFrame = FarmPos
+                                        mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                        mob.HumanoidRootPart.Transparency = 1
+                                        mob.Humanoid.JumpPower = 0
+                                        mob.Humanoid.WalkSpeed = 0
+                                        if mob.Humanoid:FindFirstChild("Animator") then
+                                            mob.Humanoid.Animator:Destroy()
+                                        end
+                                        mob.HumanoidRootPart.CanCollide = false
+                                        mob.Head.CanCollide = false
+                                        mob.Humanoid:ChangeState(11)
+                                        mob.Humanoid:ChangeState(14)
+                                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
+
+Setting:AddToggle({
+    Name = "Enable Remove Notifications",
+    Flag = "Setting/RemoveNotifications",
+    Description = "",
+    Callback = function(value)
+        spawn(function()
+            while value do
+                pcall(function()
+                    game.Players.LocalPlayer.PlayerGui.Notifications.Enabled = false
+                end)
+                wait()
+            end
+            pcall(function()
+                game.Players.LocalPlayer.PlayerGui.Notifications.Enabled = true
+            end)
+        end)
+    end
+})
 
 
 Items:AddSection("Setting Stats");
