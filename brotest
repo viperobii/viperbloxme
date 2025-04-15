@@ -1775,54 +1775,124 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
-Main:AddToggle({
-    Name = "Auto Gorilla King",
-    Flag = "Main/AutoGorillaKing",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoGorillaKing = Value
+-- Function to determine the current sea based on player's position
+local function getCurrentSea()
+    local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    -- Sea detection logic based on X position
+    if pos.X <= -5000 then
+        return 1 -- Sea 1
+    elseif pos.X <= 12000 then
+        return 2 -- Sea 2
+    else
+        return 3 -- Sea 3
+    end
+end
+
+-- Set the current sea based on player position
+local currentSea = getCurrentSea()
+
+-- Boss list based on the sea the player is in
+local tableBoss = {}
+
+-- Define bosses for each sea
+if currentSea == 1 then
+    tableBoss = {
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
+        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper", "Thunder God",
+        "Cyborg", "Saber Expert"
+    }
+elseif currentSea == 2 then
+    tableBoss = {
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
+        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
+    }
+elseif currentSea == 3 then
+    tableBoss = {
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
+        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
+    }
+end
+
+-- Add dropdown for selecting the boss
+Main:AddDropdown({
+    Name = "Select Boss",
+    Flag = "Main/BossFarmName",
+    Default = "", -- Default to no boss selected
+    Options = tableBoss, -- Dynamically populated boss list
+    Callback = function(option)
+        _G.SelectBoss = option
     end
 })
 
-spawn(function()
-    while task.wait() do
-        if _G.AutoGorillaKing then
-            pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("The Gorilla King [Lv. 20] [Boss]")
-                if boss and boss:FindFirstChild("HumanoidRootPart") and boss:FindFirstChild("Humanoid") and boss.Humanoid.Health > 0 then
-                    AutoHaki()
-                    EquipTool(SelectWeapon)
-                    boss.HumanoidRootPart.CanCollide = false
-                    boss.Humanoid.WalkSpeed = 0
-                    boss.Humanoid.JumpPower = 0
-                    boss.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                    boss.HumanoidRootPart.Transparency = 1
-                    Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0))
-                    AttackNoCoolDown()
-                else
-                    -- Updated coordinates for Gorilla King spawn location
-                    Tween(CFrame.new(-1088.75977, 8.13463783, -488.559906, -0.707134247, 0, 0.707079291, 0, 1, 0, -0.707079291, 0, -0.707134247))
+-- Auto farm boss toggle
+Main:AddToggle({
+    Name = "Auto Farm Boss",
+    Flag = "Main/AutoFarmBoss",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoBoss = Value
+        if Value then
+            task.spawn(function()
+                while _G.AutoBoss do
+                    pcall(function()
+                        local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
+                        if enemy then
+                            if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                -- Set a fixed height above the boss, adjust the Y value to avoid water
+                                local heightAboveBoss = 20
+                                repeat
+                                    task.wait(_G.Fast_Delay)
+                                    AttackNoCoolDown()
+                                    AutoHaki()
+                                    EquipTool(SelectWeapon)
+
+                                    -- Tween above the boss and keep the distance steady
+                                    local bossPos = enemy.HumanoidRootPart.Position
+                                    local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
+                                    Tween(newPos)
+
+                                    -- Set humanoid properties to prevent unwanted interactions
+                                    enemy.HumanoidRootPart.CanCollide = false
+                                    enemy.Humanoid.WalkSpeed = 0
+                                    enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+
+                                    -- Keep following the boss if it moves
+                                    sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                                until not _G.AutoBoss or not enemy.Parent or enemy.Humanoid.Health <= 0
+                            end
+                        elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
+                            -- In case the boss is in ReplicatedStorage, handle the movement and follow
+                            local bossStorage = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
+                            if bossStorage then
+                                local bossPos = bossStorage.HumanoidRootPart.Position
+                                local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
+                                Tween(newPos)
+                            end
+                        end
+                    end)
+                    task.wait()
                 end
             end)
         end
     end
-end)
+})
+
+
 
 
 Setting:AddDropdown({
-    Name = "Floating Logo Size",  -- Name of the dropdown
-    Flag = "Setting/ButtonSize",  -- Flag for internal use
-    Default = "Medium",  -- Default option
-    Options = { "Small", "Medium", "Large" },  -- Options for button size
+    Name = "Floating Logo Size",
+    Flag = "Setting/ButtonSize",
+    Default = "Medium",
+    Options = { "Small", "Medium", "Large" },
     Callback = function(option)
-        -- Check which option is selected and adjust button size accordingly
-        if option == "Small" then
-            v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
-        elseif option == "Medium" then
-            v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
-        elseif option == "Large" then
-            v23.Size = UDim2.new(0, 70, 0, 70)  -- Large size
+        local size = {
+            Small = UDim2.new(0, 30, 0, 30),
+            Medium = UDim2.new(0, 50, 0, 50),
+            Large = UDim2.new(0, 70, 0, 70)
+        }
+        if v23 and v23:IsA("GuiObject") then
+            v23.Size = size[option] or UDim2.new(0, 50, 0, 50)
         end
     end
 })
