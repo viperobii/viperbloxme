@@ -14,7 +14,7 @@ local Window = redzlib:MakeWindow({
 local Info = Window:MakeTab({
     Title = "Information",
     Description = "Info",
-    Icon = "alert",  -- Fixed the split "Icon"
+    Icon = "circle-alert",  -- Fixed the split "Icon"
 })
 
 local Main = Window:MakeTab({
@@ -86,43 +86,15 @@ Info:AddButton({
     end
 })
 
-Info:AddTextBox({
-    Name = "Special Mention",
-    Flag = "Info/HelperKidNames",
-    Value = "",
-    Placeholder = "Tanny My Friend",
-    Callback = function(value)
-        print("Helper kids:", value)
-    end
+Info:AddParagraph("Mentions", [[
+Honorable Mention: Tanny
+Honorable Mention 2: Viper
+]], {
+    Flag = "Mentions/Names"
 })
 
 
-Main:AddDropdown({
-    Name = "Select Weapon",
-    Flag = "Combat/SelectWeapon",
-    Description = "Choose a weapon category",
-    Default = "Melee",
-    Options = { "Melee", "Sword", "Blox Fruits" },
-    Callback = function(value)
-        getgenv().ChooseWeapon = value
-    end
-})
 
-task.spawn(function()
-    while task.wait() do
-        pcall(function()
-            for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                    getgenv().SelectWeapon = tool.Name
-                elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                    getgenv().SelectWeapon = tool.Name
-                elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                    getgenv().SelectWeapon = tool.Name
-                end
-            end
-        end)
-    end
-end)
 
 
 Main:AddToggle({
