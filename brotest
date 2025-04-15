@@ -1775,114 +1775,98 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
-local Sea1ID = 2753915549
-local Sea2ID = 4442272183
-local Sea3ID = 7449423635
-
-local currentPlace = game.PlaceId
-local tableBoss = {}
-
-if currentPlace == Sea1ID then
-    tableBoss = {
-        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
-        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper", "Thunder God",
-        "Cyborg", "Saber Expert"
-    }
-elseif currentPlace == Sea2ID then
-    tableBoss = {
-        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral", "Cursed Captain",
-        "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
-    }
-elseif currentPlace == Sea3ID then
-    tableBoss = {
-        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
-        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
-    }
-end
-
-Main:AddDropdown({
-    Name = "Select Boss",
-    Flag = "Main/BossFarmName",
-    Default = "",
-    Options = tableBoss,
-    Callback = function(option)
-        _G.SelectBoss = option
+Main:AddToggle({
+    Name = "Auto Farm Gorilla King",
+    Flag = "Main/AutoFarmGorillaKing",
+    Description = "Farm Gorilla King Boss",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarmGorillaKing = Value
+        if not Value then bringmob = false end
     end
 })
 
--- Auto farm boss toggle
-Main:AddToggle({
-    Name = "Auto Farm Boss",
-    Flag = "Main/AutoFarmBoss",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoBoss = Value
-        if Value then
-            task.spawn(function()
-                while _G.AutoBoss do
-                    pcall(function()
-                        if not _G.SelectBoss or _G.SelectBoss == "" then
-                            task.wait(1)
-                            return
-                        end
+-- Auto Farm Gorilla King
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarmGorillaKing then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local questGui = player.PlayerGui.Main.Quest
 
-                        local heightAboveBoss = 300
-                        local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
+                Ms = "The Gorilla King"
+                NameMon = "Gorilla King"
+                NameQuest = "JungleQuest"
+                QuestLv = 3
+                CFrameQ = CFrame.new(-1601.6553955078, 36.85213470459, 153.38809204102)
+                CFrameMon = CFrame.new(-1088.75977, 8.13463783, -488.559906, -0.707134247, 0, 0.707079291, 0, 1, 0, -0.707079291, 0, -0.707134247)
+                SelectWeapon = "Combat" -- change this to your preferred melee name if needed
 
-                        if enemy and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            repeat
-                                task.wait(_G.Fast_Delay or 0)
+                if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) then
+                    bringmob = false
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
+                    local questTween = Tween(CFrameQ)
+                    if questTween then questTween.Completed:Wait() end
+                    task.wait(1)
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                    task.wait(0.5)
+                end
 
-                                -- Auto Actions
-                                AttackNoCoolDown()
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
+                local found = false
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy.Name == Ms and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        found = true
+                        break
+                    end
+                end
 
-                                -- Tween above the boss, follow it
-                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, heightAboveBoss, 0)
-                                Tween(CFrame.new(targetPos))
+                if not found then
+                    Tween(CFrameMon)
+                    task.wait(1)
+                end
 
-                                -- Boss tweaks
-                                enemy.HumanoidRootPart.CanCollide = false
-                                enemy.Humanoid.WalkSpeed = 0
-                                enemy.Humanoid.JumpPower = 0
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if _G.AutoFarmGorillaKing and enemy.Name == Ms and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                        bringmob = true
+                        repeat
+                            if not _G.AutoFarmGorillaKing or not enemy.Parent then break end
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+                            Tween(CFrame.new(enemy.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                            AttackNoCoolDown()
+                            if enemy:FindFirstChild("HumanoidRootPart") then
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
-
-                                -- Ensure simulation radius
-                                sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
-
-                            until not _G.AutoBoss or not enemy.Parent or enemy.Humanoid.Health <= 0
-                        elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
-                            local boss = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
-                            if boss:FindFirstChild("HumanoidRootPart") then
-                                Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, heightAboveBoss, 10))
+                                enemy.HumanoidRootPart.CanCollide = false
                             end
-                        end
-                    end)
-                    task.wait(0.5)
+                            if enemy:FindFirstChild("Humanoid") then
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.Humanoid.JumpPower = 0
+                            end
+                            task.wait()
+                        until not _G.AutoFarmGorillaKing or not enemy or not enemy.Parent or enemy.Humanoid.Health <= 0
+                        bringmob = false
+                    end
                 end
             end)
         end
     end
-})
-
-
+end)
 
 
 Setting:AddDropdown({
-    Name = "Floating Logo Size",
-    Flag = "Setting/ButtonSize",
-    Default = "Medium",
-    Options = { "Small", "Medium", "Large" },
+    Name = "Floating Logo Size",  -- Name of the dropdown
+    Flag = "Setting/ButtonSize",  -- Flag for internal use
+    Default = "Medium",  -- Default option
+    Options = { "Small", "Medium", "Large" },  -- Options for button size
     Callback = function(option)
-        local size = {
-            Small = UDim2.new(0, 30, 0, 30),
-            Medium = UDim2.new(0, 50, 0, 50),
-            Large = UDim2.new(0, 70, 0, 70)
-        }
-        if v23 and v23:IsA("GuiObject") then
-            v23.Size = size[option] or UDim2.new(0, 50, 0, 50)
+        -- Check which option is selected and adjust button size accordingly
+        elseif option == "Small" then
+            v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
+        elseif option == "Medium" then
+            v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
+        elseif option == "Large" then
+            v23.Size = UDim2.new(0, 70, 0, 70)  -- Large size
         end
     end
 })
