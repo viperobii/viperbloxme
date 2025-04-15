@@ -1861,7 +1861,7 @@ Setting:AddDropdown({
     Options = { "Small", "Medium", "Large" },  -- Options for button size
     Callback = function(option)
         -- Check which option is selected and adjust button size accordingly
-        elseif option == "Small" then
+        if option == "Small" then
             v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
         elseif option == "Medium" then
             v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
