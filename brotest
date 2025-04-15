@@ -100,72 +100,74 @@ Main:AddDropdown({
     },
     Callback = function(option)
         getgenv().ChooseWeapon = option
+        getgenv().SelectWeapon = nil -- reset to force re-equip
     end
 })
 
 getgenv().ChooseWeapon = "Melee"
 getgenv().SelectWeapon = nil
-local lastEquipped = nil
+local lastWeaponEquipped = nil
 
 task.spawn(function()
-    while task.wait() do
+    while task.wait(0.2) do
         pcall(function()
             local player = game.Players.LocalPlayer
-            local character = player.Character
-            local backpack = player.Backpack
-            if not character or not backpack then return end
+            local char = player.Character
+            local backpack = player:FindFirstChild("Backpack")
+            if not char or not backpack then return end
 
-            local foundWeapon = nil
+            local selectedTool = nil
 
-            -- Look for weapon in backpack
+            -- Check Backpack first
             for _, tool in pairs(backpack:GetChildren()) do
                 if tool:IsA("Tool") and tool.ToolTip then
                     if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                        foundWeapon = tool
+                        selectedTool = tool
                         break
                     elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                        foundWeapon = tool
+                        selectedTool = tool
                         break
                     elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                        foundWeapon = tool
+                        selectedTool = tool
                         break
                     end
                 end
             end
 
-            -- Also check currently equipped if not found in backpack
-            if not foundWeapon then
-                for _, tool in pairs(character:GetChildren()) do
+            -- If not in backpack, check character
+            if not selectedTool then
+                for _, tool in pairs(char:GetChildren()) do
                     if tool:IsA("Tool") and tool.ToolTip then
                         if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                            foundWeapon = tool
+                            selectedTool = tool
                             break
                         elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                            foundWeapon = tool
+                            selectedTool = tool
                             break
                         elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                            foundWeapon = tool
+                            selectedTool = tool
                             break
                         end
                     end
                 end
             end
 
-            -- If found and not already equipped
-            if foundWeapon and foundWeapon.Name ~= lastEquipped then
-                -- Unequip all current tools
-                for _, tool in pairs(character:GetChildren()) do
+            -- Equip only if new weapon or not equipped
+            if selectedTool and selectedTool.Name ~= lastWeaponEquipped then
+                -- Unequip all tools
+                for _, tool in pairs(char:GetChildren()) do
                     if tool:IsA("Tool") then
                         tool.Parent = backpack
                     end
                 end
 
-                -- Equip the selected weapon
-                task.wait(0.1) -- slight delay to avoid race conditions
-                if foundWeapon.Parent == backpack then
-                    foundWeapon.Parent = character
-                    getgenv().SelectWeapon = foundWeapon.Name
-                    lastEquipped = foundWeapon.Name
+                task.wait(0.1)
+
+                -- Equip new weapon
+                if selectedTool and selectedTool.Parent == backpack then
+                    selectedTool.Parent = char
+                    getgenv().SelectWeapon = selectedTool.Name
+                    lastWeaponEquipped = selectedTool.Name
                 end
             end
         end)
@@ -229,7 +231,9 @@ spawn(function()
                                 
                                 -- Target and attack the mob
                                 AutoHaki()
-                                EquipTool(SelectWeapon)
+                                if getgenv().SelectWeapon then
+    EquipTool(getgenv().SelectWeapon)
+end
                                 
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
@@ -310,7 +314,9 @@ spawn(function()
                 if Closest then
                     -- Target and attack the closest mob
                     AutoHaki()
-                    EquipTool(SelectWeapon)
+                    if getgenv().SelectWeapon then
+    EquipTool(getgenv().SelectWeapon)
+end
                     
                     -- Modify mob properties for easier farming
                     if Closest:FindFirstChild("HumanoidRootPart") then
