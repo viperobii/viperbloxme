@@ -1796,7 +1796,7 @@ spawn(function()
     end
 end)
 
-Main:AddTextBox({
+Setting:AddTextBox({
     Name = "Job ID",  -- Title of the input box
     Flag = "Main/JobID",  -- Unique identifier for the input field
     Placeholder = "Input Job ID",  -- Placeholder text when the input is empty
@@ -1805,6 +1805,18 @@ Main:AddTextBox({
     Finished = false,  -- Whether the input is finished or not
     Callback = function(v301)  -- Callback when the input is finished
         _G.Job = v301  -- Store the value in a global variable _G.Job
+    end
+})
+
+Setting:AddToggle({
+    Name = "Join Job ID",
+    Flag = "Status/JoinJobID",
+    Default = false,
+    Callback = function(state)
+        _G.Join = state
+        if _G.Join and _G.Job then
+            game:GetService("TeleportService"):TeleportToPlaceInstance(game.placeId, _G.Job, game.Players.LocalPlayer)
+        end
     end
 })
 
