@@ -234,19 +234,13 @@ Main:AddSection("Chest Farm")
 Main:AddToggle({
     Name = "Auto Farm Chest",
     Flag = "Main/AutoCollectChest",
-    Description = "Automatically farm nearest chest",
+    Description = "Automatically teleport to the nearest chest and collect it",
     Default = false,
     Callback = function(Value)
         _G.AutoCollectChest = Value
-        if not Value then
-            wait()
-            Tween(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
     end
 })
 
--- AUTO FARM CHEST LOOP
 spawn(function()
     while task.wait() do
         if _G.AutoCollectChest then
@@ -260,10 +254,10 @@ spawn(function()
                 local shortestDistance = math.huge
                 local chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
 
-                -- Find closest enabled chest
                 for _, chest in pairs(chests) do
                     if chest:IsA("Model") and not chest:GetAttribute("IsDisabled") then
-                        local dist = (root.Position - chest:GetPivot().Position).Magnitude
+                        local chestPos = chest:GetPivot().Position
+                        local dist = (root.Position - chestPos).Magnitude
                         if dist < shortestDistance then
                             shortestDistance = dist
                             closestChest = chest
@@ -271,16 +265,9 @@ spawn(function()
                     end
                 end
 
-                -- Go to chest
                 if closestChest then
                     local targetPos = closestChest:GetPivot().Position + Vector3.new(0, 5, 0)
-                    local tweenService = game:GetService("TweenService")
-                    local tweenInfo = TweenInfo.new((root.Position - targetPos).Magnitude / 350, Enum.EasingStyle.Linear)
-                    local goal = { CFrame = CFrame.new(targetPos) }
-
-                    local tween = tweenService:Create(root, tweenInfo, goal)
-                    tween:Play()
-                    tween.Completed:Wait()
+                    BTPZ(CFrame.new(targetPos)) -- Use your instant teleport here
                 end
             end)
         end
@@ -1854,22 +1841,7 @@ spawn(function()
 end)
 
 
-Setting:AddDropdown({
-    Name = "Floating Logo Size",  -- Name of the dropdown
-    Flag = "Setting/ButtonSize",  -- Flag for internal use
-    Default = "Medium",  -- Default option
-    Options = { "Small", "Medium", "Large" },  -- Options for button size
-    Callback = function(option)
-        -- Check which option is selected and adjust button size accordingly
-        if option == "Small" then
-            v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
-        elseif option == "Medium" then
-            v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
-        elseif option == "Large" then
-            v23.Size = UDim2.new(0, 70, 0, 70)  -- Large size
-        end
-    end
-})
+
 
 Setting:AddSection("Other Setting");
 
