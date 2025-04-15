@@ -6,8 +6,15 @@ repeat task.wait() until redzlib
 -- Create the window
 local Window = redzlib:MakeWindow({
     Title = "viper Hub (NOVA) : Blox-Fruit",
-    SubTitle = "by Viper",
+    SubTitle = "by Vipra",
     SaveFolder = "redz Hub | Blox Fruits.lua"
+})
+
+
+local Main = Window:MakeTab({
+    Title = "Information",
+    Description = "Info",
+    Icon = "circle-alert    ",  -- Fixed the split "Icon"
 })
 
 local Main = Window:MakeTab({
@@ -69,6 +76,16 @@ local Setting = Window:MakeTab({
     Description = "Settings",
     Icon = "settings",
 })
+
+
+Info:AddDiscordInvite({
+    Name = "Diacord Server",
+    Invite = "https://discord.gg/qx9rKaC35f", -- just the code, not full link
+    Description = "Join our server for updates and support!",
+    UseDirectLink = false
+})
+
+
 
 
 Main:AddToggle({
