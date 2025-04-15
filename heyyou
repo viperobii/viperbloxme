@@ -86,11 +86,7 @@ Info:AddButton({
     end
 })
 
-Info:AddParagraph({
-    Name = "Tip",
-    Flag = "Info/Tip",
-    Content = "https://discord.gg/qx9rKaC35f"
-})
+Info:AddParagraph("https://discord.gg/qx9rKaC35f")
 
 
 
