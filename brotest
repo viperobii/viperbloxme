@@ -368,26 +368,39 @@ function AutoHaki()
     end
 end
 
--- Define Tween2 function for teleporting
+-- Enhanced Tween2 function with better speed and height adjustment
 function Tween2(targetCFrame)
     local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
     local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     
     if humanoid and humanoidRootPart then
         local tweenService = game:GetService("TweenService")
+        local distance = (targetCFrame.Position - humanoidRootPart.Position).Magnitude
+        
+        -- Faster speed calculation with a minimum speed
+        local speed = math.clamp(distance/120, 2, 10) -- Adjusted for faster movement
+        
+        -- Add height to avoid water (Y-axis adjustment)
+        local heightOffset = 15 -- Adjust this value based on how high you need to go
+        local adjustedCFrame = CFrame.new(
+            targetCFrame.Position.X,
+            targetCFrame.Position.Y + heightOffset,
+            targetCFrame.Position.Z
+        ) * targetCFrame.Rotation
+        
         local tweenInfo = TweenInfo.new(
-            (targetCFrame.Position - humanoidRootPart.Position).Magnitude/300, -- Time based on distance
+            speed,
             Enum.EasingStyle.Linear
         )
         
-        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = adjustedCFrame})
         tween:Play()
         
         return tween
     end
 end
 
--- Your original code with fixed toggle function
+-- Rest of your original code remains the same
 local playerList = {}
 for _, player in pairs(game:GetService("Players"):GetPlayers()) do
     table.insert(playerList, player.Name)
@@ -412,7 +425,6 @@ Player:AddToggle({
         _G.TeleportPly = value
         if not value then
             AutoHaki()
-            -- Removed the Tween2 call here
         end
     end
 })
@@ -420,7 +432,7 @@ Player:AddToggle({
 spawn(function()
     while task.wait() do
         if _G.TeleportPly and _G.SelectPly and game.Players:FindFirstChild(_G.SelectPly) then
-            AutoHaki() -- Added AutoHaki here to ensure Buso is active while teleporting
+            AutoHaki() 
             local target = game.Players[_G.SelectPly]
             if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                 Tween2(target.Character.HumanoidRootPart.CFrame)
