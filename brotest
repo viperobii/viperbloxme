@@ -31,7 +31,7 @@ local Items = Window:MakeTab({
 local Visual = Window:MakeTab({
     Title = "Visual ESP",
     Description = "Info",
-    Icon = "box",  -- Fixed the split "Icon"
+    Icon = "users",  -- Fixed the split "Icon"
 })
 
 local Trial = Window:MakeTab({
@@ -55,7 +55,7 @@ local Sea = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "book",  -- Fixed the split "Icon"
+    Icon = "map-pin",  -- Fixed the split "Icon"
 })
 
 local Misc = Window:MakeTab({
@@ -2338,6 +2338,38 @@ spawn(function()
     end
 end)
 
+Trial:AddToggle({
+    Name = "Auto Kill Players In Trial",
+    Flag = "Trial/AutoKillTrial",
+    Description = "Manual Use Skill To Win Only Melee Skills",
+    Default = false,
+    Callback = function(value)
+        getgenv().AutoKillTrial = value
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if getgenv().AutoKillTrial then
+                        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                            if player.Name ~= game.Players.LocalPlayer.Name and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+                                if (player.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100 and player.Character.Humanoid.Health > 0 then
+                                    repeat
+                                        wait(getgenv().Fast_Delay or 0.1)
+                                        EquipTool(SelectWeapon)
+                                        AutoHaki()
+                                        Tween(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
+                                        player.Character.HumanoidRootPart.CanCollide = false
+                                        player.Character.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                        AttackNoCoolDown()
+                                    until not getgenv().AutoKillTrial or not player.Parent or player.Character.Humanoid.Health <= 0
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
 
 
 
