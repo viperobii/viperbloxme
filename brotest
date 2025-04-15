@@ -590,42 +590,40 @@ Visual:AddToggle({
 })
 
 function UpdatePlayerChams()
-    for v427, v428 in pairs(game:GetService("Players"):GetChildren()) do
+    for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
         pcall(function()
-            if not isnil(v428.Character) then
+            if plr ~= game.Players.LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+                local head = plr.Character.Head
+                local tag = head:FindFirstChild("NameEsp")
+
                 if ESPPlayer then
-                    if (not isnil(v428.Character.Head) and not v428.Character.Head:FindFirstChild("NameEsp" .. Number)) then
-                        local cham = Instance.new("BillboardGui", v428.Character.Head)
-                        cham.Name = "NameEsp" .. Number
+                    if not tag then
+                        local cham = Instance.new("BillboardGui", head)
+                        cham.Name = "NameEsp"
                         cham.ExtentsOffset = Vector3.new(0, 1, 0)
                         cham.Size = UDim2.new(1, 200, 1, 30)
-                        cham.Adornee = v428.Character.Head
+                        cham.Adornee = head
                         cham.AlwaysOnTop = true
 
                         local text = Instance.new("TextLabel", cham)
                         text.Font = Enum.Font.GothamSemibold
-                        text.FontSize = "Size10"
+                        text.TextSize = 14
                         text.TextWrapped = true
-                        text.Text = v428.Name .. " \n" .. v20((game:GetService("Players").LocalPlayer.Character.Head.Position - v428.Character.Head.Position).Magnitude / 3) .. " Distance"
+                        text.Text = plr.Name .. " \n" .. v20((game.Players.LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3) .. " Distance"
                         text.Size = UDim2.new(1, 0, 1, 0)
-                        text.TextYAlignment = "Top"
+                        text.TextYAlignment = Enum.TextYAlignment.Top
                         text.BackgroundTransparency = 1
                         text.TextStrokeTransparency = 0.5
-
-                        if v428.Team == game.Players.LocalPlayer.Team then
-                            text.TextColor3 = Color3.new(0, 0, 254)
-                        else
-                            text.TextColor3 = Color3.new(255, 0, 0)
-                        end
+                        text.TextColor3 = (plr.Team == game.Players.LocalPlayer.Team) and Color3.new(0, 0, 1) or Color3.new(1, 0, 0)
                     else
-                        v428.Character.Head["NameEsp" .. Number].TextLabel.Text =
-                            v428.Name .. " | " ..
-                            v20((game:GetService("Players").LocalPlayer.Character.Head.Position - v428.Character.Head.Position).Magnitude / 3) ..
+                        tag.TextLabel.Text =
+                            plr.Name ..
+                            " | " .. v20((game.Players.LocalPlayer.Character.Head.Position - head.Position).Magnitude / 3) ..
                             " Distance\nHealth : " ..
-                            v20((v428.Character.Humanoid.Health * 100) / v428.Character.Humanoid.MaxHealth) .. "%"
+                            v20((plr.Character.Humanoid.Health * 100) / plr.Character.Humanoid.MaxHealth) .. "%"
                     end
-                elseif v428.Character.Head:FindFirstChild("NameEsp" .. Number) then
-                    v428.Character.Head:FindFirstChild("NameEsp" .. Number):Destroy()
+                elseif tag then
+                    tag:Destroy()
                 end
             end
         end)
