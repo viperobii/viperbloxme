@@ -78,24 +78,190 @@ local Setting = Window:MakeTab({
 })
 
 
-Info:AddParagraph("discord_invite", [[
-https://discord.gg/qx9rKaC35f
-]])
-
-Info:AddButton({
-    Name = "Join",
-    Description = "Opens the invite in your browser",
-    Callback = function()
-        game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/qx9rKaC35f")
-    end
-})
 
 
-Info:AddParagraph("honors", [[
-Mentions:
-Honorable Mention: Tanny
-Honorable Mention 2: ViperIsPinoy
-]])
+-- Create a ScreenGui for your Info window
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "InfoGui"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Create the main frame
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "Info"
+MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+-- Create a rounded corner effect
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
+
+-- Create the title bar
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TitleBar.BorderSizePixel = 0
+TitleBar.Parent = MainFrame
+
+-- Add corner radius to title bar
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 10)
+TitleCorner.Parent = TitleBar
+
+-- Create the title text
+local TitleText = Instance.new("TextLabel")
+TitleText.Name = "Title"
+TitleText.Size = UDim2.new(1, -40, 1, 0)
+TitleText.Position = UDim2.new(0, 10, 0, 0)
+TitleText.BackgroundTransparency = 1
+TitleText.Text = "Info"
+TitleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleText.TextSize = 18
+TitleText.Font = Enum.Font.SourceSansBold
+TitleText.TextXAlignment = Enum.TextXAlignment.Left
+TitleText.Parent = TitleBar
+
+-- Create the close button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.TextSize = 18
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.Parent = TitleBar
+
+-- Add corner radius to close button
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 5)
+CloseCorner.Parent = CloseButton
+
+-- Create the Discord section
+local DiscordSection = Instance.new("Frame")
+DiscordSection.Name = "DiscordSection"
+DiscordSection.Size = UDim2.new(0.9, 0, 0, 80)
+DiscordSection.Position = UDim2.new(0.05, 0, 0.2, 0)
+DiscordSection.BackgroundColor3 = Color3.fromRGB(60, 60, 150)
+DiscordSection.BorderSizePixel = 0
+DiscordSection.Parent = MainFrame
+
+-- Add corner radius to Discord section
+local DiscordCorner = Instance.new("UICorner")
+DiscordCorner.CornerRadius = UDim.new(0, 8)
+DiscordCorner.Parent = DiscordSection
+
+-- Create Discord logo (using a text label as placeholder)
+local DiscordLogo = Instance.new("TextLabel")
+DiscordLogo.Name = "DiscordLogo"
+DiscordLogo.Size = UDim2.new(0, 30, 0, 30)
+DiscordLogo.Position = UDim2.new(0, 20, 0, 10)
+DiscordLogo.BackgroundTransparency = 1
+DiscordLogo.Text = "🙏🏻"  -- Discord-like emoji
+DiscordLogo.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordLogo.TextSize = 24
+DiscordLogo.Font = Enum.Font.SourceSansBold
+DiscordLogo.Parent = DiscordSection
+
+-- Create Discord text
+local DiscordText = Instance.new("TextLabel")
+DiscordText.Name = "DiscordText"
+DiscordText.Size = UDim2.new(0.7, 0, 0, 30)
+DiscordText.Position = UDim2.new(0.15, 0, 0, 10)
+DiscordText.BackgroundTransparency = 1
+DiscordText.Text = "Join our Discord Community!"
+DiscordText.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordText.TextSize = 16
+DiscordText.Font = Enum.Font.SourceSansSemibold
+DiscordText.TextXAlignment = Enum.TextXAlignment.Left
+DiscordText.Parent = DiscordSection
+
+-- Create Discord link
+local DiscordLink = Instance.new("TextButton")
+DiscordLink.Name = "DiscordLink"
+DiscordLink.Size = UDim2.new(0.7, 0, 0, 25)
+DiscordLink.Position = UDim2.new(0.15, 0, 0, 45)
+DiscordLink.BackgroundColor3 = Color3.fromRGB(80, 80, 220)
+DiscordLink.Text = "https://discord.gg/qx9rKaC35f"
+DiscordLink.TextColor3 = Color3.fromRGB(255, 255, 255)
+DiscordLink.TextSize = 14
+DiscordLink.Font = Enum.Font.SourceSans
+DiscordLink.Parent = DiscordSection
+
+-- Add corner radius to Discord link
+local LinkCorner = Instance.new("UICorner")
+LinkCorner.CornerRadius = UDim.new(0, 5)
+LinkCorner.Parent = DiscordLink
+
+-- Create Join button
+local JoinButton = Instance.new("TextButton")
+JoinButton.Name = "JoinButton"
+JoinButton.Size = UDim2.new(0.4, 0, 0, 40)
+JoinButton.Position = UDim2.new(0.3, 0, 0.7, 0)
+JoinButton.BackgroundColor3 = Color3.fromRGB(80, 180, 80)
+JoinButton.Text = "Join"
+JoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+JoinButton.TextSize = 18
+JoinButton.Font = Enum.Font.SourceSansBold
+JoinButton.Parent = MainFrame
+
+-- Add corner radius to Join button
+local JoinCorner = Instance.new("UICorner")
+JoinCorner.CornerRadius = UDim.new(0, 8)
+JoinCorner.Parent = JoinButton
+
+-- Close button functionality
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Discord link functionality (copy to clipboard)
+DiscordLink.MouseButton1Click:Connect(function()
+    -- This only works if exploit allows clipboard access
+    local success, error = pcall(function()
+        setclipboard("https://discord.gg/YourInviteCode")
+    end)
+    
+    -- Visual feedback
+    local originalColor = DiscordLink.BackgroundColor3
+    DiscordLink.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+    DiscordLink.Text = "Copied to clipboard!"
+    
+    -- Reset after 2 seconds
+    delay(2, function()
+        DiscordLink.BackgroundColor3 = originalColor
+        DiscordLink.Text = "https://discord.gg/YourInviteCode"
+    end)
+end)
+
+-- Join button functionality
+JoinButton.MouseButton1Click:Connect(function()
+    -- Attempt to join Discord by launching URL
+    local success, error = pcall(function()
+        game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/YourInviteCode")
+    end)
+    
+    -- Feedback for the user
+    local originalColor = JoinButton.BackgroundColor3
+    JoinButton.BackgroundColor3 = Color3.fromRGB(100, 255, 100)
+    JoinButton.Text = "Opened!"
+    
+    -- Reset after 2 seconds
+    delay(2, function()
+        JoinButton.BackgroundColor3 = originalColor
+        JoinButton.Text = "Join"
+    end)
+end)
+
+
 
 
 
