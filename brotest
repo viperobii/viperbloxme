@@ -14,7 +14,7 @@ local Window = redzlib:MakeWindow({
 local Info = Window:MakeTab({
     Title = "Information",
     Description = "Info",
-    Icon = "circle-alert",  -- Fixed the split "Icon"
+    Icon = "alert",  -- Fixed the split "Icon"
 })
 
 local Main = Window:MakeTab({
@@ -79,21 +79,39 @@ local Setting = Window:MakeTab({
 
 
 Info:AddButton({
-    Name = "Join Discord",
+    Name = "Join Discord Updates",
     Description = "Tap to open Discord invite in browser",
     Callback = function()
         game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/qx9rKaC35f")
     end
 })
 
-Info:AddParagraph("Mentions", [[
-Honorable Mention: Tanny
-Honorable Mention 2: Viper
-]], {
-    Flag = "Mentions/Names"
+-- Create the dropdown for logo size
+Info:AddDropdown({
+    Name = "Logo Size",
+    Flag = "Info/LogoSize",
+    Default = "Medium",  -- Default size
+    Options = { "Small", "Medium", "Large" },
+    Callback = function(option)
+        if option == "Small" then
+            v23.Size = UDim2.new(0, 30, 0, 30)  -- Small size
+        elseif option == "Medium" then
+            v23.Size = UDim2.new(0, 50, 0, 50)  -- Medium size
+        elseif option == "Large" then
+            v23.Size = UDim2.new(0, 100, 0, 100)  -- Large size
+        end
+    end
 })
 
+-- Existing image button setup
+v22.Parent = game.CoreGui
+v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
+v23.Parent = v22
+v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+v23.BorderSizePixel = 0
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position of the floating button
+v23.Size = UDim2.new(0, 50, 0, 50)  -- Default size of the floating logo (Medium)
 
 
 
