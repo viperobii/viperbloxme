@@ -1827,12 +1827,16 @@ Setting:AddToggle({
     end
 })
 
-Setting:AddToggle({
+Setting:AddButton({
     Name = "Copy Job ID",
     Flag = "Setting/CopyJobID",
     Description = "",
     Callback = function()
-        setclipboard(tostring(game.JobId))
+        if setclipboard then
+            setclipboard(tostring(game.JobId))
+        else
+            warn("Clipboard function not supported.")
+        end
     end
 })
 
@@ -1842,19 +1846,20 @@ Setting:AddToggle({
     Default = false,
     Callback = function(value)
         _G.Join = value
-    end
-})
-
-
-spawn(function()
-    while task.wait(5) do
-        if _G.Join and _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
-            pcall(function()
-                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, _G.Job, game.Players.LocalPlayer)
+        if _G.Join then
+            spawn(function()
+                while _G.Join do
+                    if _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
+                        pcall(function()
+                            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, _G.Job, game.Players.LocalPlayer)
+                        end)
+                    end
+                    task.wait() -- 0 delay spam (1 frame)
+                end
             end)
         end
     end
-end)
+})
 
 
 Setting:AddSection("Other Setting");
