@@ -671,7 +671,7 @@ end)
 local BoatSeats = {}
 local selectedBoat = "Beast Hunter"  -- Default boat selection
 
--- Define Tween2 function if it's not already defined
+-- Updated Tween2 with speed 300
 function Tween2(targetCFrame)
     local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
     local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -679,10 +679,12 @@ function Tween2(targetCFrame)
     if humanoid and humanoidRootPart then
         local tweenService = game:GetService("TweenService")
         local distance = (targetCFrame.Position - humanoidRootPart.Position).Magnitude
-        local speed = math.clamp(distance/120, 2, 10)
-        
+        local speed = 300 -- New speed
+
+        local duration = distance / speed
+
         local tweenInfo = TweenInfo.new(
-            speed,
+            duration,
             Enum.EasingStyle.Linear
         )
         
