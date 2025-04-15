@@ -362,6 +362,124 @@ Main:AddToggle({
 })
 
 
+local playerList = {}
+for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+    table.insert(playerList, player.Name)
+end
+
+Player:AddDropdown({
+    Name = "Select Player",
+    Flag = "Player/SelectPlayers",
+    Description = "Choose a player to target",
+    Options = playerList,
+    Callback = function(option)
+        _G.SelectPly = option
+    end
+})
+
+Player:AddToggle({
+    Name = "Auto Kill Player",
+    Flag = "Player/AutoKillPlayer",
+    Description = "Teleports to selected player",
+    Default = false,
+    Callback = function(value)
+        _G.TeleportPly = value
+        if not value then
+            AutoHaki()
+            Tween2(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+        end
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.TeleportPly and _G.SelectPly and game.Players:FindFirstChild(_G.SelectPly) then
+            local target = game.Players[_G.SelectPly]
+            if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                Tween2(target.Character.HumanoidRootPart.CFrame)
+            end
+        end
+    end
+end)
+
+
+
+Player:AddToggle({
+    Name = "Spectate Player",
+    Flag = "Player/SpectatePlayer",
+    Description = "Enable or disable spectating",
+    Default = false,
+    Callback = function(Value)
+        _G.SpectatePlayer = Value
+        if Value then
+            SpectatePlayer()
+        else
+            StopSpectating()
+        end
+    end
+})
+
+
+_G.Spectating = false
+_G.SelectPly = nil
+
+function SpectatePlayer()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+
+    if not _G.SelectPly or _G.SelectPly == "" then
+        warn("No player selected!")
+        StopSpectating()
+        return
+    end
+
+    local targetPlayer = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+    if not targetPlayer or not targetPlayer.Character then 
+        warn("Invalid player selected or player not in-game!")
+        StopSpectating()
+        return
+    end
+
+    camera.CameraSubject = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = true
+
+    local connection
+    connection = targetPlayer.CharacterRemoving:Connect(function()
+        if _G.Spectating then
+            StopSpectating()
+            connection:Disconnect()
+        end
+    end)
+
+    print("Now spectating:", _G.SelectPly)
+end
+
+function StopSpectating()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+    camera.CameraSubject = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = false
+    print("Stopped spectating.")
+end
+
+
+Player:AddButton({
+    Name = "Reload Players",
+    Flag = "Player/ReloadPlayers",
+    Description = "Refresh the player dropdown list",
+    Callback = function()
+        table.clear(playerList) -- Clear existing list
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            table.insert(playerList, player.Name)
+        end
+        print("Players refreshed:", table.concat(playerList, ", ")) -- Debug
+
+        -- Update the dropdown values
+        if PlayerDropdown and PlayerDropdown.SetValues then
+            PlayerDropdown:SetValues(playerList)
+        end
+    end
+})
 
 
 Player:AddToggle({
@@ -1446,6 +1564,110 @@ spawn(function()
     end
 end)
 
+Items:AddSection("Setting Stats");
+
+Items:AddToggle({
+    Name = "Auto Stats Melee",
+    Flag = "Items/AutoStatsMelee",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Melee = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Melee then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Melee",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Stats Defense",
+    Flag = "Items/AutoStatsDefense",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Defense = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Defense then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Defense",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Stats Swords",
+    Flag = "Items/AutoStatsSword",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Sword = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Sword then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Sword",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+
+Items:AddToggle({
+    Name = "Auto Stats Gun",
+    Flag = "Items/AutoStatsGun",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Gun = Value
+    end
+})
+
+Items:AddToggle({
+    Name = "Auto Stats Fruit",
+    Flag = "Items/AutoStatsFruit",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Devil_Fruit = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Devil_Fruit then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Demon Fruit",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
 
 Trial:AddSection("Temple Clock Teleport");
 
