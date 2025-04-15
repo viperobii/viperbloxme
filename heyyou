@@ -1775,59 +1775,49 @@ end)
 
 Main:AddSection("Farm Boss Sea 1");
 
-if Sea1 then
+local tableBoss = {}
+
+local function getSea()
+    local pos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    if pos.X <= -5000 then
+        return 1
+    elseif pos.X <= 12000 then
+        return 2
+    else
+        return 3
+    end
+end
+
+local currentSea = getSea()
+
+if currentSea == 1 then
     tableBoss = {
-        "The Gorilla King",
-        "Bobby",
-        "Yeti",
-        "Mob Leader",
-        "Vice Admiral",
-        "Warden",
-        "Chief Warden",
-        "Swan",
-        "Magma Admiral",
-        "Fishman Lord",
-        "Wysper",
-        "Thunder God",
-        "Cyborg",
-        "Saber Expert"
+        "The Gorilla King", "Bobby", "Yeti", "Mob Leader", "Vice Admiral", "Warden",
+        "Chief Warden", "Swan", "Magma Admiral", "Fishman Lord", "Wysper",
+        "Thunder God", "Cyborg", "Saber Expert"
     }
-elseif Sea2 then
+elseif currentSea == 2 then
     tableBoss = {
-        "Diamond",
-        "Jeremy",
-        "Fajita",
-        "Don Swan",
-        "Smoke Admiral",
-        "Cursed Captain",
-        "Darkbeard",
-        "Order",
-        "Awakened Ice Admiral",
-        "Tide Keeper"
+        "Diamond", "Jeremy", "Fajita", "Don Swan", "Smoke Admiral",
+        "Cursed Captain", "Darkbeard", "Order", "Awakened Ice Admiral", "Tide Keeper"
     }
-elseif Sea3 then
+elseif currentSea == 3 then
     tableBoss = {
-        "Stone",
-        "Hydra Leader",
-        "Kilo Admiral",
-        "Captain Elephant",
-        "Beautiful Pirate",
-        "rip_indra True Form",
-        "Longma",
-        "Soul Reaper",
-        "Cake Queen"
+        "Stone", "Hydra Leader", "Kilo Admiral", "Captain Elephant", "Beautiful Pirate",
+        "rip_indra True Form", "Longma", "Soul Reaper", "Cake Queen"
     }
 end
 
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/BossFarmName",
-    Default = _G.SelectBoss or "",
+    Default = tableBoss[1],
     Options = tableBoss,
     Callback = function(option)
         _G.SelectBoss = option
     end
 })
+
 
 Main:AddToggle({
     Name = "Auto Farm Boss",
