@@ -671,28 +671,21 @@ end)
 local BoatSeats = {}
 local selectedBoat = "Beast Hunter"  -- Default boat selection
 
--- Updated Tween2 with speed 300
 function Tween2(targetCFrame)
-    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    
-    if humanoid and humanoidRootPart then
-        local tweenService = game:GetService("TweenService")
-        local distance = (targetCFrame.Position - humanoidRootPart.Position).Magnitude
-        local speed = 300 -- New speed
+    local player = game.Players.LocalPlayer
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
 
-        local duration = distance / speed
+    local TweenService = game:GetService("TweenService")
+    local distance = (hrp.Position - targetCFrame.Position).Magnitude
+    local speed = 300 -- this is your desired smooth speed
 
-        local tweenInfo = TweenInfo.new(
-            duration,
-            Enum.EasingStyle.Linear
-        )
-        
-        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
-        tween:Play()
-        
-        return tween
-    end
+    local duration = distance / speed -- controlled tweening like Auto Farm
+    local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+
+    local tween = TweenService:Create(hrp, info, {CFrame = targetCFrame})
+    tween:Play()
+    return tween
 end
 
 -- Fly to Boat Dealer Toggle
