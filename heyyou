@@ -1819,7 +1819,7 @@ Setting:AddToggle({
     Callback = function(state)
         _G.Join = state
 
-        if _G.Join and _G.Job and _G.Job ~= "" then
+        if _G.Join and _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
             pcall(function()
                 TeleportService:TeleportToPlaceInstance(game.PlaceId, _G.Job, player)
             end)
