@@ -1903,6 +1903,62 @@ Misc:AddButton({
     end
 })
 
+Setting:AddToggle({
+    Name = "Bring Mobs",
+    Flag = "Setting/BringMobs",
+    Description = "Bring The Mobs",
+    Callback = function(value)
+        getgenv().BringMob = value
+        if value then
+            spawn(function()
+                while getgenv().BringMob do
+                    pcall(function()
+                        for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if bringmob and mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                local root = mob:FindFirstChild("HumanoidRootPart")
+                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1000 then
+                                    root.CFrame = FarmPos
+                                    root.Size = Vector3.new(60, 60, 60)
+                                    root.Transparency = 1
+                                    root.CanCollide = false
+                                    mob.Head.CanCollide = false
+                                    mob.Humanoid.JumpPower = 0
+                                    mob.Humanoid.WalkSpeed = 0
+                                    if mob.Humanoid:FindFirstChild("Animator") then
+                                        mob.Humanoid.Animator:Destroy()
+                                    end
+                                    mob.Humanoid:ChangeState(11)
+                                    mob.Humanoid:ChangeState(14)
+                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                end
+                            end
+                        end
+                    end)
+                    wait()
+                end
+            end)
+        end
+    end
+})
+
+Misc:AddToggle({
+    Name = "Enable Remove Notifications",
+    Flag = "Misc/RemoveNotifications",
+    Description = "",
+    Callback = function(value)
+        spawn(function()
+            while value do
+                pcall(function()
+                    game.Players.LocalPlayer.PlayerGui.Notifications.Enabled = false
+                end)
+                wait()
+            end
+            pcall(function()
+                game.Players.LocalPlayer.PlayerGui.Notifications.Enabled = true
+            end)
+        end)
+    end
+})
 
 
 
