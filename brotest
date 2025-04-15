@@ -86,6 +86,14 @@ Info:AddButton({
     end
 })
 
+Info:AddParagraph({
+    Name = "How to Use Auto Farm",
+    Flag = "Info/HowToUseAutoFarm",
+    Content = [[
+        https://discord.gg/qx9rKaC35f
+    ]]
+})
+
 
 
 Main:AddDropdown({
