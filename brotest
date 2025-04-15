@@ -378,6 +378,82 @@ Player:AddDropdown({
     end
 })
 
+Player:AddToggle({
+    Name = "Spectate Player",
+    Flag = "Player/SpectatePlayer",
+    Description = "Enable or disable spectating",
+    Default = false,
+    Callback = function(Value)
+        _G.SpectatePlayer = Value
+        if Value then
+            SpectatePlayer()
+        else
+            StopSpectating()
+        end
+    end
+})
+
+
+_G.Spectating = false
+_G.SelectPly = nil
+
+function SpectatePlayer()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+
+    if not _G.SelectPly or _G.SelectPly == "" then
+        warn("No player selected!")
+        StopSpectating()
+        return
+    end
+
+    local targetPlayer = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+    if not targetPlayer or not targetPlayer.Character then 
+        warn("Invalid player selected or player not in-game!")
+        StopSpectating()
+        return
+    end
+
+    camera.CameraSubject = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = true
+
+    local connection
+    connection = targetPlayer.CharacterRemoving:Connect(function()
+        if _G.Spectating then
+            StopSpectating()
+            connection:Disconnect()
+        end
+    end)
+
+    print("Now spectating:", _G.SelectPly)
+end
+
+function StopSpectating()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+    camera.CameraSubject = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = false
+    print("Stopped spectating.")
+end
+
+
+Player:AddButton({
+    Name = "Reload Players",
+    Flag = "Player/ReloadPlayers",
+    Description = "Refresh the player dropdown list",
+    Callback = function()
+        table.clear(playerList) -- Clear existing list
+        for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+            table.insert(playerList, player.Name)
+        end
+        print("Players refreshed:", table.concat(playerList, ", ")) -- Debug
+
+        -- Update the dropdown values
+        if PlayerDropdown and PlayerDropdown.SetValues then
+            PlayerDropdown:SetValues(playerList)
+        end
+    end
+})
 
 
 Player:AddToggle({
