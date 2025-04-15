@@ -1800,7 +1800,6 @@ elseif currentPlace == Sea3ID then
     }
 end
 
--- Boss dropdown menu
 Main:AddDropdown({
     Name = "Select Boss",
     Flag = "Main/BossFarmName",
@@ -1815,100 +1814,58 @@ Main:AddDropdown({
 Main:AddToggle({
     Name = "Auto Farm Boss",
     Flag = "Main/AutoFarmBoss",
-    Description = "Auto Farm Selected Boss",
     Default = false,
     Callback = function(Value)
         _G.AutoBoss = Value
-        if not Value then
-            wait()
-            -- Ensure player is above the water level when turning off
-            local player = game:GetService("Players").LocalPlayer
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            if playerPosition.Y <= 0 then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-            end
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
-    end
-})
+        if Value then
+            task.spawn(function()
+                while _G.AutoBoss do
+                    pcall(function()
+                        if not _G.SelectBoss or _G.SelectBoss == "" then
+                            task.wait(1)
+                            return
+                        end
 
--- Separate auto boss farm function
-spawn(function()
-    while task.wait() do
-        if _G.AutoBoss then
-            pcall(function()
-                -- Check if a boss is selected
-                if not _G.SelectBoss or _G.SelectBoss == "" then
-                    print("Please select a boss first!")
-                    task.wait(2)
-                    return
-                end
-                
-                local player = game:GetService("Players").LocalPlayer
-                local heightAboveBoss = 20
-                
-                -- First check if boss exists in workspace
-                if game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss) then
-                    local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
-                    
-                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        -- Target and attack the boss
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-                        
-                        -- Make boss easier to hit
-                        enemy.HumanoidRootPart.CanCollide = false
-                        enemy.Humanoid.WalkSpeed = 0
-                        enemy.Humanoid.JumpPower = 0
-                        enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        enemy.HumanoidRootPart.Transparency = 1
-                        
-                        -- Position above the boss
-                        local bossPos = enemy.HumanoidRootPart.Position
-                        local newPos = bossPos + Vector3.new(0, heightAboveBoss, 0)
-                        player.Character.HumanoidRootPart.CFrame = CFrame.new(newPos)
-                        
-                        -- Attack
-                        AttackNoCoolDown()
-                        
-                        -- Increase player's simulation radius
-                        sethiddenproperty(player, "SimulationRadius", math.huge)
-                        
-                        -- Ensure we stay above water
-                        local playerPosition = player.Character.HumanoidRootPart.Position
-                        if playerPosition.Y <= 0 then
-                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                        local heightAboveBoss = 300
+                        local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
+
+                        if enemy and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            repeat
+                                task.wait(_G.Fast_Delay or 0)
+
+                                -- Auto Actions
+                                AttackNoCoolDown()
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+
+                                -- Tween above the boss, follow it
+                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, heightAboveBoss, 0)
+                                Tween(CFrame.new(targetPos))
+
+                                -- Boss tweaks
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.Humanoid.JumpPower = 0
+                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                enemy.HumanoidRootPart.Transparency = 1
+
+                                -- Ensure simulation radius
+                                sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+
+                            until not _G.AutoBoss or not enemy.Parent or enemy.Humanoid.Health <= 0
+                        elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
+                            local boss = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
+                            if boss:FindFirstChild("HumanoidRootPart") then
+                                Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, heightAboveBoss, 10))
+                            end
                         end
-                        
-                        task.wait(0.1)
-                    end
-                -- If boss isn't in workspace, check ReplicatedStorage
-                elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
-                    local boss = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
-                    
-                    -- Make sure the boss has a HumanoidRootPart to tween to
-                    if boss:FindFirstChild("HumanoidRootPart") then
-                        -- Tween to where the boss will spawn
-                        Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, heightAboveBoss, 10))
-                        
-                        -- Ensure we stay above water after tweening
-                        local playerPosition = player.Character.HumanoidRootPart.Position
-                        if playerPosition.Y <= 0 then
-                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                        end
-                    end
-                    
-                    task.wait(1)
-                else
-                    -- If boss isn't found anywhere, print message and wait
-                    print(_G.SelectBoss .. " not found in workspace or ReplicatedStorage. Waiting...")
-                    task.wait(2)
+                    end)
+                    task.wait(0.5)
                 end
             end)
         end
     end
-end)
+})
 
 
 
