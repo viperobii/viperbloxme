@@ -228,51 +228,15 @@ spawn(function()
     end
 end)
 
--- AUTO COLLECT CHEST TOGGLE
-Main:AddSection("Chest Farm")
-
-Main:AddToggle({
-    Name = "Auto Farm Chest",
-    Flag = "Main/AutoCollectChest",
-    Description = "Automatically teleport to the nearest chest and collect it",
-    Default = false,
+Main:AddInput({
+    Name = "Input JOB ID",
+    Flag = "Main/CustomInput",
+    PlaceholderText = "Input JOB ID",
+    RemoveTextAfterFocusLost = false,
     Callback = function(Value)
-        _G.AutoCollectChest = Value
+        print("You typed:", Value)
     end
 })
-
-spawn(function()
-    while task.wait() do
-        if _G.AutoCollectChest then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local character = player.Character or player.CharacterAdded:Wait()
-                local root = character:FindFirstChild("HumanoidRootPart")
-                if not root then return end
-
-                local closestChest = nil
-                local shortestDistance = math.huge
-                local chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
-
-                for _, chest in pairs(chests) do
-                    if chest:IsA("Model") and not chest:GetAttribute("IsDisabled") then
-                        local chestPos = chest:GetPivot().Position
-                        local dist = (root.Position - chestPos).Magnitude
-                        if dist < shortestDistance then
-                            shortestDistance = dist
-                            closestChest = chest
-                        end
-                    end
-                end
-
-                if closestChest then
-                    local targetPos = closestChest:GetPivot().Position + Vector3.new(0, 5, 0)
-                    BTPZ(CFrame.new(targetPos)) -- Use your instant teleport here
-                end
-            end)
-        end
-    end
-end)
 
 Main:AddSection("Bones Farm");
 
