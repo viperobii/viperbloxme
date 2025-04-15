@@ -228,13 +228,13 @@ spawn(function()
     end
 end)
 
-Main:AddInput({
-    Name = "Input JOB ID",
-    Flag = "Main/CustomInput",
-    PlaceholderText = "Input JOB ID",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(Value)
-        print("You typed:", Value)
+Main:AddTextbox({
+    Name = "Boss Name",
+    Flag = "Main/BossTextbox",
+    Placeholder = "Enter boss name...",
+    Callback = function(text)
+        print("Selected boss:", text)
+        _G.SelectBoss = text
     end
 })
 
