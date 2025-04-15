@@ -1795,32 +1795,61 @@ Main:AddToggle({
         if Value then
             task.spawn(function()
                 while _G.AutoFarmBoss do
+                    local bossFound = false
+                    
+                    -- Check if a boss is selected
+                    if not _G.SelectedBoss or _G.SelectedBoss == "" then
+                        print("Please select a boss from the dropdown menu")
+                        task.wait(2)
+                        continue
+                    end
+                    
+                    -- Look for the selected boss
                     for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                         if enemy.Name == _G.SelectedBoss and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                            bossFound = true
                             AutoHaki()
                             EquipTool(SelectWeapon)
-                            Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            
+                            -- Make sure HumanoidRootPart exists before tweening
+                            local hrp = enemy:FindFirstChild("HumanoidRootPart")
+                            if not hrp then
+                                print("HumanoidRootPart not found for", _G.SelectedBoss)
+                                break
+                            end
+                            
+                            Tween(hrp.CFrame * CFrame.new(0, 20, 0))
                             AttackNoCoolDown()
                             
                             -- Widen hitbox
-                            local hrp = enemy:FindFirstChild("HumanoidRootPart")
-                            if hrp then
-                                hrp.Size = Vector3.new(60, 60, 60)
-                                hrp.Transparency = 1
-                                hrp.CanCollide = false
-                            end
-
+                            hrp.Size = Vector3.new(60, 60, 60)
+                            hrp.Transparency = 1
+                            hrp.CanCollide = false
+                            
                             -- Freeze boss
                             local hum = enemy:FindFirstChild("Humanoid")
                             if hum then
                                 hum.WalkSpeed = 0
                                 hum.JumpPower = 0
                             end
-
-                            repeat task.wait() until not _G.AutoFarmBoss or enemy.Humanoid.Health <= 0 or not enemy.Parent
+                            
+                            -- Wait until the boss is defeated or the toggle is turned off
+                            repeat 
+                                task.wait() 
+                                if not enemy or not enemy.Parent or not enemy:FindFirstChild("Humanoid") then
+                                    break
+                                end
+                            until not _G.AutoFarmBoss or enemy.Humanoid.Health <= 0
+                            
+                            break -- Break the loop after handling one boss
                         end
                     end
-                    task.wait()
+                    
+                    -- Handle case when boss isn't found
+                    if not bossFound then
+                        print(_G.SelectedBoss .. " not found. Waiting for boss to spawn...")
+                        task.wait(2) -- Wait a bit before looking again
+                    end
                 end
             end)
         end
