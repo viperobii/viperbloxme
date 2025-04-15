@@ -362,6 +362,22 @@ Main:AddToggle({
 })
 
 
+local playerList = {}
+
+for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+    table.insert(playerList, player.Name)
+end
+
+Player:AddDropdown({
+    Name = "Select Players",
+    Flag = "Player/SelectPlayers",
+    Description = "",
+    Options = playerList,
+    Callback = function(option)
+        _G.SelectPly = option
+    end
+})
+
 
 
 Player:AddToggle({
@@ -1446,6 +1462,110 @@ spawn(function()
     end
 end)
 
+Items:AddSection("Setting Stats");
+
+Items:AddToggle({
+    Name = "Auto Stats Melee",
+    Flag = "Items/AutoStatsMelee",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Melee = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Melee then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Melee",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Stats Defense",
+    Flag = "Items/AutoStatsDefense",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Defense = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Defense then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Defense",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+Items:AddToggle({
+    Name = "Auto Stats Swords",
+    Flag = "Items/AutoStatsSword",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Sword = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Sword then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Sword",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+
+Items:AddToggle({
+    Name = "Auto Stats Gun",
+    Flag = "Items/AutoStatsGun",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Gun = Value
+    end
+})
+
+Items:AddToggle({
+    Name = "Auto Stats Fruit",
+    Flag = "Items/AutoStatsFruit",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Devil_Fruit = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Devil_Fruit then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Demon Fruit",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
 
 Trial:AddSection("Temple Clock Teleport");
 
