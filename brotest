@@ -1810,7 +1810,6 @@ Main:AddDropdown({
     end
 })
 
-
 -- Auto farm boss toggle
 Main:AddToggle({
     Name = "Auto Farm Boss",
@@ -1822,39 +1821,57 @@ Main:AddToggle({
             task.spawn(function()
                 while _G.AutoBoss do
                     pcall(function()
-                        local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
-                        if enemy then
+                        -- Check if a boss is selected
+                        if not _G.SelectBoss or _G.SelectBoss == "" then
+                            print("Please select a boss first!")
+                            task.wait(2)
+                            return
+                        end
+                        
+                        -- Fixed height above the boss
+                        local heightAboveBoss = 20
+                        
+                        -- First check if boss exists in workspace
+                        if game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss) then
+                            local enemy = game:GetService("Workspace").Enemies:FindFirstChild(_G.SelectBoss)
+                            
                             if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                                -- Set a fixed height above the boss, adjust the Y value to avoid water
-                                local heightAboveBoss = 20
                                 repeat
-                                    task.wait(_G.Fast_Delay)
+                                    task.wait(_G.Fast_Delay or 0)
                                     AttackNoCoolDown()
                                     AutoHaki()
                                     EquipTool(SelectWeapon)
-
-                                    -- Tween above the boss and keep the distance steady
+                                    
+                                    -- Update position calculation each iteration
                                     local bossPos = enemy.HumanoidRootPart.Position
-                                    local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
-                                    Tween(newPos)
-
-                                    -- Set humanoid properties to prevent unwanted interactions
+                                    local newCFrame = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
+                                    Tween(newCFrame)
+                                    
+                                    -- Make boss easier to hit
                                     enemy.HumanoidRootPart.CanCollide = false
                                     enemy.Humanoid.WalkSpeed = 0
+                                    enemy.Humanoid.JumpPower = 0
                                     enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-
-                                    -- Keep following the boss if it moves
+                                    enemy.HumanoidRootPart.Transparency = 1
+                                    
+                                    -- Increase player's simulation radius
                                     sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
-                                until not _G.AutoBoss or not enemy.Parent or enemy.Humanoid.Health <= 0
+                                    
+                                until not _G.AutoBoss or not enemy.Parent or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0
                             end
+                        -- If boss isn't in workspace, check ReplicatedStorage
                         elseif game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss) then
-                            -- In case the boss is in ReplicatedStorage, handle the movement and follow
-                            local bossStorage = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
-                            if bossStorage then
-                                local bossPos = bossStorage.HumanoidRootPart.Position
-                                local newPos = CFrame.new(bossPos.X, bossPos.Y + heightAboveBoss, bossPos.Z)
-                                Tween(newPos)
+                            local boss = game:GetService("ReplicatedStorage"):FindFirstChild(_G.SelectBoss)
+                            
+                            -- Make sure the boss has a HumanoidRootPart to tween to
+                            if boss:FindFirstChild("HumanoidRootPart") then
+                                -- Tween to where the boss will spawn
+                                Tween(boss.HumanoidRootPart.CFrame * CFrame.new(0, heightAboveBoss, 10))
                             end
+                        else
+                            -- If boss isn't found anywhere, print message and wait
+                            print(_G.SelectBoss .. " not found in workspace or ReplicatedStorage. Waiting...")
+                            task.wait(2)
                         end
                     end)
                     task.wait()
