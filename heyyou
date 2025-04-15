@@ -58,6 +58,12 @@ local Teleport = Window:MakeTab({
     Icon = "book",  -- Fixed the split "Icon"
 })
 
+local Misc = Window:MakeTab({
+    Title = "Miscellaneous",
+    Description = "code-xml",
+    Icon = "book",  -- Fixed the split "Icon"
+})
+
 local Setting = Window:MakeTab({
     Title = "Settings",
     Description = "Settings",
@@ -801,7 +807,7 @@ spawn(function()
     end
 end)
 
-Sea:AddSection("Sea Mobs");
+
 
 Sea:AddToggle({
     Name = "Auto Kill Piranha",
@@ -1739,6 +1745,163 @@ spawn(function()
 end)
 
 
+Items:AddSection("Buy Melee");
+
+Items:AddButton({
+    Name = "Black Leg",
+    Flag = "Items/BlackLeg",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyBlackLeg")
+    end
+})
+
+Items:AddButton({
+    Name = "Electro",
+    Flag = "Items/Electro",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectro")
+    end
+})
+
+Items:AddButton({
+    Name = "Fishman Karate",
+    Flag = "Items/FishmanKarate",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyFishmanKarate")
+    end
+})
+
+Items:AddButton({
+    Name = "Dragon Claw",
+    Flag = "Items/DragonClaw",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "1")
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "DragonClaw", "2")
+    end
+})
+
+Items:AddButton({
+    Name = "Superhuman",
+    Flag = "Items/Superhuman",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySuperhuman")
+    end
+})
+
+Items:AddButton({
+    Name = "Death Step",
+    Flag = "Items/DeathStep",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDeathStep")
+    end
+})
+
+Items:AddButton({
+    Name = "Sharkman Karate",
+    Flag = "Items/SharkmanKarate",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate", true)
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySharkmanKarate")
+    end
+})
+
+
+Items:AddButton({
+    Name = "Electric Claw",
+    Flag = "Items/ElectricClaw",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyElectricClaw")
+    end
+})
+
+Items:AddButton({
+    Name = "Dragon Talon",
+    Flag = "Items/DragonTalon",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyDragonTalon")
+    end
+})
+
+Items:AddButton({
+    Name = "Godhuman",
+    Flag = "Items/Godhuman",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyGodhuman")
+    end
+})
+
+Items:AddButton({
+    Name = "Sanguine Art",
+    Flag = "Items/SanguineArt",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuySanguineArt")
+    end
+})
+
+
+Misc:AddButton({
+    Name = "Resets Stats",
+    Flag = "Misc/ResetsStats",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "1")
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Refund", "2")
+    end
+})
+
+Misc:AddButton({
+    Name = "Roll Race",
+    Flag = "Misc/RollRace",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "1")
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BlackbeardReward", "Reroll", "2")
+    end
+})
+
+Misc:AddButton({
+    Name = "Change To Ghoul Race",
+    Flag = "Misc/GhoulRace",
+    Callback = function()
+        local args = {
+            [1] = "Ectoplasm",
+            [2] = "Change",
+            [3] = 4
+        }
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+    end
+})
+
+Misc:AddButton({
+    Name = "Change To Cyborg Race",
+    Flag = "Misc/CyborgRace",
+    Callback = function()
+        local args = {
+            [1] = "CyborgTrainer",
+            [2] = "Buy"
+        }
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+    end
+})
+
+Misc:AddButton({
+    Name = "Change To Draco Race",
+    Description = "Only in Sea 3",
+    Flag = "Misc/DracoRace",
+    Callback = function()
+        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5661.5322265625, 1013.0907592773438, -334.9649963378906))
+        Tween2(CFrame.new(5814.42724609375, 1208.3267822265625, 884.5785522460938))
+        local target = Vector3.new(5814.42724609375, 1208.3267822265625, 884.5785522460938)
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        repeat wait() until (character.HumanoidRootPart.Position - target).Magnitude < 1
+        local args = {
+            [1] = {
+                NPC = "Dragon Wizard",
+                Command = "DragonRace"
+            }
+        }
+        game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/InteractDragonQuest"):InvokeServer(unpack(args))
+    end
+})
 
 
 
