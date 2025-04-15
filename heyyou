@@ -1827,6 +1827,35 @@ Setting:AddToggle({
     end
 })
 
+Setting:AddToggle({
+    Name = "Copy Job ID",
+    Flag = "Setting/CopyJobID",
+    Description = "",
+    Callback = function()
+        setclipboard(tostring(game.JobId))
+    end
+})
+
+Setting:AddToggle({
+    Name = "Spam Join Job ID",
+    Flag = "Setting/SpamJoinJobID",
+    Default = false,
+    Callback = function(value)
+        _G.Join = value
+    end
+})
+
+
+spawn(function()
+    while task.wait(5) do
+        if _G.Join and _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
+            pcall(function()
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, _G.Job, game.Players.LocalPlayer)
+            end)
+        end
+    end
+end)
+
 
 Setting:AddSection("Other Setting");
 
