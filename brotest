@@ -803,6 +803,43 @@ end)
 
 Sea:AddSection("Sea Mobs");
 
+Sea:AddToggle({
+    Name = "Auto Kill Piranha",
+    Flag = "Sea/AutoKillPiranha",
+    Default = false,
+    Callback = function(Value)
+        _G.farmpiranya = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.farmpiranya then
+            pcall(function()
+                if game:GetService("Workspace").Enemies:FindFirstChild("Piranha") then
+                    for v1446, v1447 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if v1447.Name == "Piranha" then
+                            if v1447:FindFirstChild("Humanoid") and v1447:FindFirstChild("HumanoidRootPart") and v1447.Humanoid.Health > 0 then
+                                repeat
+                                    wait(_G.Fast_Delay)
+                                    AttackNoCoolDown()
+                                    AutoHaki()
+                                    EquipTool(SelectWeapon)
+                                    v1447.HumanoidRootPart.CanCollide = false
+                                    v1447.Humanoid.WalkSpeed = 0
+                                    v1447.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                    Tween(v1447.HumanoidRootPart.CFrame * Pos)
+                                until not _G.farmpiranya or not v1447.Parent or v1447.Humanoid.Health <= 0
+                            end
+                        end
+                    end
+                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Piranha") then
+                    Tween(game:GetService("ReplicatedStorage"):FindFirstChild("Piranha").HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
+                end
+            end)
+        end
+    end
+end)
 
 
 Player:AddSection("Anti Slow");
