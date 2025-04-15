@@ -78,24 +78,21 @@ local Setting = Window:MakeTab({
 })
 
 
-Info:AddParagraph("discord_invite", [[
-https://discord.gg/qx9rKaC35f
-]])
-
 Info:AddButton({
-    Name = "Join",
-    Description = "Opens the invite in your browser",
+    Name = "Join Discord",
+    Description = "Tap to open Discord invite in browser",
     Callback = function()
         game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/qx9rKaC35f")
     end
 })
 
-
-Info:AddParagraph("honors", [[
-Mentions:
+Info:AddParagraph("Mentions", [[
 Honorable Mention: Tanny
-Honorable Mention 2: ViperIsPinoy
-]])
+Honorable Mention 2: Viper
+]], {
+    Flag = "Mentions/Names"
+})
+
 
 
 
