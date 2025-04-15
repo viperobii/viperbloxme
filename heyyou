@@ -234,19 +234,14 @@ Main:AddSection("Chest Farm")
 Main:AddToggle({
     Name = "Auto Farm Chest",
     Flag = "Main/AutoCollectChest",
-    Description = "Automatically farm nearest chest",
+    Description = "Automatically teleport to the nearest chest and collect it",
     Default = false,
     Callback = function(Value)
         _G.AutoCollectChest = Value
-        if not Value then
-            wait()
-            Tween(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
-        end
     end
 })
 
--- AUTO FARM CHEST LOOP
+-- INSTANT AUTO FARM CHEST LOOP
 spawn(function()
     while task.wait() do
         if _G.AutoCollectChest then
@@ -260,10 +255,10 @@ spawn(function()
                 local shortestDistance = math.huge
                 local chests = game:GetService("CollectionService"):GetTagged("_ChestTagged")
 
-                -- Find closest enabled chest
                 for _, chest in pairs(chests) do
                     if chest:IsA("Model") and not chest:GetAttribute("IsDisabled") then
-                        local dist = (root.Position - chest:GetPivot().Position).Magnitude
+                        local chestPos = chest:GetPivot().Position
+                        local dist = (root.Position - chestPos).Magnitude
                         if dist < shortestDistance then
                             shortestDistance = dist
                             closestChest = chest
@@ -271,16 +266,9 @@ spawn(function()
                     end
                 end
 
-                -- Go to chest
                 if closestChest then
                     local targetPos = closestChest:GetPivot().Position + Vector3.new(0, 5, 0)
-                    local tweenService = game:GetService("TweenService")
-                    local tweenInfo = TweenInfo.new((root.Position - targetPos).Magnitude / 350, Enum.EasingStyle.Linear)
-                    local goal = { CFrame = CFrame.new(targetPos) }
-
-                    local tween = tweenService:Create(root, tweenInfo, goal)
-                    tween:Play()
-                    tween.Completed:Wait()
+                    root.CFrame = CFrame.new(targetPos)
                 end
             end)
         end
