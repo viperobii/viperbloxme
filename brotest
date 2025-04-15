@@ -368,36 +368,38 @@ function AutoHaki()
     end
 end
 
--- Enhanced Tween2 function with better speed and height adjustment
-function Tween2(targetCFrame)
-    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-    local humanoidRootPart = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    
-    if humanoid and humanoidRootPart then
-        local tweenService = game:GetService("TweenService")
-        local distance = (targetCFrame.Position - humanoidRootPart.Position).Magnitude
-        
-        -- Faster speed calculation with a minimum speed
-        local speed = math.clamp(distance/120, 2, 10) -- Adjusted for faster movement
-        
-        -- Add height to avoid water (Y-axis adjustment)
-        local heightOffset = 15 -- Adjust this value based on how high you need to go
-        local adjustedCFrame = CFrame.new(
-            targetCFrame.Position.X,
-            targetCFrame.Position.Y + heightOffset,
-            targetCFrame.Position.Z
-        ) * targetCFrame.Rotation
-        
-        local tweenInfo = TweenInfo.new(
-            speed,
-            Enum.EasingStyle.Linear
-        )
-        
-        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {CFrame = adjustedCFrame})
+function Tween2(destinationCFrame)
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+    if not hrp then return end
+
+    local tweenService = game:GetService("TweenService")
+
+    local function tweenTo(cframe)
+        local distance = (cframe.Position - hrp.Position).Magnitude
+        local time = distance / 350
+        local tween = tweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = cframe})
         tween:Play()
-        
-        return tween
+        tween.Completed:Wait()
     end
+
+    local original = hrp.CFrame
+    local target = destinationCFrame
+
+    -- Step 1: Go up vertically
+    local height = 100 -- You can increase if needed
+    local upCFrame = CFrame.new(original.Position.X, original.Position.Y + height, original.Position.Z)
+    tweenTo(upCFrame)
+
+    -- Step 2: Move horizontally at high Y
+    local airTarget = CFrame.new(target.Position.X, upCFrame.Position.Y, target.Position.Z)
+    tweenTo(airTarget)
+
+    -- Step 3: Go down to the final position (with +10 to avoid clipping in floor)
+    local downCFrame = CFrame.new(target.Position.X, target.Position.Y + 10, target.Position.Z)
+    tweenTo(downCFrame)
 end
 
 -- Rest of your original code remains the same
@@ -559,6 +561,28 @@ Player:AddToggle({
     end
 })
 
+
+Player:AddToggle({
+    Name = "Walk on Water",
+    Flag = "Player/WalkonWater",
+    Description = "",
+    Default = true,
+    Callback = function(Value)
+        _G.WalkonWater = Value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        pcall(function()
+            if _G.WalkonWater then
+                game:GetService("Workspace").Map["WaterBase-Plane"].Size = Vector3.new(1000, 112, 1000)
+            else
+                game:GetService("Workspace").Map["WaterBase-Plane"].Size = Vector3.new(1000, 80, 1000)
+            end
+        end)
+    end
+end)
 
 
 
@@ -1972,6 +1996,44 @@ spawn(function()
                     wait(0.5)
                 end
             end)
+        end
+    end
+end)
+
+
+Trial:AddToggle({
+    Name = "Auto Training Race",
+    Flag = "Trial/AutoTraining",
+    Description = "Automatically trains your race",
+    Default = false,
+    Callback = function(value)
+        _G.AutoTrainRace = value
+        
+        if not value then
+            _G.AutoBoneNoQuest = false
+        end
+    end
+})
+
+-- Create the Auto Training Race function
+spawn(function()
+    while wait() do
+        if _G.AutoTrainRace then
+            pcall(function()
+                if game.Players.LocalPlayer.Character:FindFirstChild("RaceTransformed") then
+                    if game.Players.LocalPlayer.Character.RaceTransformed.Value == true then
+                        _G.AutoBoneNoQuest = false
+                        Tween(CFrame.new(-9698.4736328125, 445.09442138671875, 6545.8525390625))
+                    elseif game.Players.LocalPlayer.Character.RaceTransformed.Value == false then
+                        _G.AutoBoneNoQuest = true
+                        game:GetService("VirtualInputManager"):SendKeyEvent(true, "Y", false, game)
+                        wait()
+                        game:GetService("VirtualInputManager"):SendKeyEvent(false, "Y", false, game)
+                    end
+                end
+            end)
+        else
+            _G.AutoBoneNoQuest = false
         end
     end
 end)
