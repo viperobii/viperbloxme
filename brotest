@@ -105,72 +105,67 @@ Main:AddDropdown({
 
 getgenv().ChooseWeapon = "Melee"
 getgenv().SelectWeapon = nil
+local lastEquipped = nil
 
 task.spawn(function()
     while task.wait() do
         pcall(function()
-            -- Check if we need to find a new weapon
             local player = game.Players.LocalPlayer
             local character = player.Character
             local backpack = player.Backpack
-            
             if not character or not backpack then return end
-            
-            -- First, find the appropriate weapon
-            getgenv().SelectWeapon = nil
-            
-            -- Check backpack items
+
+            local foundWeapon = nil
+
+            -- Look for weapon in backpack
             for _, tool in pairs(backpack:GetChildren()) do
                 if tool:IsA("Tool") and tool.ToolTip then
                     if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                        getgenv().SelectWeapon = tool.Name
+                        foundWeapon = tool
                         break
                     elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                        getgenv().SelectWeapon = tool.Name
+                        foundWeapon = tool
                         break
                     elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                        getgenv().SelectWeapon = tool.Name
+                        foundWeapon = tool
                         break
                     end
                 end
             end
-            
-            -- If no weapon found in backpack, check already equipped
-            if not getgenv().SelectWeapon then
+
+            -- Also check currently equipped if not found in backpack
+            if not foundWeapon then
                 for _, tool in pairs(character:GetChildren()) do
                     if tool:IsA("Tool") and tool.ToolTip then
                         if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                            getgenv().SelectWeapon = tool.Name
+                            foundWeapon = tool
                             break
                         elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                            getgenv().SelectWeapon = tool.Name
+                            foundWeapon = tool
                             break
                         elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                            getgenv().SelectWeapon = tool.Name
+                            foundWeapon = tool
                             break
                         end
                     end
                 end
             end
-            
-            -- Now actually equip the weapon
-            if getgenv().SelectWeapon then
-                -- Check if we're already holding the weapon
-                local alreadyEquipped = false
-                
+
+            -- If found and not already equipped
+            if foundWeapon and foundWeapon.Name ~= lastEquipped then
+                -- Unequip all current tools
                 for _, tool in pairs(character:GetChildren()) do
-                    if tool:IsA("Tool") and tool.Name == getgenv().SelectWeapon then
-                        alreadyEquipped = true
-                        break
+                    if tool:IsA("Tool") then
+                        tool.Parent = backpack
                     end
                 end
-                
-                -- If not holding it, equip it
-                if not alreadyEquipped then
-                    local weaponToEquip = backpack:FindFirstChild(getgenv().SelectWeapon)
-                    if weaponToEquip then
-                        weaponToEquip.Parent = character
-                    end
+
+                -- Equip the selected weapon
+                task.wait(0.1) -- slight delay to avoid race conditions
+                if foundWeapon.Parent == backpack then
+                    foundWeapon.Parent = character
+                    getgenv().SelectWeapon = foundWeapon.Name
+                    lastEquipped = foundWeapon.Name
                 end
             end
         end)
