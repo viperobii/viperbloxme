@@ -1441,59 +1441,96 @@ Player:AddSection("Anti Slow");
 Player:AddSlider({
     Name = "Walkspeed",
     Flag = "Player/SpeedMultiplier",
-    Description = "Make It Low To Increase Speed Lol",
-    Range = {1, 10},
+    Description = "Speed Multiplier",
+    Range = {1, 5},
     Suffix = "×",
-    CurrentValue = 2,
+    CurrentValue = 1.5,
     Increment = 0.1,
     Callback = function(Value)
         _G.SpeedMultiplier = Value
     end,
 })
 
--- Initialize global variables
+-- Initialize variables
 _G.SpeedBoost = false
-_G.SpeedMultiplier = 2
+_G.SpeedMultiplier = 1.5
 
--- Loop for velocity-based speed modification
+-- Create a spoofed humanoid to trick anti-cheat
+local function setupSpeedBypass()
+    pcall(function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        
+        -- Create a hook for the Humanoid.WalkSpeed property
+        local oldIndex = nil
+        local defaultWalkSpeed = humanoid.WalkSpeed
+        
+        oldIndex = hookmetamethod(game, "__index", function(self, key)
+            if not checkcaller() and self == humanoid and key == "WalkSpeed" then
+                -- Return the default speed to the game/anti-cheat checks
+                return defaultWalkSpeed
+            end
+            return oldIndex(self, key)
+        end)
+        
+        -- Create a hook for when the game tries to set the walkspeed
+        local oldNewIndex = nil
+        oldNewIndex = hookmetamethod(game, "__newindex", function(self, key, value)
+            if not checkcaller() and self == humanoid and key == "WalkSpeed" then
+                -- Let the game think it's setting the walkspeed
+                defaultWalkSpeed = value
+                return oldNewIndex(self, key, value)
+            end
+            return oldNewIndex(self, key, value)
+        end)
+    end)
+end
+
+-- Try to apply speed in a different way that might bypass detection
 task.spawn(function()
+    setupSpeedBypass()
+    
     while true do
         if _G.SpeedBoost then
             pcall(function()
-                local char = game.Players.LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
-                    -- Get current movement direction
-                    local humanoid = char.Humanoid
-                    local moveDirection = humanoid.MoveDirection
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    local humanoid = character:FindFirstChild("Humanoid")
                     
-                    -- Only apply if player is actually moving
-                    if moveDirection.Magnitude > 0 then
-                        -- Normalize and apply multiplier
-                        local velocity = moveDirection.Unit * (_G.SpeedMultiplier * 30)
-                        -- Preserve Y velocity to maintain jumping
-                        velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
-                        -- Apply velocity
-                        char.HumanoidRootPart.Velocity = velocity
+                    -- Apply speed through normal walkspeed (now protected by our metatable hooks)
+                    if humanoid then
+                        -- Get the default value from the game
+                        local defaultSpeed = humanoid.WalkSpeed
+                        -- Apply our multiplier using the protected setter
+                        humanoid.WalkSpeed = defaultSpeed * _G.SpeedMultiplier
                     end
                 end
             end)
         end
-        task.wait()
+        task.wait(0.1) -- Run less frequently to avoid detection
     end
+end)
+
+-- Respawn handler
+game.Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.wait(1)
+    setupSpeedBypass()
 end)
 
 Player:AddToggle({
     Name = "Enable Walkspeed",
     Flag = "Player/SpeedBoost",
-    Description = "",
+    Description = "More subtle speed increase",
     Default = false,
     Callback = function(Value)
         _G.SpeedBoost = Value
         if not Value then
-            -- Reset any active speed modifications when disabled
+            -- Reset speed modification when disabled
             local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.Velocity = Vector3.new(0, char.HumanoidRootPart.Velocity.Y, 0)
+            if char and char:FindFirstChild("Humanoid") then
+                char:FindFirstChild("Humanoid").WalkSpeed = 16 -- Default Roblox walkspeed
             end
         end
     end,
