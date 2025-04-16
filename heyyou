@@ -62,7 +62,7 @@ local Sea = Window:MakeTab({
 local Teleport = Window:MakeTab({
     Title = "Teleport Sea",
     Description = "Info",
-    Icon = "map-pin",  -- Fixed the split "Icon"
+    Icon = "palm",  -- Fixed the split "Icon"
 })
 
 local Misc = Window:MakeTab({
@@ -86,7 +86,7 @@ Info:AddButton({
     end
 })
 
-Info:AddLabel("Discord: https://discord.gg/qx9rKaC35f")
+
 
 
 
@@ -1672,6 +1672,74 @@ spawn(function()
     end
 end)
 
+
+Raid:AddSection("Setting Fruit")
+
+Raid:AddToggle({
+    Name = "Teleport To Fruit",
+    Flag = "Raid/CollectFruitTP",
+    Description = "Instant TP Fruit",
+    Default = false,
+    Callback = function(Value)
+        getgenv().CollectFruitTP = Value
+    end
+})
+
+-- Instant Teleport Loop
+spawn(function()
+    while task.wait(1) do
+        if getgenv().CollectFruitTP then
+            pcall(function()
+                for _, fruit in pairs(game.Workspace:GetChildren()) do
+                    if fruit:IsA("Model") and fruit:FindFirstChild("Handle") and string.find(fruit.Name, "Fruit") then
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = fruit.Handle.CFrame
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+Fruit:AddToggle({
+    Name = "Teleport Collect Fruit",
+    Flag = "Fruit/TweenCollectFruit",
+    Description = "Teleports to fruit using TweenService (safer from bans)",
+    Default = false,
+    Callback = function(Value)
+        getgenv().Tweenfruit = Value
+    end
+})
+
+-- Tween Function
+local TweenService = game:GetService("TweenService")
+local function TweenTo(CF)
+    local HRP = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not HRP then return end
+
+    local distance = (HRP.Position - CF.Position).Magnitude
+    local Time = distance / 250  -- Tween speed = 250
+
+    local TweenInfo = TweenInfo.new(Time, Enum.EasingStyle.Linear)
+    local Goal = {CFrame = CF}
+    local Tween = TweenService:Create(HRP, TweenInfo, Goal)
+    Tween:Play()
+    Tween.Completed:Wait()
+end
+
+-- Tween Teleport Loop
+spawn(function()
+    while task.wait(1) do
+        if getgenv().Tweenfruit then
+            pcall(function()
+                for _, fruit in pairs(game.Workspace:GetChildren()) do
+                    if fruit:IsA("Model") and fruit:FindFirstChild("Handle") and string.find(fruit.Name, "Fruit") then
+                        TweenTo(fruit.Handle.CFrame)
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 Items:AddToggle({
     Name = "Auto Saber",
