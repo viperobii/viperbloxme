@@ -1588,92 +1588,7 @@ spawn(function()
 end)
 
 Raids:AddToggle({
-    Name = "Auto Start Raids",
-    Flag = "Raids/AutoStartRaid",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.Auto_StartRaid = Value
-    end
-})
-
-spawn(function()
-    while wait(1) do -- Slower check to reduce lag
-        if _G.Auto_StartRaid then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local backpack = player.Backpack
-                local char = player.Character
-                
-                -- Check for chip in both backpack and character
-                local hasChip = backpack:FindFirstChild("Special Microchip") or (char and char:FindFirstChild("Special Microchip"))
-                
-                -- Check if raid is already in progress
-                local timerVisible = player.PlayerGui.Main.Timer.Visible
-                local hasIsland = workspace["_WorldOrigin"].Locations:FindFirstChild("Island 1")
-                
-                if not timerVisible and not hasIsland then
-                    if hasChip then
-                        -- Set spawn point first
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetSpawnPoint")
-                        
-                        -- Different handling based on sea level
-                        if Sea2 then
-                            -- Teleport to Second Sea raid location
-                            Tween2(CFrame.new(-6438.73535, 250.645355, -4501.50684))
-                            wait(1) -- Wait for teleport to complete
-                            
-                            -- Make sure we're close to the button
-                            local button = workspace.Map.CircleIsland.RaidSummon2.Button
-                            if button and button:FindFirstChild("Main") and button.Main:FindFirstChild("ClickDetector") then
-                                local distance = (button.Main.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                if distance <= 10 then
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Second Sea raid button")
-                                else
-                                    -- Try to teleport closer
-                                    Tween2(button.Main.CFrame)
-                                    wait(1)
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Second Sea raid button after repositioning")
-                                end
-                            end
-                        elseif Sea3 then
-                            -- Request entrance to Third Sea raid location
-                            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.509, 314.5155, -3150.022))
-                            wait(1) -- Wait for teleport to complete
-                            
-                            -- Teleport to the button
-                            Tween2(CFrame.new(-5017.40869, 314.844055, -2823.0127))
-                            wait(1) -- Wait for teleport to complete
-                            
-                            -- Make sure we're close to the button
-                            local button = workspace.Map["Boat Castle"].RaidSummon2.Button
-                            if button and button:FindFirstChild("Main") and button.Main:FindFirstChild("ClickDetector") then
-                                local distance = (button.Main.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                                if distance <= 10 then
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Third Sea raid button")
-                                else
-                                    -- Try to teleport closer
-                                    Tween2(button.Main.CFrame)
-                                    wait(1)
-                                    fireclickdetector(button.Main.ClickDetector)
-                                    print("Clicked Third Sea raid button after repositioning")
-                                end
-                            end
-                        end
-                    else
-                        print("No Special Microchip found!")
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-Raids:AddToggle({
-    Name = "Auto Raids Mobs",
+    Name = "Auto Raid",
     Flag = "Raids/AutoFarmNearestMob",
     Description = "Nearest",
     Default = false,
@@ -1681,98 +1596,90 @@ Raids:AddToggle({
         _G.AutoNear = Value
         if not Value then 
             bringmob = false
-            -- Return to original position when turning off
-            wait()
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            -- Return to original position or stop tweening
             wait()
         end
     end
 })
 
--- Modified Tween function with fixed speed
-function TweenFixed(Pos)
-    local TweenService = game:GetService("TweenService")
-    local Tw = TweenService:Create(
-        game:GetService("Players").LocalPlayer.Character.HumanoidRootPart,
-        TweenInfo.new(
-            (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - Pos.Position).Magnitude / 300, -- Fixed speed at 300
-            Enum.EasingStyle.Linear
-        ),
+-- Fixed Tween Function (speed 300)
+function TweenToPosition(Pos)
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+
+    local tween = game:GetService("TweenService"):Create(
+        char.HumanoidRootPart,
+        tweenInfo,
         {CFrame = Pos}
     )
-    Tw:Play()
-    return Tw
+    tween:Play()
+    return tween
 end
 
--- AUTO FARM NEAREST MOB LOOP
+-- Auto Farm Nearest Mob (Using Tween Only, No Teleport)
 spawn(function()
     while task.wait() do
         if _G.AutoNear then
             pcall(function()
-                local Closest = nil
-                local ClosestDistance = math.huge
-                local MaxDistance = 1000 -- Only target enemies within this distance
-                
-                -- Find the closest enemy within range
-                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
-                        if dist < MaxDistance and dist < ClosestDistance then
-                            Closest = enemy
-                            ClosestDistance = dist
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                local root = char and char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+
+                local ClosestMob, ClosestDist = nil, math.huge
+                for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                        local dist = (root.Position - mob.HumanoidRootPart.Position).Magnitude
+                        if dist < ClosestDist and dist <= 1000 then
+                            ClosestMob = mob
+                            ClosestDist = dist
                         end
                     end
                 end
 
-                if Closest then
-                    -- Target and attack the closest mob
+                if ClosestMob then
+                    -- Prepare the mob
                     AutoHaki()
                     EquipTool(SelectWeapon)
-                    
-                    -- Modify mob properties for easier farming
-                    if Closest:FindFirstChild("HumanoidRootPart") then
-                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        Closest.HumanoidRootPart.Transparency = 1
-                        Closest.HumanoidRootPart.CanCollide = false
+
+                    if ClosestMob:FindFirstChild("HumanoidRootPart") then
+                        ClosestMob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        ClosestMob.HumanoidRootPart.Transparency = 1
+                        ClosestMob.HumanoidRootPart.CanCollide = false
                     end
-                    if Closest:FindFirstChild("Humanoid") then
-                        Closest.Humanoid.WalkSpeed = 0
-                        Closest.Humanoid.JumpPower = 0
+                    if ClosestMob:FindFirstChild("Humanoid") then
+                        ClosestMob.Humanoid.WalkSpeed = 0
+                        ClosestMob.Humanoid.JumpPower = 0
                     end
-                    
-                    -- Position above the mob using tween instead of teleport
-                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    local targetCFrame = CFrame.new(targetPos)
-                    
-                    -- Check if we need to tween or are already close enough
-                    local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-                    if (currentPos - targetPos).Magnitude > 10 then
-                        -- Use tween to move to target
-                        local tweenComplete = false
-                        local tween = TweenFixed(targetCFrame)
-                        tween.Completed:Connect(function()
-                            tweenComplete = true
-                        end)
-                        
+
+                    local aboveMob = CFrame.new(ClosestMob.HumanoidRootPart.Position + Vector3.new(0, 30, 0))
+
+                    -- Tween to target (if far enough)
+                    if (root.Position - aboveMob.Position).Magnitude > 5 then
+                        local tweenDone = false
+                        local tween = TweenToPosition(aboveMob)
+                        tween.Completed:Connect(function() tweenDone = true end)
+
                         -- Wait for tween to complete or timeout
-                        local startTime = tick()
-                        repeat task.wait() until tweenComplete or (tick() - startTime > 5)
+                        local start = tick()
+                        repeat task.wait() until tweenDone or (tick() - start > 5)
                     end
-                    
-                    -- Attack
+
+                    -- Start attacking
                     AttackNoCoolDown()
                     bringmob = true
-                    
-                    -- Wait before next loop iteration
-                    wait(_G.Fast_Delay or 0.1)
-                    
-                    -- Check if mob is dead or no longer valid
-                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
-                        bringmob = false
-                        wait(0.5) -- Short wait before targeting next mob
-                    end
+
+                    -- Wait while mob is alive
+                    repeat
+                        task.wait(_G.Fast_Delay or 0.1)
+                    until not ClosestMob or not ClosestMob:FindFirstChild("Humanoid") or ClosestMob.Humanoid.Health <= 0
+
+                    bringmob = false
+                    wait(0.25)
                 else
-                    -- No enemies found within range
                     bringmob = false
                     wait(0.5)
                 end
@@ -1780,6 +1687,8 @@ spawn(function()
         end
     end
 end)
+
+
 
 
 Raids:AddToggle({
