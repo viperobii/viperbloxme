@@ -697,6 +697,60 @@ spawn(function()
 end)
 
 
+-- Island ESP Function
+function UpdateIslandESP()
+    for _, island in pairs(game:GetService("Workspace")['_WorldOrigin'].Locations:GetChildren()) do
+        pcall(function()
+            if IslandESP then
+                if island.Name ~= "Sea" then
+                    if not island:FindFirstChild("NameEsp") then
+                        local espGui = Instance.new("BillboardGui", island)
+                        espGui.Name = "NameEsp"
+                        espGui.ExtentsOffset = Vector3.new(0, 1, 0)
+                        espGui.Size = UDim2.new(1, 200, 1, 30)
+                        espGui.Adornee = island
+                        espGui.AlwaysOnTop = true
+
+                        local label = Instance.new("TextLabel", espGui)
+                        label.Font = Enum.Font.GothamBold
+                        label.TextWrapped = true
+                        label.Size = UDim2.new(1, 0, 1, 0)
+                        label.TextYAlignment = Enum.TextYAlignment.Top
+                        label.BackgroundTransparency = 1
+                        label.TextStrokeTransparency = 0.5
+                        label.TextColor3 = Color3.fromRGB(0, 255, 255)
+                        label.Text = island.Name
+                    else
+                        local dist = (game.Players.LocalPlayer.Character.Head.Position - island.Position).Magnitude / 3
+                        island.NameEsp.TextLabel.Text = island.Name .. "   \n" .. math.floor(dist + 0.5) .. " Distance"
+                    end
+                end
+            elseif island:FindFirstChild("NameEsp") then
+                island:FindFirstChild("NameEsp"):Destroy()
+            end
+        end)
+    end
+end
+
+-- Island ESP Toggle
+Visual:AddToggle({
+    Name = "ESP Island",
+    Flag = "Visual/IslandESP",
+    Description = "Show island names and distance",
+    Default = false,
+    Callback = function(Value)
+        IslandESP = Value
+        if IslandESP then
+            spawn(function()
+                while IslandESP do
+                    wait(0.5)
+                    pcall(UpdateIslandESP)
+                end
+            end)
+        end
+    end
+})
+
 
 -- Initialize the BoatSeats table first
 local BoatSeats = {}
@@ -1589,7 +1643,34 @@ end)
 
 
 
+Fruit:AddToggle({
+    Name = "Teleport Collect Fruit",
+    Flag = "Fruit/TeleportCollectFruit",
+    Description = "Better No Report Ban",
+    Default = false,
+    Callback = function(Value)
+        _G.Tweenfruit = Value
+    end
+})
 
+spawn(function()
+    while wait() do
+        if _G.Tweenfruit then
+            pcall(function()
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    for _, fruit in pairs(game.Workspace:GetChildren()) do
+                        if string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
+                            Tween(fruit.Handle.CFrame)
+                            wait(0.1) -- Small delay to prevent issues
+                            break -- Teleport to one fruit at a time
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 
