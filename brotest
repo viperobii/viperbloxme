@@ -751,6 +751,75 @@ Visual:AddToggle({
     end
 })
 
+function UpdateDevilChams()
+    for _, v432 in pairs(game.Workspace:GetChildren()) do
+        pcall(function()
+            if DevilFruitESP then
+                if string.find(v432.Name, "Fruit") then
+                    -- Check if the fruit has a Handle
+                    if v432:FindFirstChild("Handle") then
+                        if not v432.Handle:FindFirstChild("NameEsp" .. Number) then
+                            local v1164 = Instance.new("BillboardGui", v432.Handle)
+                            v1164.Name = "NameEsp" .. Number
+                            v1164.ExtentsOffset = Vector3.new(0, 1, 0)
+                            v1164.Size = UDim2.new(1, 200, 1, 30)
+                            v1164.Adornee = v432.Handle
+                            v1164.AlwaysOnTop = true
+                            
+                            local v1171 = Instance.new("TextLabel", v1164)
+                            v1171.Font = Enum.Font.GothamSemibold
+                            v1171.FontSize = "Size14"
+                            v1171.TextWrapped = true
+                            v1171.Size = UDim2.new(1, 0, 1, 0)
+                            v1171.TextYAlignment = "Top"
+                            v1171.BackgroundTransparency = 1
+                            v1171.TextStrokeTransparency = 0.5
+                            v1171.TextColor3 = Color3.fromRGB(255, 255, 255)
+                            
+                            -- Check if Player character exists before calculating distance
+                            local player = game:GetService("Players").LocalPlayer
+                            if player.Character and player.Character:FindFirstChild("Head") then
+                                v1171.Text = v432.Name .. " \n" .. v20((player.Character.Head.Position - v432.Handle.Position).Magnitude / 3) .. " Distance"
+                            else
+                                v1171.Text = v432.Name
+                            end
+                        else
+                            -- Update existing ESP with distance
+                            local player = game:GetService("Players").LocalPlayer
+                            if player.Character and player.Character:FindFirstChild("Head") then
+                                v432.Handle["NameEsp" .. Number].TextLabel.Text = v432.Name .. "   \n" .. v20((player.Character.Head.Position - v432.Handle.Position).Magnitude / 3) .. " Distance"
+                            else
+                                v432.Handle["NameEsp" .. Number].TextLabel.Text = v432.Name
+                            end
+                        end
+                    end
+                end
+            elseif v432:FindFirstChild("Handle") and v432.Handle:FindFirstChild("NameEsp" .. Number) then
+                v432.Handle:FindFirstChild("NameEsp" .. Number):Destroy()
+            end
+        end)
+    end
+end
+
+-- Add the toggle to the Visual tab
+Visual:AddToggle({
+    Name = "Esp Fruit",
+    Flag = "Visual/DevilFruitESP",
+    Description = "Show all devil fruits with distance",
+    Default = false,
+    Callback = function(Value)
+        DevilFruitESP = Value
+        if DevilFruitESP then
+            spawn(function()
+                while DevilFruitESP do
+                    wait()
+                    pcall(UpdateDevilChams)
+                end
+            end)
+        end
+    end
+})
+
 
 -- Initialize the BoatSeats table first
 local BoatSeats = {}
@@ -1645,6 +1714,7 @@ Raids:AddSection("Fruits");
 
 
 -- Toggle for Teleport Collect Fruit under Raid tab
+-- Toggle inside your Raid tab
 Raids:AddToggle({
     Name = "Teleport Collect Fruit",
     Flag = "Raids/TeleportCollectFruit",
@@ -1656,29 +1726,30 @@ Raids:AddToggle({
 })
 
 -- Tween function
-local function Tween(CF)
+local function TweenTo(CF)
     local ts = game:GetService("TweenService")
-    local plr = game.Players.LocalPlayer
-    local char = plr.Character or plr.CharacterAdded:Wait()
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
-    local dist = (hrp.Position - CF.Position).Magnitude
-    local info = TweenInfo.new(dist / 200, Enum.EasingStyle.Linear)
-    local tween = ts:Create(hrp, info, {CFrame = CF})
+    local distance = (hrp.Position - CF.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 200, Enum.EasingStyle.Linear)
+    local tween = ts:Create(hrp, tweenInfo, {CFrame = CF})
     tween:Play()
     tween.Completed:Wait()
 end
 
--- Fruit Collection Loop
+-- Auto Teleport to Fruits
 task.spawn(function()
     while task.wait() do
         if getgenv().Tweenfruit then
             pcall(function()
-                local char = game.Players.LocalPlayer.Character
+                local player = game.Players.LocalPlayer
+                local char = player.Character
                 if char and char:FindFirstChild("HumanoidRootPart") then
-                    for _, fruit in pairs(workspace:GetChildren()) do
-                        if fruit:IsA("Tool") and string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
-                            Tween(fruit.Handle.CFrame)
+                    for _, obj in pairs(workspace:GetChildren()) do
+                        if obj:IsA("Tool") and string.find(obj.Name, "Fruit") and obj:FindFirstChild("Handle") then
+                            TweenTo(obj.Handle.CFrame)
                             task.wait(0.1)
                             break
                         end
@@ -1690,7 +1761,31 @@ task.spawn(function()
 end)
 
 
+Raids:AddToggle({
+    Name = "Instant Teleport To Fruit",
+    Flag = "Raids/TeleportCollectFruit",
+    Description = "Instantly collect fruits if spawned or dropped.",
+    Default = false,
+    Callback = function(Value)
+        getgenv().CollectFruitTP = Value
+    end
+})
 
+-- Loop to collect fruit
+task.spawn(function()
+    while task.wait() do
+        if getgenv().CollectFruitTP then
+            pcall(function()
+                for _, fruit in pairs(game.Workspace:GetChildren()) do
+                    if fruit:IsA("Tool") and string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = fruit.Handle.CFrame
+                        task.wait(0.1)
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 Items:AddToggle({
