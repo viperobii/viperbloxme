@@ -1009,40 +1009,24 @@ end)
 
 Player:AddSection("Anti Slow");
 
-Player:AddToggle({
-    Name = "Walkspeed Enable",
-    Flag = "Player/SpeedBoost",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.SpeedBoost = Value
-        if not Value then
-            -- Reset any active speed modifications when disabled
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.Velocity = Vector3.new(0, char.HumanoidRootPart.Velocity.Y, 0)
-            end
-        end
-    end,
-})
 
--- Speed Multiplier Slider
+
 Player:AddSlider({
-    Name = "WalkSpeed",
-    Flag = "Player/SpeedMultiplier",
-    Description = "",
-    Range = {1, 10},
-    Suffix = "×",
-    CurrentValue = 2,
-    Increment = 0.1,
+    Name = "Walkspeed",
+    Flag = "Player/SpeedValue",
+    Description = "Higher values = faster speed",
+    Range = {16, 300},  -- Changed to match expected speed range
+    Suffix = "Speed",
+    CurrentValue = 50,
+    Increment = 5,
     Callback = function(Value)
-        _G.SpeedMultiplier = Value
+        _G.SpeedValue = Value
     end,
 })
 
 -- Initialize global variables
 _G.SpeedBoost = false
-_G.SpeedMultiplier = 2
+_G.SpeedValue = 50
 
 -- Loop for velocity-based speed modification
 task.spawn(function()
@@ -1057,8 +1041,8 @@ task.spawn(function()
                     
                     -- Only apply if player is actually moving
                     if moveDirection.Magnitude > 0 then
-                        -- Normalize and apply multiplier
-                        local velocity = moveDirection.Unit * (_G.SpeedMultiplier * 30)
+                        -- Apply speed value directly (higher = faster)
+                        local velocity = moveDirection.Unit * _G.SpeedValue
                         -- Preserve Y velocity to maintain jumping
                         velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
                         -- Apply velocity
@@ -1070,6 +1054,27 @@ task.spawn(function()
         task.wait()
     end
 end)
+
+
+Player:AddToggle({
+    Name = "Enable WalkSpeed",
+    Flag = "Player/SpeedBoost",
+    Description = "Uses velocity method to bypass anti-cheat",
+    Default = false,
+    Callback = function(Value)
+        _G.SpeedBoost = Value
+        if not Value then
+            -- Reset any active speed modifications when disabled
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.Velocity = Vector3.new(0, char.HumanoidRootPart.Velocity.Y, 0)
+            end
+        end
+    end,
+})
+
+-- Speed Multiplier Slider (Fixed to match expected speed values)
+
 
 -- Alternative method using BodyVelocity (uncomment if the above doesn't work)
 --[[
