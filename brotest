@@ -5464,13 +5464,23 @@ function Tween2(destinationCFrame)
     _G.Clip2 = false
 end
 
-function BTPZ(destinationCFrame)
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
-    task.wait()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
-end
+local TweenService = game:GetService("TweenService")
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local HRP = Character:WaitForChild("HumanoidRootPart")
 
-TweenSpeed = 350
+local TweenSpeed = 350
+
+function BTPZ(destinationCFrame)
+    local distance = (HRP.Position - destinationCFrame.Position).Magnitude
+    local time = distance / TweenSpeed
+
+    local tweenInfo = TweenInfo.new(time, Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(HRP, tweenInfo, {CFrame = destinationCFrame})
+    tween:Play()
+
+    tween.Completed:Wait()
+end
 
 function Tween(destinationCFrame)
     -- Cancel any existing tweens first
