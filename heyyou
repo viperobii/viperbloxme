@@ -1689,61 +1689,42 @@ spawn(function()
     end
 end)
 
+
 Raids:AddToggle({
     Name = "Auto Raids",
     Flag = "Raids/AutoFarmNearestMob",
-    Description = "Raid Mob",
+    Description = "Raid",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
-        if not Value then 
+        if not Value then
             bringmob = false
-            -- Return to original position or stop tweening
-            wait()
         end
     end
 })
 
--- Fixed Tween Function (speed 300)
-function TweenToPosition(Pos)
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-    local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
-    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
-
-    local tween = game:GetService("TweenService"):Create(
-        char.HumanoidRootPart,
-        tweenInfo,
-        {CFrame = Pos}
-    )
-    tween:Play()
-    return tween
-end
-
--- Auto Farm Nearest Mob (Using Tween Only, No Teleport)
 spawn(function()
     while task.wait() do
-        if _G.AutoNear then
+        if _G.AutoNear or AutoNextIsland then
             pcall(function()
                 local player = game.Players.LocalPlayer
                 local char = player.Character
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                -- Get closest enemy within 1000 studs
-                local closest, minDist = nil, 1000
+                local closest, closestDist = nil, 300
                 for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
                     if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                        local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        if dist < minDist then
-                            closest = mob
-                            minDist = dist
+                        if mob:FindFirstChild("IsRaidMob") or string.find(mob.Name, "Order") or string.find(mob.Name, "Raid") then
+                            local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
+                            if dist < closestDist then
+                                closest = mob
+                                closestDist = dist
+                            end
                         end
                     end
                 end
 
-                -- If found a nearby mob
                 if closest then
                     repeat
                         task.wait(_G.Fast_Delay or 0.1)
@@ -1753,7 +1734,6 @@ spawn(function()
                         AttackNoCoolDown()
                         bringmob = true
 
-                        -- Mob setup
                         local mobHRP = closest.HumanoidRootPart
                         mobHRP.Size = Vector3.new(60, 60, 60)
                         mobHRP.Transparency = 1
@@ -1761,21 +1741,21 @@ spawn(function()
                         closest.Humanoid.WalkSpeed = 0
                         closest.Humanoid.JumpPower = 0
 
-                        -- Tween above mob
                         Tween(CFrame.new(mobHRP.Position + Vector3.new(0, 20, 0)))
 
                         FarmPos = mobHRP.CFrame
                         MonFarm = closest.Name
 
-                    until not _G.AutoNear or not closest.Parent or closest.Humanoid.Health <= 0
+                    until not (_G.AutoNear or AutoNextIsland) or not closest.Parent or closest.Humanoid.Health <= 0
 
                     bringmob = false
+                else
+                    task.wait(1)
                 end
             end)
         end
     end
 end)
-
 
 Raids:AddToggle({
     Name = "Auto Next Island",
@@ -1801,7 +1781,7 @@ spawn(function()
                     local pos = hrp.Position
                     local Locations = workspace["_WorldOrigin"].Locations
 
-                    -- Reset tracker if teleported back to raid area
+                    -- Reset visited islands if teleported back to start
                     if (pos - Vector3.new(-6438.735, 250.645, -4501.506)).Magnitude < 1 or
                        (pos - Vector3.new(-5017.408, 314.844, -2823.012)).Magnitude < 1 then
                         VisitedIslands = {}
