@@ -1015,10 +1015,10 @@ Player:AddSlider({
     Name = "Speed Multiplier",
     Flag = "Player/SpeedMultiplier",
     Description = "Adjusts velocity-based speed boost",
-    Range = {16, 300},
-    Suffix = "Speed",
-    CurrentValue = 50,
-    Increment = 5,
+    Range = {1, 100}, -- 100 * 10 = 1000 max speed
+    Suffix = "×10",
+    CurrentValue = 30,
+    Increment = 1,
     Callback = function(Value)
         _G.SpeedMultiplier = Value
     end,
@@ -1042,7 +1042,7 @@ task.spawn(function()
                     -- Only apply if player is actually moving
                     if moveDirection.Magnitude > 0 then
                         -- Apply speed value directly (higher = faster)
-                        local velocity = moveDirection.Unit * _G.SpeedMultiplier
+                        local velocity = moveDirection.Unit * (_G.SpeedMultiplier * 10)
                         -- Preserve Y velocity to maintain jumping
                         velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
                         -- Apply velocity
