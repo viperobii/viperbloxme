@@ -751,6 +751,86 @@ Visual:AddToggle({
     end
 })
 
+local function v20(distance)
+    return tostring(math.floor(distance)) .. "m"
+end
+
+local function UpdateDevilChams()
+    for _, v432 in pairs(game.Workspace:GetChildren()) do
+        pcall(function()
+            if getgenv().DevilFruitESP then
+                if string.find(v432.Name, "Fruit") and v432:FindFirstChild("Handle") then
+                    local espName = "NameEsp_Devil"
+
+                    if not v432.Handle:FindFirstChild(espName) then
+                        local billboard = Instance.new("BillboardGui", v432.Handle)
+                        billboard.Name = espName
+                        billboard.ExtentsOffset = Vector3.new(0, 1, 0)
+                        billboard.Size = UDim2.new(1, 200, 1, 30)
+                        billboard.Adornee = v432.Handle
+                        billboard.AlwaysOnTop = true
+
+                        local label = Instance.new("TextLabel", billboard)
+                        label.Font = Enum.Font.GothamSemibold
+                        label.TextWrapped = true
+                        label.Size = UDim2.new(1, 0, 1, 0)
+                        label.TextYAlignment = Enum.TextYAlignment.Top
+                        label.BackgroundTransparency = 1
+                        label.TextStrokeTransparency = 0.5
+                        label.TextColor3 = Color3.fromRGB(255, 0, 0) -- Red color
+                        label.TextSize = 14
+
+                        local player = game.Players.LocalPlayer
+                        if player.Character and player.Character:FindFirstChild("Head") then
+                            local dist = (player.Character.Head.Position - v432.Handle.Position).Magnitude / 3
+                            label.Text = v432.Name .. " \n" .. v20(dist) .. " Distance"
+                        else
+                            label.Text = v432.Name
+                        end
+                    else
+                        -- Update existing
+                        local player = game.Players.LocalPlayer
+                        if player.Character and player.Character:FindFirstChild("Head") then
+                            local dist = (player.Character.Head.Position - v432.Handle.Position).Magnitude / 3
+                            v432.Handle[espName].TextLabel.Text = v432.Name .. " \n" .. v20(dist) .. " Distance"
+                        else
+                            v432.Handle[espName].TextLabel.Text = v432.Name
+                        end
+                    end
+                end
+            elseif v432:FindFirstChild("Handle") and v432.Handle:FindFirstChild("NameEsp_Devil") then
+                v432.Handle:FindFirstChild("NameEsp_Devil"):Destroy()
+            end
+        end)
+    end
+end
+
+-- Toggle in Visual tab
+Visual:AddToggle({
+    Name = "Devil Fruit ESP",
+    Flag = "Visual/DevilFruitESP",
+    Description = "Show all devil fruits with distance",
+    Default = false,
+    Callback = function(Value)
+        getgenv().DevilFruitESP = Value
+        if Value then
+            task.spawn(function()
+                while getgenv().DevilFruitESP do
+                    pcall(UpdateDevilChams)
+                    task.wait(1)
+                end
+            end)
+        else
+            -- Cleanup all ESPs
+            for _, obj in pairs(game.Workspace:GetDescendants()) do
+                if obj:IsA("BillboardGui") and obj.Name == "NameEsp_Devil" then
+                    obj:Destroy()
+                end
+            end
+        end
+    end
+})
+
 
 -- Initialize the BoatSeats table first
 local BoatSeats = {}
@@ -2954,7 +3034,6 @@ Setting:AddToggle({
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
-local v24 = Instance.new("UICorner")
 local v25 = Instance.new("ParticleEmitter")
 local v26 = game:GetService("TweenService")
 
@@ -2964,13 +3043,12 @@ v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 v23.Parent = v22
 v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 v23.BorderSizePixel = 0
-v23.Position = UDim2.new(0.1, 0, 0.1, 0)  -- Position of the floating button
-v23.Size = UDim2.new(0, 50, 0, 50)  -- Size of the floating logo
-v23.Draggable = true  -- Makes it draggable
-v23.Image = "rbxassetid://101883839381557"  -- Fixed image ID (removed extra digits)
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)
+v23.Size = UDim2.new(0, 35, 0, 35)  -- Smaller box size
+v23.Draggable = true
+v23.Image = "rbxassetid://9820821561"  -- Make sure ID is valid
 
-v24.Parent = v23
-v24.CornerRadius = UDim.new(1, 0)  -- Round corners
+-- Removed UICorner so it's a box
 
 v25.Parent = v23
 v25.LightEmission = 1
@@ -2981,28 +3059,27 @@ v25.Size = NumberSequence.new({
 v25.Lifetime = NumberRange.new(0.5, 1)
 v25.Rate = 0
 v25.Speed = NumberRange.new(5, 10)
-v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))  -- Particle colors
+v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))
 
 -- Animation on button press
 v23.MouseButton1Down:Connect(function()
-    v25.Rate = 100  -- Start emitting particles
+    v25.Rate = 100
     
-    -- Toggle UI visibility
     if Window.Enabled then
         Window:Minimize(true)
     else
         Window:Minimize(false)
     end
-    
+
     task.delay(1, function()
-        v25.Rate = 0  -- Stop emitting after 1 second
+        v25.Rate = 0
     end)
 end)
 
--- Optional Tween effect for smooth appearance
+-- Smooth entrance animation
 local v47 = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
     Position = UDim2.new(0.1, 0, 0.1, 0),
-    Size = UDim2.new(0, 50, 0, 50),
+    Size = UDim2.new(0, 35, 0, 35),  -- Match the new size
     BackgroundTransparency = 0.2
 })
 v47:Play()
