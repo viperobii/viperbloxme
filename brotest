@@ -1009,16 +1009,15 @@ end)
 
 Player:AddSection("Anti Slow");
 
-
-
+-- Speed Multiplier Slider
 Player:AddSlider({
-    Name = "Speed Multiplier",
+    Name = "Walkspeed",
     Flag = "Player/SpeedMultiplier",
-    Description = "Adjusts velocity-based speed boost",
-    Range = {16, 300},
-    Suffix = "Speed",
-    CurrentValue = 50,
-    Increment = 5,
+    Description = "Make It Low To Increase Speed Lol",
+    Range = {1, 10},
+    Suffix = "×",
+    CurrentValue = 2,
+    Increment = 0.1,
     Callback = function(Value)
         _G.SpeedMultiplier = Value
     end,
@@ -1026,7 +1025,7 @@ Player:AddSlider({
 
 -- Initialize global variables
 _G.SpeedBoost = false
-_G.SpeedValue = 50
+_G.SpeedMultiplier = 2
 
 -- Loop for velocity-based speed modification
 task.spawn(function()
@@ -1041,8 +1040,8 @@ task.spawn(function()
                     
                     -- Only apply if player is actually moving
                     if moveDirection.Magnitude > 0 then
-                        -- Apply speed value directly (higher = faster)
-                        local velocity = moveDirection.Unit * _G.SpeedMultiplier
+                        -- Normalize and apply multiplier
+                        local velocity = moveDirection.Unit * (_G.SpeedMultiplier * 30)
                         -- Preserve Y velocity to maintain jumping
                         velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
                         -- Apply velocity
@@ -1055,11 +1054,10 @@ task.spawn(function()
     end
 end)
 
-
 Player:AddToggle({
-    Name = "Enable WalkSpeed",
+    Name = "Enable Walkspeed",
     Flag = "Player/SpeedBoost",
-    Description = "Uses velocity method to bypass anti-cheat",
+    Description = "",
     Default = false,
     Callback = function(Value)
         _G.SpeedBoost = Value
@@ -1073,7 +1071,6 @@ Player:AddToggle({
     end,
 })
 
--- Speed Multiplier Slider (Fixed to match expected speed values)
 
 
 -- Alternative method using BodyVelocity (uncomment if the above doesn't work)
