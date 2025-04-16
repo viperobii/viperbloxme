@@ -1009,60 +1009,145 @@ end)
 
 Player:AddSection("Anti Slow");
 
--- WalkSpeed Toggle
-Player:AddToggle({
-    Name = "Enable WalkSpeed",
-    Flag = "Player/EnableWalkSpeed",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.EnableWalkSpeed = Value
-        if not Value then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = 16
-            end
-        end
-    end,
-})
 
--- WalkSpeed Slider
+
 Player:AddSlider({
-    Name = "WalkSpeed",
-    Flag = "Player/WalkSpeed",
-    Description = "",
-    Range = {16, 300},
+    Name = "Walkspeed",
+    Flag = "Player/SpeedValue",
+    Description = "Higher values = faster speed",
+    Range = {16, 300},  -- Max speed is now 300
     Suffix = "Speed",
-    CurrentValue = 50,
-    Increment = 1,  -- Added increment for smoother slider
+    CurrentValue = 300,  -- Set default to max (optional, can adjust)
+    Increment = 5,
     Callback = function(Value)
-        _G.CustomWalkSpeed = Value
-        -- Apply speed immediately if enabled
-        if _G.EnableWalkSpeed then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = Value
-            end
-        end
+        _G.SpeedValue = Value
     end,
 })
 
 -- Initialize global variables
-_G.EnableWalkSpeed = false
-_G.CustomWalkSpeed = 50
+_G.SpeedBoost = false
+_G.SpeedValue = 50
 
--- Loop to Apply WalkSpeed continuously 
+-- Loop for velocity-based speed modification
 task.spawn(function()
-    while true do  -- Changed to true for reliability
-        if _G.EnableWalkSpeed then
-            local char = game.Players.LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = _G.CustomWalkSpeed
-            end
+    while true do
+        if _G.SpeedBoost then
+            pcall(function()
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+                    -- Get current movement direction
+                    local humanoid = char.Humanoid
+                    local moveDirection = humanoid.MoveDirection
+                    
+                    -- Only apply if player is actually moving
+                    if moveDirection.Magnitude > 0 then
+                        -- Apply speed value directly (higher = faster)
+                        local velocity = moveDirection.Unit * _G.SpeedValue
+                        -- Preserve Y velocity to maintain jumping
+                        velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
+                        -- Apply velocity
+                        char.HumanoidRootPart.Velocity = velocity
+                    end
+                end
+            end)
         end
-        task.wait(0.1)  -- Moved wait to end of loop for better flow
+        task.wait()
     end
 end)
+
+
+Player:AddToggle({
+    Name = "Enable WalkSpeed",
+    Flag = "Player/SpeedBoost",
+    Description = "Uses velocity method to bypass anti-cheat",
+    Default = false,
+    Callback = function(Value)
+        _G.SpeedBoost = Value
+        if not Value then
+            -- Reset any active speed modifications when disabled
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.Velocity = Vector3.new(0, char.HumanoidRootPart.Velocity.Y, 0)
+            end
+        end
+    end,
+})
+
+-- Speed Multiplier Slider (Fixed to match expected speed values)
+
+
+-- Alternative method using BodyVelocity (uncomment if the above doesn't work)
+--[[
+Player:AddToggle({
+    Name = "Alt Speed Boost",
+    Flag = "Player/AltSpeedBoost",
+    Description = "Uses BodyVelocity to bypass anti-cheat",
+    Default = false,
+    Callback = function(Value)
+        _G.AltSpeedBoost = Value
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            -- Remove existing BodyVelocity if toggle is turned off
+            if not Value then
+                for _, obj in pairs(char.HumanoidRootPart:GetChildren()) do
+                    if obj:IsA("BodyVelocity") and obj.Name == "SpeedBoost" then
+                        obj:Destroy()
+                    end
+                end
+            end
+        end
+    end,
+})
+
+-- Initialize global variable
+_G.AltSpeedBoost = false
+_G.SpeedPower = 50
+
+-- Speed Power Slider
+Player:AddSlider({
+    Name = "Speed Power",
+    Flag = "Player/SpeedPower",
+    Description = "Adjusts BodyVelocity power",
+    Range = {10, 200},
+    Suffix = "Power",
+    CurrentValue = 50,
+    Increment = 5,
+    Callback = function(Value)
+        _G.SpeedPower = Value
+    end,
+})
+
+-- Alternative speed boost loop
+task.spawn(function()
+    while true do
+        if _G.AltSpeedBoost then
+            pcall(function()
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+                    -- Remove any existing BodyVelocity
+                    for _, obj in pairs(char.HumanoidRootPart:GetChildren()) do
+                        if obj:IsA("BodyVelocity") and obj.Name == "SpeedBoost" then
+                            obj:Destroy()
+                        end
+                    end
+                    
+                    -- Only create BodyVelocity if player is moving
+                    if char.Humanoid.MoveDirection.Magnitude > 0 then
+                        local bodyVel = Instance.new("BodyVelocity")
+                        bodyVel.Name = "SpeedBoost"
+                        bodyVel.MaxForce = Vector3.new(100000, 0, 100000)
+                        bodyVel.P = 5000
+                        bodyVel.Velocity = char.Humanoid.MoveDirection * _G.SpeedPower
+                        bodyVel.Parent = char.HumanoidRootPart
+                    end
+                end
+            end)
+        end
+        task.wait()
+    end
+end)
+]]--
+
 
 Teleport:AddSection("Sea 1")
 
@@ -2614,7 +2699,7 @@ Trial:AddButton({
     Flag = "Trial/ViperFly",
     Description = "Use For Draco Trial And Normal Trial Ez Win",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/cokka"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/translator"))()
     end
 })
 
@@ -3046,7 +3131,7 @@ v23.BorderSizePixel = 0
 v23.Position = UDim2.new(0.1, 0, 0.1, 0)
 v23.Size = UDim2.new(0, 35, 0, 35)  -- Smaller box size
 v23.Draggable = true
-v23.Image = "rbxassetid://9820821561"  -- Make sure ID is valid
+v23.Image = "rbxassetid://11742382093"  -- Make sure ID is valid
 
 -- Removed UICorner so it's a box
 
