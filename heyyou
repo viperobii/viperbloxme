@@ -90,91 +90,7 @@ Info:AddButton({
 
 
 
-Main:AddDropdown({
-    Name = "Select Weapons",
-    Flag = "Main/SelectWeapon",
-    Description = "",
-    Default = "Melee",
-    Options = {
-        "Melee",
-        "Sword",
-        "Blox Fruits"
-    },
-    Callback = function(option)
-        getgenv().ChooseWeapon = option
-        getgenv().SelectWeapon = nil -- reset to force re-equip
-    end
-})
 
-getgenv().ChooseWeapon = "Melee"
-getgenv().SelectWeapon = nil
-local lastWeaponEquipped = nil
-
-task.spawn(function()
-    while task.wait(0.2) do
-        pcall(function()
-            local player = game.Players.LocalPlayer
-            local char = player.Character
-            local backpack = player:FindFirstChild("Backpack")
-            if not char or not backpack then return end
-
-            local selectedTool = nil
-
-            -- Check Backpack first
-            for _, tool in pairs(backpack:GetChildren()) do
-                if tool:IsA("Tool") and tool.ToolTip then
-                    if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                        selectedTool = tool
-                        break
-                    elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                        selectedTool = tool
-                        break
-                    elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                        selectedTool = tool
-                        break
-                    end
-                end
-            end
-
-            -- If not in backpack, check character
-            if not selectedTool then
-                for _, tool in pairs(char:GetChildren()) do
-                    if tool:IsA("Tool") and tool.ToolTip then
-                        if getgenv().ChooseWeapon == "Melee" and tool.ToolTip == "Melee" then
-                            selectedTool = tool
-                            break
-                        elseif getgenv().ChooseWeapon == "Sword" and tool.ToolTip == "Sword" then
-                            selectedTool = tool
-                            break
-                        elseif getgenv().ChooseWeapon == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
-                            selectedTool = tool
-                            break
-                        end
-                    end
-                end
-            end
-
-            -- Equip only if new weapon or not equipped
-            if selectedTool and selectedTool.Name ~= lastWeaponEquipped then
-                -- Unequip all tools
-                for _, tool in pairs(char:GetChildren()) do
-                    if tool:IsA("Tool") then
-                        tool.Parent = backpack
-                    end
-                end
-
-                task.wait(0.1)
-
-                -- Equip new weapon
-                if selectedTool and selectedTool.Parent == backpack then
-                    selectedTool.Parent = char
-                    getgenv().SelectWeapon = selectedTool.Name
-                    lastWeaponEquipped = selectedTool.Name
-                end
-            end
-        end)
-    end
-end)
 
 
 
@@ -233,9 +149,7 @@ spawn(function()
                                 
                                 -- Target and attack the mob
                                 AutoHaki()
-                                if getgenv().SelectWeapon then
-    EquipTool(getgenv().SelectWeapon)
-end
+                                EquipTool(SelectWeapon)
                                 
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
@@ -316,9 +230,7 @@ spawn(function()
                 if Closest then
                     -- Target and attack the closest mob
                     AutoHaki()
-                    if getgenv().SelectWeapon then
-    EquipTool(getgenv().SelectWeapon)
-end
+                    EquipTool(SelectWeapon)
                     
                     -- Modify mob properties for easier farming
                     if Closest:FindFirstChild("HumanoidRootPart") then
@@ -785,70 +697,59 @@ spawn(function()
 end)
 
 
-ESP:AddToggle({
-    Name = "Esp Island",
-    Flag = "ESP/IslandESP",
-    Description = "Show island locations with distance",
+-- Island ESP Function
+function UpdateIslandESP()
+    for _, island in pairs(game:GetService("Workspace")['_WorldOrigin'].Locations:GetChildren()) do
+        pcall(function()
+            if IslandESP then
+                if island.Name ~= "Sea" then
+                    if not island:FindFirstChild("NameEsp") then
+                        local espGui = Instance.new("BillboardGui", island)
+                        espGui.Name = "NameEsp"
+                        espGui.ExtentsOffset = Vector3.new(0, 1, 0)
+                        espGui.Size = UDim2.new(1, 200, 1, 30)
+                        espGui.Adornee = island
+                        espGui.AlwaysOnTop = true
+
+                        local label = Instance.new("TextLabel", espGui)
+                        label.Font = Enum.Font.GothamBold
+                        label.TextWrapped = true
+                        label.Size = UDim2.new(1, 0, 1, 0)
+                        label.TextYAlignment = Enum.TextYAlignment.Top
+                        label.BackgroundTransparency = 1
+                        label.TextStrokeTransparency = 0.5
+                        label.TextColor3 = Color3.fromRGB(8, 0, 0)
+                        label.Text = island.Name
+                    else
+                        local dist = (game.Players.LocalPlayer.Character.Head.Position - island.Position).Magnitude / 3
+                        island.NameEsp.TextLabel.Text = island.Name .. "   \n" .. math.floor(dist + 0.5) .. " Distance"
+                    end
+                end
+            elseif island:FindFirstChild("NameEsp") then
+                island:FindFirstChild("NameEsp"):Destroy()
+            end
+        end)
+    end
+end
+
+-- Island ESP Toggle
+Visual:AddToggle({
+    Name = "ESP Island",
+    Flag = "Visual/IslandESP",
+    Description = "Show island names and distance",
     Default = false,
     Callback = function(Value)
         IslandESP = Value
         if IslandESP then
             spawn(function()
                 while IslandESP do
-                    wait()
+                    wait(0.5)
                     pcall(UpdateIslandESP)
                 end
             end)
         end
     end
 })
-
-
-function UpdateIslandESP()
-    for v425, v426 in pairs(game:GetService("Workspace")['_WorldOrigin'].Locations:GetChildren()) do
-        pcall(function()
-            if IslandESP then
-                if (v426.Name ~= "Sea") then
-                    if not v426:FindFirstChild("NameEsp") then
-                        local v1130 = Instance.new("BillboardGui", v426);
-                        v1130.Name = "NameEsp";
-                        v1130.ExtentsOffset = Vector3.new(0, 1, 0);
-                        v1130.Size = UDim2.new(1, 200, 1, 30);
-                        v1130.Adornee = v426;
-                        v1130.AlwaysOnTop = true;
-                        local v1136 = Instance.new("TextLabel", v1130);
-                        v1136.Font = "GothamBold";
-                        v1136.FontSize = "Size14";
-                        v1136.TextWrapped = true;
-                        v1136.Size = UDim2.new(1, 0, 1, 0);
-                        v1136.TextYAlignment = "Top";
-                        v1136.BackgroundTransparency = 1;
-                        v1136.TextStrokeTransparency = 0.5;
-                        v1136.TextColor3 = Color3.fromRGB(8, 0, 0);
-                    else
-                        v426['NameEsp'].TextLabel.Text = v426.Name .. "   \n" .. round((game:GetService("Players").LocalPlayer.Character.Head.Position - v426.Position).Magnitude / 3) .. " Distance";
-                    end
-                end
-            elseif v426:FindFirstChild("NameEsp") then
-                v426:FindFirstChild("NameEsp"):Destroy();
-            end
-        end);
-    end
-end
-
-function isnil(v198)
-    return v198 == nil;
-end
-
-local function v20(v199)
-    return math.floor(tonumber(v199) + 0.5);
-end
-
-Number = math.random(1, 1000000);
-
-
-
-
 
 
 -- Initialize the BoatSeats table first
@@ -1738,8 +1639,6 @@ spawn(function()
         end
     end
 end)
-
-
 
 
 
