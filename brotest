@@ -1692,7 +1692,7 @@ end)
 Raids:AddToggle({
     Name = "Auto Raids",
     Flag = "Raids/AutoFarmNearestMob",
-    Description = "Raid Mob",
+    Description = "Raid",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
@@ -1708,24 +1708,25 @@ Raids:AddToggle({
 
     
 
--- Auto Farm Nearest Mob (Using Tween Only, No Teleport)
 spawn(function()
     while task.wait() do
-        if _G.AutoNear then
+        if _G.AutoRaidMobs then
             pcall(function()
                 local player = game.Players.LocalPlayer
                 local char = player.Character
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                -- Get closest mob within 300 studs only
+                -- Only farm mobs inside raid room
                 local closest, closestDist = nil, 300
                 for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
                     if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                        local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        if dist < closestDist then
-                            closest = mob
-                            closestDist = dist
+                        if mob:FindFirstChild("IsRaidMob") or string.find(mob.Name, "Order") or string.find(mob.Name, "Raid") then -- optional filter
+                            local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
+                            if dist < closestDist then
+                                closest = mob
+                                closestDist = dist
+                            end
                         end
                     end
                 end
@@ -1747,17 +1748,17 @@ spawn(function()
                         closest.Humanoid.WalkSpeed = 0
                         closest.Humanoid.JumpPower = 0
 
-                        -- Tween above mob
+                        -- Tween to mob
                         Tween(CFrame.new(mobHRP.Position + Vector3.new(0, 20, 0)))
 
                         FarmPos = mobHRP.CFrame
                         MonFarm = closest.Name
 
-                    until not _G.AutoNear or not closest.Parent or closest.Humanoid.Health <= 0
+                    until not _G.AutoRaidMobs or not closest.Parent or closest.Humanoid.Health <= 0
 
                     bringmob = false
                 else
-                    -- No mobs near, wait and do nothing (no TP!)
+                    -- Wait for mobs to spawn in raid, don’t tween away
                     task.wait(1)
                 end
             end)
