@@ -1672,32 +1672,27 @@ spawn(function()
     end
 end)
 
-Raid:AddSection("Fruits");
 
-Raid:AddToggle({
-    Name = "Teleport To Fruit",
-    Flag = "Raid/CollectFruitTP",
-    Description = "Instant TP Fruit",
+Fruit:AddToggle({
+    Name = "Teleport Collect Fruit",
+    Flag = "Fruit/CollectFruit",
+    Description = "Better No Report Ban",
     Default = false,
     Callback = function(Value)
-        getgenv().CollectFruitTP = Value
+        _G.Tweenfruit = Value
     end
 })
 
--- Instant Teleport Loop
 spawn(function()
-    while task.wait(1) do
-        if getgenv().CollectFruitTP then
+    while wait() do
+        if _G.Tweenfruit then
             pcall(function()
                 local character = game.Players.LocalPlayer.Character
-                local humanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-                
-                if humanoidRootPart then
+                if character and character:FindFirstChild("HumanoidRootPart") then
                     for _, fruit in pairs(game.Workspace:GetChildren()) do
-                        if fruit:IsA("Model") and fruit:FindFirstChild("Handle") and string.find(fruit.Name, "Fruit") then
-                            humanoidRootPart.CFrame = fruit.Handle.CFrame
-                            -- Add a small delay after teleporting to avoid any potential issues
-                            task.wait(0.1)
+                        if string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
+                            Tween(fruit.Handle.CFrame)
+                            wait(0.1) -- Small delay to prevent issues
                             break -- Teleport to one fruit at a time
                         end
                     end
@@ -1706,6 +1701,8 @@ spawn(function()
         end
     end
 end)
+
+
 
 
 
