@@ -1641,11 +1641,14 @@ spawn(function()
 end)
 
 
+Raids:AddSection("Fruits");
 
 
-Fruit:AddToggle({
+-- Toggle for Teleport Collect Fruit under Raid tab
+-- Toggle inside your Raid tab
+Raids:AddToggle({
     Name = "Teleport Collect Fruit",
-    Flag = "Fruit/TeleportCollectFruit",
+    Flag = "Raids/TeleportCollectFruit",
     Description = "Better No Report Ban",
     Default = false,
     Callback = function(Value)
@@ -1654,31 +1657,31 @@ Fruit:AddToggle({
 })
 
 -- Tween function
-local function Tween(cframe)
-    local TweenService = game:GetService("TweenService")
-    local Player = game.Players.LocalPlayer
-    local Character = Player.Character or Player.CharacterAdded:Wait()
-    local HRP = Character:WaitForChild("HumanoidRootPart")
+local function TweenTo(CF)
+    local ts = game:GetService("TweenService")
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
 
-    local distance = (HRP.Position - cframe.Position).Magnitude
+    local distance = (hrp.Position - CF.Position).Magnitude
     local tweenInfo = TweenInfo.new(distance / 200, Enum.EasingStyle.Linear)
-
-    local tween = TweenService:Create(HRP, tweenInfo, {CFrame = cframe})
+    local tween = ts:Create(hrp, tweenInfo, {CFrame = CF})
     tween:Play()
     tween.Completed:Wait()
 end
 
--- Tween fruit loop
-spawn(function()
+-- Auto Teleport to Fruits
+task.spawn(function()
     while task.wait() do
         if getgenv().Tweenfruit then
             pcall(function()
-                local character = game.Players.LocalPlayer.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    for _, fruit in pairs(game.Workspace:GetChildren()) do
-                        if string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
-                            Tween(fruit.Handle.CFrame)
-                            wait(0.1)
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    for _, obj in pairs(workspace:GetChildren()) do
+                        if obj:IsA("Tool") and string.find(obj.Name, "Fruit") and obj:FindFirstChild("Handle") then
+                            TweenTo(obj.Handle.CFrame)
+                            task.wait(0.1)
                             break
                         end
                     end
@@ -1689,7 +1692,31 @@ spawn(function()
 end)
 
 
+Raids:AddToggle({
+    Name = "Instant Teleport To Fruit",
+    Flag = "Raids/TeleportCollectFruit",
+    Description = "Instantly collect fruits if spawned or dropped.",
+    Default = false,
+    Callback = function(Value)
+        getgenv().CollectFruitTP = Value
+    end
+})
 
+-- Loop to collect fruit
+task.spawn(function()
+    while task.wait() do
+        if getgenv().CollectFruitTP then
+            pcall(function()
+                for _, fruit in pairs(game.Workspace:GetChildren()) do
+                    if fruit:IsA("Tool") and string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
+                        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = fruit.Handle.CFrame
+                        task.wait(0.1)
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 Items:AddToggle({
