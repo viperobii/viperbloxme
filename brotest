@@ -1641,29 +1641,46 @@ spawn(function()
 end)
 
 
+Raids:AddSection("Fruits");
 
 
-Fruit:AddToggle({
+-- Toggle for Teleport Collect Fruit under Raid tab
+Raids:AddToggle({
     Name = "Teleport Collect Fruit",
-    Flag = "Fruit/TeleportCollectFruit",
+    Flag = "Raids/TeleportCollectFruit",
     Description = "Better No Report Ban",
     Default = false,
     Callback = function(Value)
-        _G.Tweenfruit = Value
+        getgenv().Tweenfruit = Value
     end
 })
 
-spawn(function()
-    while wait() do
-        if _G.Tweenfruit then
+-- Tween function
+local function Tween(CF)
+    local ts = game:GetService("TweenService")
+    local plr = game.Players.LocalPlayer
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    local dist = (hrp.Position - CF.Position).Magnitude
+    local info = TweenInfo.new(dist / 200, Enum.EasingStyle.Linear)
+    local tween = ts:Create(hrp, info, {CFrame = CF})
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+-- Fruit Collection Loop
+task.spawn(function()
+    while task.wait() do
+        if getgenv().Tweenfruit then
             pcall(function()
-                local character = game.Players.LocalPlayer.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    for _, fruit in pairs(game.Workspace:GetChildren()) do
-                        if string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    for _, fruit in pairs(workspace:GetChildren()) do
+                        if fruit:IsA("Tool") and string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
                             Tween(fruit.Handle.CFrame)
-                            wait(0.1) -- Small delay to prevent issues
-                            break -- Teleport to one fruit at a time
+                            task.wait(0.1)
+                            break
                         end
                     end
                 end
