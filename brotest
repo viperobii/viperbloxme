@@ -784,6 +784,73 @@ spawn(function()
     end
 end)
 
+
+ESP:AddToggle({
+    Name = "Esp Island",
+    Flag = "ESP/IslandESP",
+    Description = "Show island locations with distance",
+    Default = false,
+    Callback = function(Value)
+        IslandESP = Value
+        if IslandESP then
+            spawn(function()
+                while IslandESP do
+                    wait()
+                    pcall(UpdateIslandESP)
+                end
+            end)
+        end
+    end
+})
+
+
+function UpdateIslandESP()
+    for v425, v426 in pairs(game:GetService("Workspace")['_WorldOrigin'].Locations:GetChildren()) do
+        pcall(function()
+            if IslandESP then
+                if (v426.Name ~= "Sea") then
+                    if not v426:FindFirstChild("NameEsp") then
+                        local v1130 = Instance.new("BillboardGui", v426);
+                        v1130.Name = "NameEsp";
+                        v1130.ExtentsOffset = Vector3.new(0, 1, 0);
+                        v1130.Size = UDim2.new(1, 200, 1, 30);
+                        v1130.Adornee = v426;
+                        v1130.AlwaysOnTop = true;
+                        local v1136 = Instance.new("TextLabel", v1130);
+                        v1136.Font = "GothamBold";
+                        v1136.FontSize = "Size14";
+                        v1136.TextWrapped = true;
+                        v1136.Size = UDim2.new(1, 0, 1, 0);
+                        v1136.TextYAlignment = "Top";
+                        v1136.BackgroundTransparency = 1;
+                        v1136.TextStrokeTransparency = 0.5;
+                        v1136.TextColor3 = Color3.fromRGB(8, 0, 0);
+                    else
+                        v426['NameEsp'].TextLabel.Text = v426.Name .. "   \n" .. round((game:GetService("Players").LocalPlayer.Character.Head.Position - v426.Position).Magnitude / 3) .. " Distance";
+                    end
+                end
+            elseif v426:FindFirstChild("NameEsp") then
+                v426:FindFirstChild("NameEsp"):Destroy();
+            end
+        end);
+    end
+end
+
+function isnil(v198)
+    return v198 == nil;
+end
+
+local function v20(v199)
+    return math.floor(tonumber(v199) + 0.5);
+end
+
+Number = math.random(1, 1000000);
+
+
+
+
+
+
 -- Initialize the BoatSeats table first
 local BoatSeats = {}
 local selectedBoat = "Beast Hunter"  -- Default boat selection
@@ -1672,30 +1739,95 @@ spawn(function()
     end
 end)
 
-Raid:AddSection("Fruits");
 
-Raid:AddToggle({
-    Name = "Teleport To Fruit",
-    Flag = "Raid/CollectFruitTP",
-    Description = "Instant TP Fruit",
+
+-- Tween Function
+function TweenToFruit(targetCFrame)
+    local TweenService = game:GetService("TweenService")
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local humanoidRootPart = character.HumanoidRootPart
+        local distance = (humanoidRootPart.Position - targetCFrame.Position).Magnitude
+        local tweenInfo = TweenInfo.new(
+            distance/300, -- Time (distance divided by speed)
+            Enum.EasingStyle.Linear,
+            Enum.EasingDirection.Out,
+            0, -- Repeat count (0 = play once)
+            false, -- Reverses?
+            0 -- Delay
+        )
+        
+        local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+        tween:Play()
+        
+        return tween
+    end
+    return nil
+end
+
+-- Fruit Collection Toggle
+Fruit:AddToggle({
+    Name = "Tween to Fruits",
+    Flag = "Fruit/TweenToFruits",
+    Description = "Smoothly move to fruits when they spawn",
     Default = false,
     Callback = function(Value)
-        getgenv().CollectFruitTP = Value
+        _G.TweenToFruits = Value
     end
 })
 
--- Instant Teleport Loop
--- Instant Teleport Loop
+-- Fruit Detection and Collection
 spawn(function()
-    while task.wait(1) do
-        if getgenv().CollectFruitTP then
+    while wait(0.5) do  -- Check every half second
+        if _G.TweenToFruits then
             pcall(function()
                 local character = game.Players.LocalPlayer.Character
                 if character and character:FindFirstChild("HumanoidRootPart") then
-                    for _, fruit in pairs(game.Workspace:GetChildren()) do
-                        if fruit:IsA("Model") and fruit:FindFirstChild("Handle") and string.find(fruit.Name, "Fruit") then
-                            character.HumanoidRootPart.CFrame = fruit.Handle.CFrame
-                            break -- Teleport to one fruit at a time
+                    local humanoid = character:FindFirstChild("Humanoid")
+                    if humanoid and humanoid.Health > 0 then
+                        -- Check for fruits in workspace
+                        local foundFruit = false
+                        local closestFruit = nil
+                        local closestDistance = math.huge
+                        
+                        -- Look for fruits in Workspace
+                        for _, object in pairs(game.Workspace:GetChildren()) do
+                            if object:IsA("Model") and (string.find(object.Name, "Fruit") or string.find(object.Name, "fruit")) and object:FindFirstChild("Handle") then
+                                local distance = (character.HumanoidRootPart.Position - object.Handle.Position).Magnitude
+                                if distance < closestDistance then
+                                    closestDistance = distance
+                                    closestFruit = object
+                                    foundFruit = true
+                                end
+                            end
+                        end
+                        
+                        -- Also check for dropped fruits in Drops or DevilFruits folders if they exist
+                        local possibleFolders = {"Drops", "DevilFruits", "DroppedItems"}
+                        for _, folderName in ipairs(possibleFolders) do
+                            if game.Workspace:FindFirstChild(folderName) then
+                                for _, object in pairs(game.Workspace[folderName]:GetChildren()) do
+                                    if object:IsA("Model") and (string.find(object.Name, "Fruit") or string.find(object.Name, "fruit")) and object:FindFirstChild("Handle") then
+                                        local distance = (character.HumanoidRootPart.Position - object.Handle.Position).Magnitude
+                                        if distance < closestDistance then
+                                            closestDistance = distance
+                                            closestFruit = object
+                                            foundFruit = true
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        -- Tween to the closest fruit if found
+                        if foundFruit and closestFruit and closestFruit:FindFirstChild("Handle") then
+                            local tween = TweenToFruit(closestFruit.Handle.CFrame)
+                            if tween then
+                                -- Wait for tween to complete
+                                tween.Completed:Wait()
+                            end
                         end
                     end
                 end
@@ -1703,6 +1835,10 @@ spawn(function()
         end
     end
 end)
+
+
+
+
 
 
 
