@@ -1012,15 +1012,15 @@ Player:AddSection("Anti Slow");
 
 
 Player:AddSlider({
-    Name = "Walkspeed",
-    Flag = "Player/SpeedValue",
-    Description = "Higher values = faster speed",
-    Range = {16, 300},  -- Max speed is now 300
+    Name = "Speed Multiplier",
+    Flag = "Player/SpeedMultiplier",
+    Description = "Adjusts velocity-based speed boost",
+    Range = {16, 300},
     Suffix = "Speed",
-    CurrentValue = 300,  -- Set default to max (optional, can adjust)
+    CurrentValue = 50,
     Increment = 5,
     Callback = function(Value)
-        _G.SpeedValue = Value
+        _G.SpeedMultiplier = Value
     end,
 })
 
@@ -1042,7 +1042,7 @@ task.spawn(function()
                     -- Only apply if player is actually moving
                     if moveDirection.Magnitude > 0 then
                         -- Apply speed value directly (higher = faster)
-                        local velocity = moveDirection.Unit * _G.SpeedValue
+                        local velocity = moveDirection.Unit * _G.SpeedMultiplier
                         -- Preserve Y velocity to maintain jumping
                         velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
                         -- Apply velocity
