@@ -718,7 +718,7 @@ function UpdateIslandESP()
                         label.TextYAlignment = Enum.TextYAlignment.Top
                         label.BackgroundTransparency = 1
                         label.TextStrokeTransparency = 0.5
-                        label.TextColor3 = Color3.fromRGB(8, 0, 0)
+                        label.TextColor3 = Color3.fromRGB(0, 255, 255)
                         label.Text = island.Name
                     else
                         local dist = (game.Players.LocalPlayer.Character.Head.Position - island.Position).Magnitude / 3
@@ -1643,7 +1643,50 @@ end)
 
 
 
+Fruit:AddToggle({
+    Name = "Teleport Collect Fruit",
+    Flag = "Fruit/TeleportCollectFruit",
+    Description = "Better No Report Ban",
+    Default = false,
+    Callback = function(Value)
+        getgenv().Tweenfruit = Value
+    end
+})
 
+-- Tween function
+local function Tween(cframe)
+    local TweenService = game:GetService("TweenService")
+    local Player = game.Players.LocalPlayer
+    local Character = Player.Character or Player.CharacterAdded:Wait()
+    local HRP = Character:WaitForChild("HumanoidRootPart")
+
+    local distance = (HRP.Position - cframe.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 200, Enum.EasingStyle.Linear)
+
+    local tween = TweenService:Create(HRP, tweenInfo, {CFrame = cframe})
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+-- Tween fruit loop
+spawn(function()
+    while task.wait() do
+        if getgenv().Tweenfruit then
+            pcall(function()
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    for _, fruit in pairs(game.Workspace:GetChildren()) do
+                        if string.find(fruit.Name, "Fruit") and fruit:FindFirstChild("Handle") then
+                            Tween(fruit.Handle.CFrame)
+                            wait(0.1)
+                            break
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 
