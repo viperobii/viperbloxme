@@ -1712,6 +1712,68 @@ spawn(function()
     end
 end)
 
+Raids:AddToggle({
+    Name = "Auto Raid Mobs",
+    Flag = "Raid/AutoFarmNearestMob",
+    Description = "Farms nearest mob within short distance only",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoNear = Value
+        if not Value then bringmob = false end
+    end
+})
+
+-- AUTO FARM NEAREST MOB LOOP
+spawn(function()
+    while task.wait() do
+        if _G.AutoNear then
+            pcall(function()
+                local playerHRP = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if not playerHRP then return end
+
+                local Closest = nil
+                local ClosestDistance = 100 -- Limit distance to short range (100 studs)
+
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    local hrp = enemy:FindFirstChild("HumanoidRootPart")
+                    local hum = enemy:FindFirstChild("Humanoid")
+                    if hrp and hum and hum.Health > 0 then
+                        local dist = (playerHRP.Position - hrp.Position).Magnitude
+                        if dist < ClosestDistance then
+                            Closest = enemy
+                            ClosestDistance = dist
+                        end
+                    end
+                end
+
+                if Closest then
+                    repeat
+                        task.wait(_G.Fast_Delay or 0.1)
+                        AutoHaki()
+                        EquipTool(SelectWeapon)
+                        Tween(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                        AttackNoCoolDown()
+
+                        if Closest:FindFirstChild("HumanoidRootPart") then
+                            Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            Closest.HumanoidRootPart.Transparency = 1
+                            Closest.HumanoidRootPart.CanCollide = false
+                        end
+                        if Closest:FindFirstChild("Humanoid") then
+                            Closest.Humanoid.WalkSpeed = 0
+                            Closest.Humanoid.JumpPower = 0
+                        end
+
+                        bringmob = true
+                    until not _G.AutoNear or Closest.Humanoid.Health <= 0 or not Closest.Parent
+                    bringmob = false
+                end
+            end)
+        end
+    end
+end)
+
+
 
 Raids:AddToggle({
     Name = "Auto Next Island",
@@ -1726,6 +1788,7 @@ Raids:AddToggle({
     end
 })
 
+-- Auto Tween to Next Island (only in raid)
 spawn(function()
     local visitedIslands = {}
     while task.wait() do
@@ -1735,12 +1798,17 @@ spawn(function()
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                local currentPos = hrp.Position
-                local islands = game:GetService("Workspace")['_WorldOrigin'].Locations
+                -- Make sure player is inside a Raid
+                local isInRaid = workspace:FindFirstChild("_WorldOrigin") and workspace["_WorldOrigin"]:FindFirstChild("Locations")
+                if not isInRaid then return end
 
-                -- Reset visited if at portal positions
-                if (currentPos - Vector3.new(-6438.73535, 250.645355, -4501.50684)).Magnitude < 1
-                or (currentPos - Vector3.new(-5017.40869, 314.844055, -2823.0127)).Magnitude < 1 then
+                local currentPos = hrp.Position
+                local islands = workspace["_WorldOrigin"].Locations
+
+                -- Reset visited islands when near portal (end/start position)
+                local atPortal1 = (currentPos - Vector3.new(-6438.73535, 250.645355, -4501.50684)).Magnitude < 10
+                local atPortal2 = (currentPos - Vector3.new(-5017.40869, 314.844055, -2823.0127)).Magnitude < 10
+                if atPortal1 or atPortal2 then
                     visitedIslands = {}
                 end
 
@@ -1751,7 +1819,7 @@ spawn(function()
                         Tween(island.CFrame)
                         visitedIslands["Island " .. i] = true
                         AutoNextIsland = false
-                        wait(1)
+                        wait(1.5)
                         AutoNextIsland = true
                         break
                     end
