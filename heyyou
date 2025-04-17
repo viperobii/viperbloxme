@@ -193,30 +193,23 @@ end)
 -- AUTO FARM NEAREST MOB TOGGLE
 Main:AddToggle({
     Name = "Auto Farm Nearest",
-    Flag = "Main/AutoFarmNearestMob",
+    Flag = "Raids/AutoFarmNearestMob",
     Description = "Nearest",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
         if not Value then 
             bringmob = false
-            _G.StopTween = true
-        else
-            _G.StopTween = false
+            -- Return to original position or stop tweening
+            wait()
         end
     end
 })
 
--- Improved Tween Function (speed 300)
+-- Fixed Tween Function (speed 300)
 function TweenToPosition(Pos)
     local char = game.Players.LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-    -- Cancel any existing tween first
-    if _G.CurrentTween then
-        _G.CurrentTween:Cancel()
-        _G.CurrentTween = nil
-    end
 
     local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
     local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
@@ -226,11 +219,7 @@ function TweenToPosition(Pos)
         tweenInfo,
         {CFrame = Pos}
     )
-    
-    _G.CurrentTween = tween
     tween:Play()
-    
-    -- Return the tween but don't wait for it to complete
     return tween
 end
 
@@ -249,9 +238,7 @@ spawn(function()
 
                 -- Look for mobs in range only
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if mob:FindFirstChild("Humanoid") and 
-                       mob:FindFirstChild("HumanoidRootPart") and 
-                       mob.Humanoid.Health > 0 then
+                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
                         local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
                         if dist < closestDist and dist <= maxRange then
                             closestMob = mob
@@ -278,53 +265,15 @@ spawn(function()
                     end
 
                     local aboveCFrame = CFrame.new(mobRoot.Position + Vector3.new(0, 30, 0))
-                    
-                    -- Calculate distance to target position
-                    local distToTarget = (hrp.Position - aboveCFrame.Position).Magnitude
-                    
-                    -- Only tween if we're not already at the target position
-                    if distToTarget > 10 then
-                        -- Start the tween but don't wait for completion
-                        local tween = TweenToPosition(aboveCFrame)
-                        
-                        -- Wait a small amount to let the tween get started
-                        task.wait(0.1)
-                        
-                        -- We don't want to wait for the full tween completion
-                        -- Just start attacking when we get close enough
-                    end
-                    
+                    Tween(aboveCFrame)
+
                     bringmob = true
 
-                    -- Attack until mob is dead or toggle turned off
-                    while closestMob and 
-                          closestMob:FindFirstChild("Humanoid") and 
-                          closestMob.Humanoid.Health > 0 and 
-                          _G.AutoNear do
-                          
-                        -- Update position to stay above mob as it might move
-                        if mobRoot then
-                            local currentPosition = hrp.Position
-                            local targetPosition = mobRoot.Position + Vector3.new(0, 30, 0)
-                            local distToMob = (currentPosition - targetPosition).Magnitude
-                            
-                            -- If we're too far from the mob, update position
-                            if distToMob > 10 then
-                                hrp.CFrame = CFrame.new(currentPosition):Lerp(
-                                    CFrame.new(targetPosition), 
-                                    0.2  -- Smooth interpolation factor
-                                )
-                            end
-                        end
-                        
+                    -- Attack until mob is dead
+                    repeat
                         AttackNoCoolDown()
                         task.wait(_G.Fast_Delay or 0.1)
-                        
-                        -- Break if toggle turned off
-                        if not _G.AutoNear then
-                            break
-                        end
-                    end
+                    until not closestMob or not closestMob:FindFirstChild("Humanoid") or closestMob.Humanoid.Health <= 0
 
                     bringmob = false
                 else
@@ -333,18 +282,6 @@ spawn(function()
                     task.wait(0.5)
                 end
             end)
-        else
-            task.wait(0.5)
-        end
-    end
-end)
-
--- Add this function to handle stop tween
-game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.StopTween then
-        if _G.CurrentTween then
-            _G.CurrentTween:Cancel()
-            _G.CurrentTween = nil
         end
     end
 end)
@@ -1751,11 +1688,6 @@ spawn(function()
         end
     end
 end)
-
-
-
-
-
 
 
 
@@ -5389,12 +5321,6 @@ end
 TweenSpeed = 350
 
 function Tween(destinationCFrame)
-    -- Cancel any existing tweens first
-    if _G.CurrentTween then
-        _G.CurrentTween:Cancel()
-        _G.CurrentTween = nil
-    end
-
     local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
     local speed = TweenSpeed
 
@@ -5407,16 +5333,11 @@ function Tween(destinationCFrame)
         CFrame = destinationCFrame
     })
 
-    -- Store the current tween so we can cancel it later if needed
-    _G.CurrentTween = tween
     tween:Play()
 
     if _G.StopTween then
         tween:Cancel()
-        _G.CurrentTween = nil
     end
-    
-    -- We don't wait here to allow the script to continue executing while tweening
 end
 
 
