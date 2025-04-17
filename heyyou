@@ -240,7 +240,8 @@ spawn(function()
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
                     if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
                         local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        if dist < closestDist and dist <= maxRange then
+                        local maxRange = 2000
+if dist < closestDist and dist <= maxRange then
                             closestMob = mob
                             closestDist = dist
                         end
@@ -1689,74 +1690,7 @@ spawn(function()
     end
 end)
 
-local RaidToggle = Raid:AddToggle("ToggleMobAura", {
-    Title = "Auto Raid Mobs",
-    Description = "Kill Aura A Little Lol",
-    Default = false
-});
 
-RaidToggle:OnChanged(function(v238)
-    _G.AutoNear = v238;
-    
-    if (v238 == false) then
-        wait();
-        Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
-        wait();
-    end
-end);
-
-RaidToggle:SetValue(false);
-
--- Tween function (adding this if you don't have it)
-function Tween(Pos)
-    local TweenService = game:GetService("TweenService")
-    local Tw = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart,
-    TweenInfo.new(
-        (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - Pos.Position).Magnitude / 300, -- 300 is the speed
-        Enum.EasingStyle.Linear
-    ),
-    {CFrame = Pos}
-    )
-    Tw:Play()
-    return Tw
-end
-
--- Make sure Pos is defined
-Pos = CFrame.new(0, 30, 0) -- Position offset for farming
-
-spawn(function()
-    while wait() do
-        if _G.AutoNear then
-            pcall(function()
-                for v838, v839 in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if (v839:FindFirstChild("Humanoid") and v839:FindFirstChild("HumanoidRootPart") and (v839.Humanoid.Health > 0)) then
-                        if v839.Name then
-                            if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v839:FindFirstChild("HumanoidRootPart").Position).Magnitude <= 5000) then
-                                repeat
-                                    wait(_G.Fast_Delay);
-                                    AttackNoCoolDown();
-                                    bringmob = true;
-                                    AutoHaki();
-                                    EquipTool(SelectWeapon);
-                                    Tween(v839.HumanoidRootPart.CFrame * Pos);
-                                    v839.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-                                    v839.HumanoidRootPart.Transparency = 1;
-                                    v839.Humanoid.JumpPower = 0;
-                                    v839.Humanoid.WalkSpeed = 0;
-                                    v839.HumanoidRootPart.CanCollide = false;
-                                    FarmPos = v839.HumanoidRootPart.CFrame;
-                                    MonFarm = v839.Name;
-                                until not _G.AutoNear or not v839.Parent or (v839.Humanoid.Health <= 0) or not game.Workspace.Enemies:FindFirstChild(v839.Name)
-                                
-                                bringmob = false;
-                            end
-                        end
-                    end
-                end
-            end);
-        end
-    end
-end);
 
 
 Raids:AddSection("Fruits");
@@ -5352,54 +5286,59 @@ spawn(function()
 end)
 
 
-local connection, tween
-function Tween(targetCFrame)
-    if not targetCFrame then
-        if tween then pcall(function() tween:Cancel() end) tween = nil end
-        if connection then pcall(function() connection:Disconnect() end) connection = nil end
-        return
-    end
-    if not game.Players.LocalPlayer.Character then
-        if tween then pcall(function() tween:Cancel() end) tween = nil end
-        if connection then pcall(function() connection:Disconnect() end) connection = nil end
-        return
+
+
+function Tween2(destinationCFrame)
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = 350
+
+    if distance >= 350 then
+        speed = 350
     end
 
-
-    local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if not root or not humanoid then return end
-    if humanoid.Sit then humanoid.Sit = false end
-
-    if (targetCFrame.Position - root.Position).Magnitude > 600 then
-        root.CFrame = root.CFrame + (targetCFrame.Position - root.Position).Unit * 600
-    else root.CFrame = targetCFrame
-    end
-
-    local pathPart = Instance.new("Part")
-    pathPart.Transparency = 1
-    pathPart.Anchored = true
-    pathPart.Parent = game.Workspace
-    pathPart.CFrame = root.CFrame
-    tween = game:GetService("TweenService"):Create(pathPart, TweenInfo.new((targetCFrame.Position - root.Position).Magnitude / getgenv().LocalConfig.Settings["Tween Speed"], Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {CFrame = targetCFrame})
-
-    connection = game:GetService("RunService").Heartbeat:Connect(function()
-        root.CFrame = pathPart.CFrame
-    end)
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
 
     tween:Play()
 
-    tween.Completed:Connect(function()
-        if connection then connection:Disconnect() connection = nil end
-        pathPart:Destroy()
-        tween = nil
-    end)
+    if _G.CancelTween2 then
+        tween:Cancel()
+    end
+
+    _G.Clip2 = true
+    wait(distance / speed)
+    _G.Clip2 = false
 end
 
+function BTPZ(destinationCFrame)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
+    task.wait()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
+end
 
+TweenSpeed = 350
 
+function Tween(destinationCFrame)
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = TweenSpeed
 
+    if distance >= 350 then
+        speed = TweenSpeed
+    end
 
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
+
+    tween:Play()
+
+    if _G.StopTween then
+        tween:Cancel()
+    end
+end
 
 
 function AutoHaki()
