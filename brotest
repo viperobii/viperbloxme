@@ -1769,60 +1769,6 @@ Raids:AddToggle({
     end
 })
 
-Raids:AddToggle({
-    Name = "Auto Next Island",
-    Flag = "Raids/AutoNextIsland",
-    Description = "Tween to next island after clearing mobs",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoNextIsland = Value
-    end
-})
-
--- Tween Function (Speed 300)
-function TweenToPosition(Pos)
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-    if _G.CurrentTween then
-        _G.CurrentTween:Cancel()
-        _G.CurrentTween = nil
-    end
-
-    local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
-    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
-
-    local tween = game:GetService("TweenService"):Create(
-        char.HumanoidRootPart,
-        tweenInfo,
-        {CFrame = Pos}
-    )
-
-    _G.CurrentTween = tween
-    tween:Play()
-end
-
--- Tween to Next Island
-function TweenToNextIsland()
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-    for _, v in pairs(workspace["_Worlds"].Raid.RaidEnemies:GetChildren()) do
-        if v:IsA("Model") and v:FindFirstChild("IslandPosition") then
-            local pos = v.IslandPosition
-            TweenToPosition(pos.CFrame + Vector3.new(0, 100, 0))
-            break
-        end
-    end
-end
-
--- Stop Tween on Heartbeat if needed
-game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.StopTween and _G.CurrentTween then
-        _G.CurrentTween:Cancel()
-        _G.CurrentTween = nil
-    end
-end)
 
 -- Auto Raid Mobs Handler
 spawn(function()
@@ -1901,7 +1847,48 @@ end)
 
 
 
+Raids:AddToggle({
+    Name = "Auto Next Island",
+    Flag = "Raids/AutoNextIsland",
+    Description = "Tween to next island only",
+    Default = false,
+    Callback = function(Value)
+        AutoNextIsland = Value
+    end
+})
 
+spawn(function()
+    local VisitedIslands = {}
+    while task.wait() do
+        if AutoNextIsland then
+            pcall(function()
+                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local Locations = workspace["_WorldOrigin"].Locations
+                if not hrp or not Locations then return end
+
+                local pos = hrp.Position
+
+                -- Reset visited if teleported back to spawn
+                local spawn1 = Vector3.new(-6438.735, 250.645, -4501.506)
+                local spawn2 = Vector3.new(-5017.408, 314.844, -2823.012)
+                if (pos - spawn1).Magnitude < 5 or (pos - spawn2).Magnitude < 5 then
+                    VisitedIslands = {}
+                end
+
+                for i = 1, 5 do
+                    local name = "Island " .. i
+                    local island = Locations:FindFirstChild(name)
+                    if island and not VisitedIslands[name] then
+                        VisitedIslands[name] = true
+                        Tween(island.CFrame)
+                        task.wait(2)
+                        break
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 
