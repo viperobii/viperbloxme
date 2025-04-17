@@ -34,7 +34,6 @@ local Teleport = Window:MakeTab({
     Icon = "book",  -- Fixed the split "Icon"
 })
 
-
 -- Auto Raid with Redz Lib UI
 Raids:AddToggle({
     Name = "Auto Raid Mobs",
@@ -42,58 +41,67 @@ Raids:AddToggle({
     Description = "Kill Aura for Raid Mobs",
     Default = false,
     Callback = function(Value)
-        _G.AutoNear = Value
-        if not Value then 
-            wait()
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
+        _G.AutoRaidMobs = Value
+        if not Value then
             bringmob = false
         end
     end
 })
 
 -- Tween function
-function Tween(Pos)
+function TweenTo(CF, speed)
     local TweenService = game:GetService("TweenService")
-    local Tw = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart,
-    TweenInfo.new(
-        (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position - Pos.Position).Magnitude / 300, -- 300 is the speed
-        Enum.EasingStyle.Linear
-    ),
-    {CFrame = Pos}
-    )
-    Tw:Play()
-    return Tw
+    local HRP = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not HRP then return end
+    local distance = (HRP.Position - CF.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / (speed or 300), Enum.EasingStyle.Linear)
+    local tween = TweenService:Create(HRP, tweenInfo, {CFrame = CF})
+    tween:Play()
+    tween.Completed:Wait()
 end
 
 -- Position offset for farming
-Pos = CFrame.new(0, 30, 0)
+local Offset = CFrame.new(0, 30, 0)
 
--- Main farming function
+-- Main farming loop
 spawn(function()
-    while wait() do
-        if _G.AutoNear then
+    while task.wait() do
+        if _G.AutoRaidMobs then
             pcall(function()
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
                 for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
                     if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                        if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude <= 5000) then
-                            repeat
-                                wait(_G.Fast_Delay)
-                                AttackNoCoolDown()
-                                bringmob = true
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-                                Tween(mob.HumanoidRootPart.CFrame * Pos)
-                                mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                mob.HumanoidRootPart.Transparency = 1
-                                mob.Humanoid.JumpPower = 0
-                                mob.Humanoid.WalkSpeed = 0
-                                mob.HumanoidRootPart.CanCollide = false
-                                FarmPos = mob.HumanoidRootPart.CFrame
-                                MonFarm = mob.Name
-                            until not _G.AutoNear or not mob.Parent or mob.Humanoid.Health <= 0 or not game.Workspace.Enemies:FindFirstChild(mob.Name)
-                            
-                            bringmob = false
+                        if mob:FindFirstChild("IsRaidMob") or string.find(mob.Name, "Order") or string.find(mob.Name, "Raid") then
+                            if (hrp.Position - mob.HumanoidRootPart.Position).Magnitude <= 5000 then
+                                repeat
+                                    task.wait(_G.Fast_Delay or 0.1)
+                                    AutoHaki()
+                                    EquipTool(SelectWeapon)
+                                    AttackNoCoolDown()
+                                    bringmob = true
+
+                                    -- Mob debuff
+                                    mob.Humanoid.WalkSpeed = 0
+                                    mob.Humanoid.JumpPower = 0
+                                    mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                    mob.HumanoidRootPart.Transparency = 1
+                                    mob.HumanoidRootPart.CanCollide = false
+
+                                    -- Tween to mob
+                                    TweenTo(mob.HumanoidRootPart.CFrame * Offset, 300)
+
+                                    -- Set farm tracking
+                                    FarmPos = mob.HumanoidRootPart.CFrame
+                                    MonFarm = mob.Name
+
+                                until not _G.AutoRaidMobs or not mob.Parent or mob.Humanoid.Health <= 0 or not game.Workspace.Enemies:FindFirstChild(mob.Name)
+
+                                bringmob = false
+                            end
                         end
                     end
                 end
