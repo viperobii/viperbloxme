@@ -1690,15 +1690,14 @@ spawn(function()
 end)
 
 Raids:AddToggle({
-    Name = "Auto Raids Test",
-    Flag = "Raids/AutoFarmNearestMob",
+    Name = "Auto Raids",
+    Flag = "Raids/AutoRaidMobs",
     Description = "Raid ",
     Default = false,
     Callback = function(Value)
         _G.AutoRaidMobs = Value
         if not Value then 
             bringmob = false
-            wait()
         end
     end
 })
@@ -1714,7 +1713,7 @@ local function TweenTo(pos, speed)
     local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
     local tween = ts:Create(hrp, tweenInfo, {CFrame = pos})
     tween:Play()
-    tween.Completed:Wait()
+    return tween -- Return the tween object instead of waiting for completion
 end
 
 -- Main Auto Raid Logic
@@ -1741,33 +1740,42 @@ spawn(function()
                 end
 
                 if closest then
-                    repeat
-                        task.wait(_G.Fast_Delay or 0.1)
-
-                        AutoHaki()
-                        EquipTool(SelectWeapon)
-                        AttackNoCoolDown()
-                        bringmob = true
-
-                        local mobHRP = closest.HumanoidRootPart
-                        mobHRP.Size = Vector3.new(60, 60, 60)
-                        mobHRP.Transparency = 1
-                        mobHRP.CanCollide = false
-                        closest.Humanoid.WalkSpeed = 0
-                        closest.Humanoid.JumpPower = 0
-
-                        TweenTo(CFrame.new(mobHRP.Position + Vector3.new(0, 20, 0)), 300)
-
-                        FarmPos = mobHRP.CFrame
-                        MonFarm = closest.Name
-
-                    until not _G.AutoRaidMobs or not closest.Parent or closest.Humanoid.Health <= 0
-
-                    bringmob = false
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+                    
+                    local mobHRP = closest.HumanoidRootPart
+                    mobHRP.Size = Vector3.new(60, 60, 60)
+                    mobHRP.Transparency = 1
+                    mobHRP.CanCollide = false
+                    closest.Humanoid.WalkSpeed = 0
+                    closest.Humanoid.JumpPower = 0
+                    
+                    -- Create a position above the mob
+                    local targetPosition = CFrame.new(mobHRP.Position + Vector3.new(0, 20, 0))
+                    
+                    -- Use TweenTo but don't wait for completion
+                    local tween = TweenTo(targetPosition, 300)
+                    
+                    -- Attack while tweening
+                    AttackNoCoolDown()
+                    bringmob = true
+                    
+                    FarmPos = mobHRP.CFrame
+                    MonFarm = closest.Name
+                    
+                    -- Wait a short delay before next loop iteration
+                    task.wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or farming turned off to break the loop
+                    if not _G.AutoRaidMobs or not closest.Parent or closest.Humanoid.Health <= 0 then
+                        bringmob = false
+                    end
                 else
-                    task.wait(1)
+                    task.wait(1) -- Wait longer if no mobs found
                 end
             end)
+        else
+            task.wait(0.5) -- Wait when farming is off
         end
     end
 end)
