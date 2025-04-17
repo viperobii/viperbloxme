@@ -240,8 +240,7 @@ spawn(function()
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
                     if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
                         local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        local maxRange = 2000
-if dist < closestDist and dist <= maxRange then
+                        if dist < closestDist and dist <= maxRange then
                             closestMob = mob
                             closestDist = dist
                         end
@@ -1691,6 +1690,53 @@ spawn(function()
 end)
 
 
+Raids:AddToggle({
+    Name = "Auto Next Island",
+    Flag = "Raids/AutoNextIsland",
+    Description = "Automatically tween to the next island during raid",
+    Default = false,
+    Callback = function(Value)
+        AutoNextIsland = Value
+        if not Value then
+            _G.AutoNear = false
+        end
+    end
+})
+
+spawn(function()
+    local visitedIslands = {}
+    while task.wait() do
+        if AutoNextIsland then
+            pcall(function()
+                local char = game.Players.LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local currentPos = hrp.Position
+                local islands = game:GetService("Workspace")['_WorldOrigin'].Locations
+
+                -- Reset visited if at portal positions
+                if (currentPos - Vector3.new(-6438.73535, 250.645355, -4501.50684)).Magnitude < 1
+                or (currentPos - Vector3.new(-5017.40869, 314.844055, -2823.0127)).Magnitude < 1 then
+                    visitedIslands = {}
+                end
+
+                -- Tween to next unvisited island
+                for i = 1, 5 do
+                    local island = islands:FindFirstChild("Island " .. i)
+                    if island and not visitedIslands["Island " .. i] then
+                        Tween(island.CFrame)
+                        visitedIslands["Island " .. i] = true
+                        AutoNextIsland = false
+                        wait(1)
+                        AutoNextIsland = true
+                        break
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 Raids:AddSection("Fruits");
