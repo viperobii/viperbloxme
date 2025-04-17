@@ -1634,7 +1634,7 @@ Raids:AddDropdown({
     Flag = "Raids/SelectChip",
     Default = "Flame",
     Options = {
-        "Flame", "Ice" "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
+        "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
     },
     Callback = function(option)
         SelectChip = option
