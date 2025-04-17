@@ -1754,21 +1754,32 @@ end)
 
 
 Raids:AddToggle({
-    Name = "Auto Raids Mobsz",
+    Name = "Auto Raids Mobs",
     Flag = "Raids/AutoRaidsMobs",
-    Description = "Farm mobs using tween like Auto Farm Bone",
+    Description = "Tween to mobs and kill them like Bone Farm",
     Default = false,
     Callback = function(Value)
         _G.AutoRaidsMobs = Value
-        if not Value then 
-            bringmob = false
+        if not Value then
             _G.StopTween = true
+            bringmob = false
         else
             _G.StopTween = false
         end
     end
 })
 
+Raids:AddToggle({
+    Name = "Auto Next Island",
+    Flag = "Raids/AutoNextIsland",
+    Description = "Tween to next island after clearing mobs",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoNextIsland = Value
+    end
+})
+
+-- Tween Function (Speed 300)
 function TweenToPosition(Pos)
     local char = game.Players.LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
@@ -1789,10 +1800,23 @@ function TweenToPosition(Pos)
 
     _G.CurrentTween = tween
     tween:Play()
-    return tween
 end
 
+-- Tween to Next Island
+function TweenToNextIsland()
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
+    for _, v in pairs(workspace["_Worlds"].Raid.RaidEnemies:GetChildren()) do
+        if v:IsA("Model") and v:FindFirstChild("IslandPosition") then
+            local pos = v.IslandPosition
+            TweenToPosition(pos.CFrame + Vector3.new(0, 100, 0))
+            break
+        end
+    end
+end
+
+-- Stop Tween on Heartbeat if needed
 game:GetService("RunService").Heartbeat:Connect(function()
     if _G.StopTween and _G.CurrentTween then
         _G.CurrentTween:Cancel()
@@ -1800,7 +1824,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
     end
 end)
 
-
+-- Auto Raid Mobs Handler
 spawn(function()
     while task.wait() do
         if _G.AutoRaidsMobs then
@@ -1810,15 +1834,13 @@ spawn(function()
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                local closestMob, closestDist = nil, math.huge
-                local maxRange = 9999
-
+                local closestMob, dist = nil, math.huge
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                        local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        if dist < closestDist and dist <= maxRange then
+                    if mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 and mob:FindFirstChild("HumanoidRootPart") then
+                        local d = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
+                        if d < dist then
+                            dist = d
                             closestMob = mob
-                            closestDist = dist
                         end
                     end
                 end
@@ -1827,46 +1849,45 @@ spawn(function()
                     AutoHaki()
                     EquipTool(SelectWeapon)
 
-                    local mobRoot = closestMob:FindFirstChild("HumanoidRootPart")
-                    if mobRoot then
-                        mobRoot.Size = Vector3.new(60, 60, 60)
-                        mobRoot.Transparency = 1
-                        mobRoot.CanCollide = false
-                    end
+                    local root = closestMob.HumanoidRootPart
+                    root.Size = Vector3.new(60, 60, 60)
+                    root.Transparency = 1
+                    root.CanCollide = false
 
-                    if closestMob:FindFirstChild("Humanoid") then
-                        closestMob.Humanoid.WalkSpeed = 0
-                        closestMob.Humanoid.JumpPower = 0
-                    end
+                    closestMob.Humanoid.WalkSpeed = 0
+                    closestMob.Humanoid.JumpPower = 0
 
-                    local targetCFrame = CFrame.new(mobRoot.Position + Vector3.new(0, 30, 0))
-                    local distToTarget = (hrp.Position - targetCFrame.Position).Magnitude
-
-                    if distToTarget > 10 then
-                        TweenToPosition(targetCFrame)
+                    local above = CFrame.new(root.Position + Vector3.new(0, 30, 0))
+                    if (hrp.Position - above.Position).Magnitude > 10 then
+                        TweenToPosition(above)
                         task.wait(0.1)
                     end
 
                     bringmob = true
 
                     while closestMob and closestMob:FindFirstChild("Humanoid") and closestMob.Humanoid.Health > 0 and _G.AutoRaidsMobs do
-                        local currentPosition = hrp.Position
-                        local targetPosition = mobRoot.Position + Vector3.new(0, 30, 0)
-                        local distToMob = (currentPosition - targetPosition).Magnitude
-
-                        if distToMob > 10 then
-                            hrp.CFrame = CFrame.new(currentPosition):Lerp(CFrame.new(targetPosition), 0.2)
-                        end
-
+                        hrp.CFrame = CFrame.new(hrp.Position):Lerp(CFrame.new(root.Position + Vector3.new(0, 30, 0)), 0.2)
                         AttackNoCoolDown()
                         task.wait(_G.Fast_Delay or 0.1)
-
-                        if not _G.AutoRaidsMobs then
-                            break
-                        end
                     end
 
                     bringmob = false
+
+                    -- Auto go to next island if enabled
+                    if _G.AutoNextIsland then
+                        local enemiesLeft = false
+                        for _, m in pairs(workspace.Enemies:GetChildren()) do
+                            if m:FindFirstChild("Humanoid") and m.Humanoid.Health > 0 then
+                                enemiesLeft = true
+                                break
+                            end
+                        end
+
+                        if not enemiesLeft then
+                            TweenToNextIsland()
+                            task.wait(1)
+                        end
+                    end
                 else
                     bringmob = false
                     task.wait(0.5)
@@ -1877,8 +1898,6 @@ spawn(function()
         end
     end
 end)
-
-
 
 
 
