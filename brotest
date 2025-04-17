@@ -89,28 +89,27 @@ Info:AddButton({
 
 
 
-
-
-
-
-
 Main:AddToggle({
     Name = "Auto Farm Level",
     Flag = "Main/AutoFarmLevel",
-    Description = "Fast Farm With Dodge Skill Mobs",
+    Description = "Fast Farm With Dodge Skill Mobs (Tween Only)",
     Default = false,
     Callback = function(Value)
         _G.AutoLevel = Value
         if not Value then
-            wait()
-            -- Ensure player is above the water level
-            local player = game:GetService("Players").LocalPlayer
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            if playerPosition.Y <= 0 then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+            _G.StopTween = true
+            bringmob = false
+
+            -- Ensure player is above water
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local pos = char.HumanoidRootPart.Position
+                if pos.Y <= 0 then
+                    char.HumanoidRootPart.CFrame = CFrame.new(pos.X, 5, pos.Z)
+                end
             end
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
+        else
+            _G.StopTween = false
         end
     end
 })
@@ -121,233 +120,100 @@ spawn(function()
             pcall(function()
                 CheckLevel()
 
-                local player = game:GetService("Players").LocalPlayer
-                local questGui = player.PlayerGui.Main.Quest
-
-                if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    Tween(CFrameQ)
-
-                    -- Ensure player stays above water after tweening
-                    local playerPosition = player.Character.HumanoidRootPart.Position
-                    if playerPosition.Y <= 0 then
-                        player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                    end
-
-                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
-                        wait(0.5) -- Small delay before accepting quest
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
-                    end
-                else
-                    -- Check if there are mobs to farm
-                    local foundMob = false
-                    
-                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            if string.find(enemy.Name, Ms) then
-                                foundMob = true
-                                
-                                -- Target and attack the mob
-                                AutoHaki()
-                                EquipTool(SelectWeapon)
-                                
-                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                enemy.HumanoidRootPart.Transparency = 1
-                                enemy.Humanoid.JumpPower = 0
-                                enemy.Humanoid.WalkSpeed = 0
-                                enemy.HumanoidRootPart.CanCollide = false
-                                
-                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                                
-                                -- Attack
-                                AttackNoCoolDown()
-                                bringmob = true
-                                
-                                wait(0.1)
-                                break -- Focus on one mob at a time
-                            end
-                        end
-                    end
-                    
-                    -- If no mobs found, go to spawn location
-                    if not foundMob then
-                        bringmob = false
-                        -- Go to mob spawn location
-                        Tween(CFrameMon)
-
-                        -- Ensure player stays above water during movement
-                        local playerPosition = player.Character.HumanoidRootPart.Position
-                        if playerPosition.Y <= 0 then
-                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                        end
-
-                        wait(0.5)
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- AUTO FARM NEAREST MOB TOGGLE
-Main:AddToggle({
-    Name = "Auto Farm Nearest",
-    Flag = "Main/AutoFarmNearestMob",
-    Description = "Nearest",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoNear = Value
-        if not Value then 
-            bringmob = false
-            _G.StopTween = true
-        else
-            _G.StopTween = false
-        end
-    end
-})
-
--- Improved Tween Function (speed 300)
-function TweenToPosition(Pos)
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-    -- Cancel any existing tween first
-    if _G.CurrentTween then
-        _G.CurrentTween:Cancel()
-        _G.CurrentTween = nil
-    end
-
-    local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
-    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
-
-    local tween = game:GetService("TweenService"):Create(
-        char.HumanoidRootPart,
-        tweenInfo,
-        {CFrame = Pos}
-    )
-    
-    _G.CurrentTween = tween
-    tween:Play()
-    
-    -- Return the tween but don't wait for it to complete
-    return tween
-end
-
--- Auto Farm Nearest Mob (Using Tween Only, No Teleport)
-spawn(function()
-    while task.wait() do
-        if _G.AutoNear then
-            pcall(function()
                 local plr = game.Players.LocalPlayer
                 local char = plr.Character
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                local closestMob, closestDist = nil, math.huge
-                local maxRange = 100 -- only go to mobs within 100 studs
-
-                -- Look for mobs in range only
-                for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if mob:FindFirstChild("Humanoid") and 
-                       mob:FindFirstChild("HumanoidRootPart") and 
-                       mob.Humanoid.Health > 0 then
-                        local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        if dist < closestDist and dist <= maxRange then
-                            closestMob = mob
-                            closestDist = dist
-                        end
-                    end
-                end
-
-                if closestMob then
-                    -- Valid mob found in range
-                    AutoHaki()
-                    EquipTool(SelectWeapon)
-
-                    local mobRoot = closestMob:FindFirstChild("HumanoidRootPart")
-                    if mobRoot then
-                        mobRoot.Size = Vector3.new(60, 60, 60)
-                        mobRoot.Transparency = 1
-                        mobRoot.CanCollide = false
-                    end
-
-                    if closestMob:FindFirstChild("Humanoid") then
-                        closestMob.Humanoid.WalkSpeed = 0
-                        closestMob.Humanoid.JumpPower = 0
-                    end
-
-                    local aboveCFrame = CFrame.new(mobRoot.Position + Vector3.new(0, 30, 0))
+                local questGui = plr.PlayerGui.Main.Quest
+                if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) then
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                     
-                    -- Calculate distance to target position
-                    local distToTarget = (hrp.Position - aboveCFrame.Position).Magnitude
-                    
-                    -- Only tween if we're not already at the target position
-                    if distToTarget > 10 then
-                        -- Start the tween but don't wait for completion
-                        local tween = TweenToPosition(aboveCFrame)
-                        
-                        -- Wait a small amount to let the tween get started
-                        task.wait(0.1)
-                        
-                        -- We don't want to wait for the full tween completion
-                        -- Just start attacking when we get close enough
-                    end
-                    
-                    bringmob = true
+                    -- Tween to quest NPC
+                    TweenToPosition(CFrameQ)
+                    repeat task.wait() until (hrp.Position - CFrameQ.Position).Magnitude < 10
 
-                    -- Attack until mob is dead or toggle turned off
-                    while closestMob and 
-                          closestMob:FindFirstChild("Humanoid") and 
-                          closestMob.Humanoid.Health > 0 and 
-                          _G.AutoNear do
-                          
-                        -- Update position to stay above mob as it might move
-                        if mobRoot then
-                            local currentPosition = hrp.Position
-                            local targetPosition = mobRoot.Position + Vector3.new(0, 30, 0)
-                            local distToMob = (currentPosition - targetPosition).Magnitude
-                            
-                            -- If we're too far from the mob, update position
-                            if distToMob > 10 then
-                                hrp.CFrame = CFrame.new(currentPosition):Lerp(
-                                    CFrame.new(targetPosition), 
-                                    0.2  -- Smooth interpolation factor
-                                )
+                    -- Ensure above water
+                    if hrp.Position.Y <= 0 then
+                        hrp.CFrame = CFrame.new(hrp.Position.X, 5, hrp.Position.Z)
+                    end
+
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                    wait(0.5)
+                else
+                    -- Look for mobs
+                    local foundMob = false
+
+                    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                        if enemy.Name:find(Ms) and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            foundMob = true
+                            AutoHaki()
+                            EquipTool(SelectWeapon)
+
+                            local root = enemy.HumanoidRootPart
+                            root.Size = Vector3.new(60, 60, 60)
+                            root.Transparency = 1
+                            root.CanCollide = false
+
+                            enemy.Humanoid.WalkSpeed = 0
+                            enemy.Humanoid.JumpPower = 0
+
+                            local above = root.Position + Vector3.new(0, 30, 0)
+                            if (hrp.Position - above).Magnitude > 10 then
+                                TweenToPosition(CFrame.new(above))
+                                task.wait(0.2)
                             end
-                        end
-                        
-                        AttackNoCoolDown()
-                        task.wait(_G.Fast_Delay or 0.1)
-                        
-                        -- Break if toggle turned off
-                        if not _G.AutoNear then
+
+                            bringmob = true
+                            while enemy and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 and _G.AutoLevel do
+                                hrp.CFrame = CFrame.new(hrp.Position):Lerp(CFrame.new(root.Position + Vector3.new(0, 30, 0)), 0.2)
+                                AttackNoCoolDown()
+                                task.wait(_G.Fast_Delay or 0.1)
+                            end
+                            bringmob = false
                             break
                         end
                     end
 
-                    bringmob = false
-                else
-                    -- No mobs nearby, do nothing
-                    bringmob = false
-                    task.wait(0.5)
+                    -- Go to spawn location if no mob found
+                    if not foundMob then
+                        TweenToPosition(CFrameMon)
+                        task.wait(0.5)
+
+                        if hrp.Position.Y <= 0 then
+                            hrp.CFrame = CFrame.new(hrp.Position.X, 5, hrp.Position.Z)
+                        end
+                    end
                 end
             end)
-        else
-            task.wait(0.5)
         end
     end
 end)
 
--- Add this function to handle stop tween
-game:GetService("RunService").Heartbeat:Connect(function()
-    if _G.StopTween then
-        if _G.CurrentTween then
-            _G.CurrentTween:Cancel()
-            _G.CurrentTween = nil
-        end
+function TweenToPosition(pos)
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    if _G.CurrentTween then
+        _G.CurrentTween:Cancel()
+        _G.CurrentTween = nil
     end
-end)
+
+    local hrp = char.HumanoidRootPart
+    local distance = (hrp.Position - pos.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+
+    local tween = game:GetService("TweenService"):Create(hrp, tweenInfo, {CFrame = pos})
+    _G.CurrentTween = tween
+    tween:Play()
+end
+
+
+
+
+
+-- AUTO FARM NEAREST MOB TOGGLE
+
 
 
 
