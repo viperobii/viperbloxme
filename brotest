@@ -35,25 +35,24 @@ local Teleport = Window:MakeTab({
 })
 
 
-local Raids = Raids:AddToggle("ToggleMobAura", {
-    Title = "Auto Raid Mobs",
-    Description = "Kill Aura A Little Lol",
-    Default = false
-});
-
-RaidToggle:OnChanged(function(v238)
-    _G.AutoNear = v238;
-    
-    if (v238 == false) then
-        wait();
-        Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame);
-        wait();
+-- Auto Raid with Redz Lib UI
+Raids:AddToggle({
+    Name = "Auto Raid Mobs",
+    Flag = "Raids/AutoRaidMobs",
+    Description = "Kill Aura for Raid Mobs",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoNear = Value
+        if not Value then 
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
+            bringmob = false
+        end
     end
-end);
+})
 
-RaidToggle:SetValue(false);
-
--- Tween function (adding this if you don't have it)
+-- Tween function
 function Tween(Pos)
     local TweenService = game:GetService("TweenService")
     local Tw = TweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart,
@@ -67,42 +66,42 @@ function Tween(Pos)
     return Tw
 end
 
--- Make sure Pos is defined
-Pos = CFrame.new(0, 30, 0) -- Position offset for farming
+-- Position offset for farming
+Pos = CFrame.new(0, 30, 0)
 
+-- Main farming function
 spawn(function()
     while wait() do
         if _G.AutoNear then
             pcall(function()
-                for v838, v839 in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if (v839:FindFirstChild("Humanoid") and v839:FindFirstChild("HumanoidRootPart") and (v839.Humanoid.Health > 0)) then
-                        if v839.Name then
-                            if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - v839:FindFirstChild("HumanoidRootPart").Position).Magnitude <= 5000) then
-                                repeat
-                                    wait(_G.Fast_Delay);
-                                    AttackNoCoolDown();
-                                    bringmob = true;
-                                    AutoHaki();
-                                    EquipTool(SelectWeapon);
-                                    Tween(v839.HumanoidRootPart.CFrame * Pos);
-                                    v839.HumanoidRootPart.Size = Vector3.new(60, 60, 60);
-                                    v839.HumanoidRootPart.Transparency = 1;
-                                    v839.Humanoid.JumpPower = 0;
-                                    v839.Humanoid.WalkSpeed = 0;
-                                    v839.HumanoidRootPart.CanCollide = false;
-                                    FarmPos = v839.HumanoidRootPart.CFrame;
-                                    MonFarm = v839.Name;
-                                until not _G.AutoNear or not v839.Parent or (v839.Humanoid.Health <= 0) or not game.Workspace.Enemies:FindFirstChild(v839.Name)
-                                
-                                bringmob = false;
-                            end
+                for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
+                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                        if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - mob.HumanoidRootPart.Position).Magnitude <= 5000) then
+                            repeat
+                                wait(_G.Fast_Delay)
+                                AttackNoCoolDown()
+                                bringmob = true
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                Tween(mob.HumanoidRootPart.CFrame * Pos)
+                                mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                mob.HumanoidRootPart.Transparency = 1
+                                mob.Humanoid.JumpPower = 0
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.HumanoidRootPart.CanCollide = false
+                                FarmPos = mob.HumanoidRootPart.CFrame
+                                MonFarm = mob.Name
+                            until not _G.AutoNear or not mob.Parent or mob.Humanoid.Health <= 0 or not game.Workspace.Enemies:FindFirstChild(mob.Name)
+                            
+                            bringmob = false
                         end
                     end
                 end
-            end);
+            end)
         end
     end
-end);
+end)
+
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
