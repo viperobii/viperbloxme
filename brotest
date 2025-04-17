@@ -193,23 +193,30 @@ end)
 -- AUTO FARM NEAREST MOB TOGGLE
 Main:AddToggle({
     Name = "Auto Farm Nearest",
-    Flag = "Raids/AutoFarmNearestMob",
+    Flag = "Main/AutoFarmNearestMob",
     Description = "Nearest",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
         if not Value then 
             bringmob = false
-            -- Return to original position or stop tweening
-            wait()
+            _G.StopTween = true
+        else
+            _G.StopTween = false
         end
     end
 })
 
--- Fixed Tween Function (speed 300)
+-- Improved Tween Function (speed 300)
 function TweenToPosition(Pos)
     local char = game.Players.LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    -- Cancel any existing tween first
+    if _G.CurrentTween then
+        _G.CurrentTween:Cancel()
+        _G.CurrentTween = nil
+    end
 
     local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
     local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
@@ -219,7 +226,11 @@ function TweenToPosition(Pos)
         tweenInfo,
         {CFrame = Pos}
     )
+    
+    _G.CurrentTween = tween
     tween:Play()
+    
+    -- Return the tween but don't wait for it to complete
     return tween
 end
 
@@ -238,7 +249,9 @@ spawn(function()
 
                 -- Look for mobs in range only
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                    if mob:FindFirstChild("Humanoid") and 
+                       mob:FindFirstChild("HumanoidRootPart") and 
+                       mob.Humanoid.Health > 0 then
                         local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
                         if dist < closestDist and dist <= maxRange then
                             closestMob = mob
@@ -265,15 +278,53 @@ spawn(function()
                     end
 
                     local aboveCFrame = CFrame.new(mobRoot.Position + Vector3.new(0, 30, 0))
-                    Tween(aboveCFrame)
-
+                    
+                    -- Calculate distance to target position
+                    local distToTarget = (hrp.Position - aboveCFrame.Position).Magnitude
+                    
+                    -- Only tween if we're not already at the target position
+                    if distToTarget > 10 then
+                        -- Start the tween but don't wait for completion
+                        local tween = TweenToPosition(aboveCFrame)
+                        
+                        -- Wait a small amount to let the tween get started
+                        task.wait(0.1)
+                        
+                        -- We don't want to wait for the full tween completion
+                        -- Just start attacking when we get close enough
+                    end
+                    
                     bringmob = true
 
-                    -- Attack until mob is dead
-                    repeat
+                    -- Attack until mob is dead or toggle turned off
+                    while closestMob and 
+                          closestMob:FindFirstChild("Humanoid") and 
+                          closestMob.Humanoid.Health > 0 and 
+                          _G.AutoNear do
+                          
+                        -- Update position to stay above mob as it might move
+                        if mobRoot then
+                            local currentPosition = hrp.Position
+                            local targetPosition = mobRoot.Position + Vector3.new(0, 30, 0)
+                            local distToMob = (currentPosition - targetPosition).Magnitude
+                            
+                            -- If we're too far from the mob, update position
+                            if distToMob > 10 then
+                                hrp.CFrame = CFrame.new(currentPosition):Lerp(
+                                    CFrame.new(targetPosition), 
+                                    0.2  -- Smooth interpolation factor
+                                )
+                            end
+                        end
+                        
                         AttackNoCoolDown()
                         task.wait(_G.Fast_Delay or 0.1)
-                    until not closestMob or not closestMob:FindFirstChild("Humanoid") or closestMob.Humanoid.Health <= 0
+                        
+                        -- Break if toggle turned off
+                        if not _G.AutoNear then
+                            break
+                        end
+                    end
 
                     bringmob = false
                 else
@@ -282,6 +333,18 @@ spawn(function()
                     task.wait(0.5)
                 end
             end)
+        else
+            task.wait(0.5)
+        end
+    end
+end)
+
+-- Add this function to handle stop tween
+game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.StopTween then
+        if _G.CurrentTween then
+            _G.CurrentTween:Cancel()
+            _G.CurrentTween = nil
         end
     end
 end)
@@ -1571,7 +1634,7 @@ Raids:AddDropdown({
     Flag = "Raids/SelectChip",
     Default = "Flame",
     Options = {
-        "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
+        "Flame", "Ice" "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
     },
     Callback = function(option)
         SelectChip = option
@@ -1690,60 +1753,172 @@ spawn(function()
 end)
 
 
-
 Raids:AddToggle({
-    Name = "Auto Raids",
-    Flag = "Raids/AutoRaids",
-    Description = "Exactly like Auto Bone farm, tweens and kills raid mobs",
+    Name = "Auto Raids Mobsz",
+    Flag = "Raids/AutoFarmNearestMob",
+    Description = "Nearest",
     Default = false,
     Callback = function(Value)
-        _G.AutoRaids = Value
-        if not Value then bringmob = false end
-    end
-})
-
-spawn(function()
-    while task.wait() do
-        if _G.AutoRaids then
-            pcall(function()
-                for i,v in pairs(workspace.Enemies:GetChildren()) do
-                    if v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                        if v:FindFirstChild("IsRaidMob") or string.find(v.Name, "Order") or string.find(v.Name, "Raid") then
-                            repeat task.wait()
-                                EquipTool(SelectWeapon)
-                                AutoHaki()
-                                bringmob = true
-                                Tween(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                                AttackNoCoolDown()
-
-                                v.HumanoidRootPart.Size = Vector3.new(60,60,60)
-                                v.HumanoidRootPart.Transparency = 1
-                                v.HumanoidRootPart.CanCollide = false
-                                v.Humanoid.WalkSpeed = 0
-                                v.Humanoid.JumpPower = 0
-                            until not _G.AutoRaids or not v.Parent or v.Humanoid.Health <= 0
-                            bringmob = false
-                        end
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-Raids:AddToggle({
-    Name = "Auto Next Island",
-    Flag = "Raids/AutoNextIsland",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        AutoNextIsland = Value
-        if not Value then
-            _G.AutoNear = false
+        _G.AutoNear = Value
+        if not Value then 
+            bringmob = false
             _G.StopTween = true
         else
             _G.StopTween = false
         end
+    end
+})
+
+-- Improved Tween Function (speed 300)
+function TweenToPosition(Pos)
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+    -- Cancel any existing tween first
+    if _G.CurrentTween then
+        _G.CurrentTween:Cancel()
+        _G.CurrentTween = nil
+    end
+
+    local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
+
+    local tween = game:GetService("TweenService"):Create(
+        char.HumanoidRootPart,
+        tweenInfo,
+        {CFrame = Pos}
+    )
+    
+    _G.CurrentTween = tween
+    tween:Play()
+    
+    -- Return the tween but don't wait for it to complete
+    return tween
+end
+
+-- Auto Farm Nearest Mob (Using Tween Only, No Teleport)
+spawn(function()
+    while task.wait() do
+        if _G.AutoNear then
+            pcall(function()
+                local plr = game.Players.LocalPlayer
+                local char = plr.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local closestMob, closestDist = nil, math.huge
+                local maxRange = 100 -- only go to mobs within 100 studs
+
+                -- Look for mobs in range only
+                for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                    if mob:FindFirstChild("Humanoid") and 
+                       mob:FindFirstChild("HumanoidRootPart") and 
+                       mob.Humanoid.Health > 0 then
+                        local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
+                        if dist < closestDist and dist <= maxRange then
+                            closestMob = mob
+                            closestDist = dist
+                        end
+                    end
+                end
+
+                if closestMob then
+                    -- Valid mob found in range
+                    AutoHaki()
+                    EquipTool(SelectWeapon)
+
+                    local mobRoot = closestMob:FindFirstChild("HumanoidRootPart")
+                    if mobRoot then
+                        mobRoot.Size = Vector3.new(60, 60, 60)
+                        mobRoot.Transparency = 1
+                        mobRoot.CanCollide = false
+                    end
+
+                    if closestMob:FindFirstChild("Humanoid") then
+                        closestMob.Humanoid.WalkSpeed = 0
+                        closestMob.Humanoid.JumpPower = 0
+                    end
+
+                    local aboveCFrame = CFrame.new(mobRoot.Position + Vector3.new(0, 30, 0))
+                    
+                    -- Calculate distance to target position
+                    local distToTarget = (hrp.Position - aboveCFrame.Position).Magnitude
+                    
+                    -- Only tween if we're not already at the target position
+                    if distToTarget > 10 then
+                        -- Start the tween but don't wait for completion
+                        local tween = TweenToPosition(aboveCFrame)
+                        
+                        -- Wait a small amount to let the tween get started
+                        task.wait(0.1)
+                        
+                        -- We don't want to wait for the full tween completion
+                        -- Just start attacking when we get close enough
+                    end
+                    
+                    bringmob = true
+
+                    -- Attack until mob is dead or toggle turned off
+                    while closestMob and 
+                          closestMob:FindFirstChild("Humanoid") and 
+                          closestMob.Humanoid.Health > 0 and 
+                          _G.AutoNear do
+                          
+                        -- Update position to stay above mob as it might move
+                        if mobRoot then
+                            local currentPosition = hrp.Position
+                            local targetPosition = mobRoot.Position + Vector3.new(0, 30, 0)
+                            local distToMob = (currentPosition - targetPosition).Magnitude
+                            
+                            -- If we're too far from the mob, update position
+                            if distToMob > 10 then
+                                hrp.CFrame = CFrame.new(currentPosition):Lerp(
+                                    CFrame.new(targetPosition), 
+                                    0.2  -- Smooth interpolation factor
+                                )
+                            end
+                        end
+                        
+                        AttackNoCoolDown()
+                        task.wait(_G.Fast_Delay or 0.1)
+                        
+                        -- Break if toggle turned off
+                        if not _G.AutoNear then
+                            break
+                        end
+                    end
+
+                    bringmob = false
+                else
+                    -- No mobs nearby, do nothing
+                    bringmob = false
+                    task.wait(0.5)
+                end
+            end)
+        else
+            task.wait(0.5)
+        end
+    end
+end)
+
+-- Add this function to handle stop tween
+game:GetService("RunService").Heartbeat:Connect(function()
+    if _G.StopTween then
+        if _G.CurrentTween then
+            _G.CurrentTween:Cancel()
+            _G.CurrentTween = nil
+        end
+    end
+end)
+
+
+Raids:AddToggle({
+    Name = "Auto Next Island",
+    Flag = "Raids/AutoNextIsland",
+    Description = "Tween to next island only",
+    Default = false,
+    Callback = function(Value)
+        AutoNextIsland = Value
     end
 })
 
@@ -1752,41 +1927,27 @@ spawn(function()
     while task.wait() do
         if AutoNextIsland then
             pcall(function()
-                local char = game.Players.LocalPlayer.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local hrp = char.HumanoidRootPart
-                    local pos = hrp.Position
-                    local Locations = workspace["_WorldOrigin"].Locations
+                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local Locations = workspace["_WorldOrigin"].Locations
+                if not hrp or not Locations then return end
 
-                    -- Reset visited islands if teleported back to start
-                    if (pos - Vector3.new(-6438.735, 250.645, -4501.506)).Magnitude < 1 or
-                       (pos - Vector3.new(-5017.408, 314.844, -2823.012)).Magnitude < 1 then
-                        VisitedIslands = {}
-                    end
+                local pos = hrp.Position
 
-                    if Locations:FindFirstChild("Island 1") then
-                        _G.AutoNear = true
-                    end
+                -- Reset visited if teleported back to spawn
+                local spawn1 = Vector3.new(-6438.735, 250.645, -4501.506)
+                local spawn2 = Vector3.new(-5017.408, 314.844, -2823.012)
+                if (pos - spawn1).Magnitude < 5 or (pos - spawn2).Magnitude < 5 then
+                    VisitedIslands = {}
+                end
 
-                    for i = 2, 5 do
-                        local islandName = "Island " .. i
-                        if Locations:FindFirstChild(islandName) and not VisitedIslands[islandName] then
-                            -- Stop any current tweens before starting a new one
-                            _G.StopTween = true
-                            task.wait(0.5)
-                            _G.StopTween = false
-                            
-                            -- Tween to the next island
-                            Tween(Locations[islandName].CFrame)
-                            
-                            -- Mark as visited and temporarily toggle features
-                            VisitedIslands[islandName] = true
-                            local wasAutoNextIsland = AutoNextIsland
-                            AutoNextIsland = false
-                            task.wait(1)  -- Give more time to reach destination
-                            AutoNextIsland = wasAutoNextIsland
-                            break
-                        end
+                for i = 1, 5 do
+                    local name = "Island " .. i
+                    local island = Locations:FindFirstChild(name)
+                    if island and not VisitedIslands[name] then
+                        VisitedIslands[name] = true
+                        Tween(island.CFrame)
+                        task.wait(2)
+                        break
                     end
                 end
             end)
