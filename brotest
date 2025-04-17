@@ -342,6 +342,64 @@ Main:AddToggle({
     end
 })
 
+-- Define the Tween function if it doesn't exist
+if not Tween then
+    function Tween(Pos, Speed)
+        Speed = Speed or 300
+        local Distance = (Pos.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+        local TweenInfo = game:GetService("TweenService"):Create(
+            game.Players.LocalPlayer.Character.HumanoidRootPart,
+            TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear),
+            {CFrame = Pos}
+        )
+        TweenInfo:Play()
+        return TweenInfo
+    end
+end
+
+-- Make sure the AttackNoCoolDown function exists
+if not AttackNoCoolDown then
+    function AttackNoCoolDown()
+        local Combat = game:GetService("Players").LocalPlayer.Character:FindFirstChild("Combat") or 
+                        game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Combat")
+        if not Combat then return end
+        
+        local args = {
+            [1] = "LeftDown",
+            [2] = Vector3.new()  -- You might need to adjust this depending on your game
+        }
+        
+        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+    end
+end
+
+-- Define AutoHaki function if it doesn't exist
+if not AutoHaki then
+    function AutoHaki()
+        if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso")
+        end
+    end
+end
+
+-- Define EquipTool function if it doesn't exist
+if not EquipTool then
+    function EquipTool(ToolName)
+        local tool = game.Players.LocalPlayer.Backpack:FindFirstChild(ToolName) or 
+                    game.Players.LocalPlayer.Character:FindFirstChild(ToolName)
+        
+        if tool and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    end
+end
+
+-- Define SelectWeapon variable if it doesn't exist
+if not SelectWeapon then
+    SelectWeapon = "Combat" -- Default weapon, change this to your preferred weapon
+end
+
 spawn(function()
     while task.wait() do
         if _G.AutoFarmBones then
@@ -360,35 +418,73 @@ spawn(function()
                 if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) then
                     bringmob = false
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    local qTween = Tween(CFrameQ)
-                    if qTween then qTween.Completed:Wait() end
-                    task.wait(1)
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
-                    task.wait(0.5)
+                    
+                    -- Fix tweening by adding a check for character and humanoid
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local qTween = Tween(CFrameQ)
+                        if qTween then 
+                            qTween.Completed:Wait() 
+                            -- Wait until we're close enough to the quest giver
+                            local distance = (player.Character.HumanoidRootPart.Position - CFrameQ.Position).Magnitude
+                            if distance > 10 then
+                                -- Retry tween if we're not close enough
+                                Tween(CFrameQ).Completed:Wait()
+                            end
+                        end
+                        
+                        task.wait(1)
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                        task.wait(0.5)
+                    end
                 end
 
                 -- If no mobs found, move to mob location
                 local mobFound = false
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if mob.Name == Ms and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                    if mob.Name == Ms and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
                         mobFound = true
                         break
                     end
                 end
+                
                 if not mobFound then
-                    Tween(CFrameMon)
-                    task.wait(1)
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        Tween(CFrameMon)
+                        task.wait(1)
+                        -- Additional wait to ensure game loads enemies
+                        task.wait(2)
+                    end
                 end
 
                 -- Kill mobs
                 for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if _G.AutoFarmBones and mob.Name == Ms and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                    if _G.AutoFarmBones and mob and mob.Parent and mob.Name == Ms and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
                         bringmob = true
+                        
                         repeat
-                            if not _G.AutoFarmBones or not mob.Parent then break end
+                            if not _G.AutoFarmBones or not mob or not mob.Parent then 
+                                break 
+                            end
+                            
+                            -- Make sure character exists
+                            if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+                                task.wait(1)
+                                continue
+                            end
+                            
                             AutoHaki()
                             EquipTool(SelectWeapon)
-                            Tween(CFrame.new(mob.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                            
+                            -- Check if mob still exists
+                            if not mob or not mob.Parent or not mob:FindFirstChild("HumanoidRootPart") then
+                                break
+                            end
+                            
+                            -- Position above the mob for better attacking
+                            local targetPos = CFrame.new(mob.HumanoidRootPart.Position + Vector3.new(0, 20, 0))
+                            Tween(targetPos, 200) -- Use faster speed for combat
+                            
+                            -- Attack the mob
                             AttackNoCoolDown()
 
                             -- Disable enemy movement/collision
@@ -396,17 +492,32 @@ spawn(function()
                                 mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 mob.HumanoidRootPart.Transparency = 1
                                 mob.HumanoidRootPart.CanCollide = false
+                                -- Add anchoring to prevent movement
+                                if not mob.HumanoidRootPart.Anchored then
+                                    mob.HumanoidRootPart.Anchored = false -- Don't fully anchor as it might break game mechanics
+                                end
                             end
+                            
                             if mob:FindFirstChild("Humanoid") then
                                 mob.Humanoid.WalkSpeed = 0
                                 mob.Humanoid.JumpPower = 0
+                                -- Prevent moving via teleporting
+                                mob.Humanoid:ChangeState(11) -- Enum.HumanoidStateType.Physics
                             end
-                            task.wait()
-                        until not _G.AutoFarmBones or not mob or not mob.Parent or mob.Humanoid.Health <= 0
+                            
+                            task.wait(0.1) -- Small wait to prevent script from freezing
+                            
+                        until not _G.AutoFarmBones or not mob or not mob.Parent or not mob:FindFirstChild("Humanoid") or mob.Humanoid.Health <= 0
+                        
                         bringmob = false
+                        task.wait(0.5) -- Wait before moving to next target
                     end
                 end
             end)
+            
+            task.wait(0.1) -- Small wait between loops to prevent high CPU usage
+        else
+            task.wait(0.5) -- Longer wait when not farming
         end
     end
 end)
