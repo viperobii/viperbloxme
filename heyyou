@@ -1715,7 +1715,7 @@ end)
 Raids:AddToggle({
     Name = "Auto Raid Mobs",
     Flag = "Raid/AutoFarmNearestMob",
-    Description = "",
+    Description = "Farms nearest mob within short distance only",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
@@ -1723,16 +1723,29 @@ Raids:AddToggle({
     end
 })
 
--- AUTO FARM NEAREST MOB LOOP
+-- AUTO FARM NEAREST MOB LOOP (RAID ONLY, SHORT RANGE)
 spawn(function()
     while task.wait() do
         if _G.AutoNear then
             pcall(function()
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                -- Check if inside Raid (has _WorldOrigin with Locations)
+                local isInRaid = workspace:FindFirstChild("_WorldOrigin") and workspace["_WorldOrigin"]:FindFirstChild("Locations")
+                if not isInRaid then return end
+
                 local Closest = nil
-                local ClosestDistance = math.huge
+                local ClosestDistance = 50 -- very short distance only
+
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
-                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                    local eHum = enemy:FindFirstChild("Humanoid")
+                    local eHRP = enemy:FindFirstChild("HumanoidRootPart")
+
+                    if eHum and eHRP and eHum.Health > 0 then
+                        local dist = (hrp.Position - eHRP.Position).Magnitude
                         if dist < ClosestDistance then
                             Closest = enemy
                             ClosestDistance = dist
@@ -1745,17 +1758,23 @@ spawn(function()
                         task.wait(_G.Fast_Delay or 0.1)
                         AutoHaki()
                         EquipTool(SelectWeapon)
-                        Tween(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                        -- Don't teleport far, just adjust position
+                        char:PivotTo(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
                         AttackNoCoolDown()
-                        if Closest:FindFirstChild("HumanoidRootPart") then
-                            Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            Closest.HumanoidRootPart.Transparency = 1
-                            Closest.HumanoidRootPart.CanCollide = false
+
+                        -- Slow and enlarge target
+                        local hum = Closest:FindFirstChild("Humanoid")
+                        local hrp = Closest:FindFirstChild("HumanoidRootPart")
+                        if hum then
+                            hum.WalkSpeed = 0
+                            hum.JumpPower = 0
                         end
-                        if Closest:FindFirstChild("Humanoid") then
-                            Closest.Humanoid.WalkSpeed = 0
-                            Closest.Humanoid.JumpPower = 0
+                        if hrp then
+                            hrp.Size = Vector3.new(60, 60, 60)
+                            hrp.Transparency = 1
+                            hrp.CanCollide = false
                         end
+
                         bringmob = true
                     until not _G.AutoNear or Closest.Humanoid.Health <= 0 or not Closest.Parent
                     bringmob = false
@@ -1780,6 +1799,7 @@ Raids:AddToggle({
     end
 })
 
+-- Auto Tween to Next Island (only in raid)
 spawn(function()
     local visitedIslands = {}
     while task.wait() do
@@ -1789,12 +1809,17 @@ spawn(function()
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
 
-                local currentPos = hrp.Position
-                local islands = game:GetService("Workspace")['_WorldOrigin'].Locations
+                -- Make sure player is inside a Raid
+                local isInRaid = workspace:FindFirstChild("_WorldOrigin") and workspace["_WorldOrigin"]:FindFirstChild("Locations")
+                if not isInRaid then return end
 
-                -- Reset visited if at portal positions
-                if (currentPos - Vector3.new(-6438.73535, 250.645355, -4501.50684)).Magnitude < 1
-                or (currentPos - Vector3.new(-5017.40869, 314.844055, -2823.0127)).Magnitude < 1 then
+                local currentPos = hrp.Position
+                local islands = workspace["_WorldOrigin"].Locations
+
+                -- Reset visited islands when near portal (end/start position)
+                local atPortal1 = (currentPos - Vector3.new(-6438.73535, 250.645355, -4501.50684)).Magnitude < 10
+                local atPortal2 = (currentPos - Vector3.new(-5017.40869, 314.844055, -2823.0127)).Magnitude < 10
+                if atPortal1 or atPortal2 then
                     visitedIslands = {}
                 end
 
@@ -1805,7 +1830,7 @@ spawn(function()
                         Tween(island.CFrame)
                         visitedIslands["Island " .. i] = true
                         AutoNextIsland = false
-                        wait(1)
+                        wait(1.5)
                         AutoNextIsland = true
                         break
                     end
