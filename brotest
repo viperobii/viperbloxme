@@ -1689,8 +1689,134 @@ spawn(function()
     end
 end)
 
+Raids:AddToggle({
+    Name = "Auto Raids",
+    Flag = "Raids/AutoFarmNearestMob",
+    Description = "Raid ",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoNear = Value
+        if not Value then 
+            bringmob = false
+            -- Return to original position or stop tweening
+            wait()
+        end
+    end
+})
 
 
+
+    
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoRaidMobs then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local char = player.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                -- Only farm mobs inside raid room
+                local closest, closestDist = nil, 300
+                for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
+                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                        if mob:FindFirstChild("IsRaidMob") or string.find(mob.Name, "Order") or string.find(mob.Name, "Raid") then -- optional filter
+                            local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
+                            if dist < closestDist then
+                                closest = mob
+                                closestDist = dist
+                            end
+                        end
+                    end
+                end
+
+                if closest then
+                    repeat
+                        task.wait(_G.Fast_Delay or 0.1)
+
+                        AutoHaki()
+                        EquipTool(SelectWeapon)
+                        AttackNoCoolDown()
+                        bringmob = true
+
+                        -- Buff mob
+                        local mobHRP = closest.HumanoidRootPart
+                        mobHRP.Size = Vector3.new(60, 60, 60)
+                        mobHRP.Transparency = 1
+                        mobHRP.CanCollide = false
+                        closest.Humanoid.WalkSpeed = 0
+                        closest.Humanoid.JumpPower = 0
+
+                        -- Tween to mob
+                        Tween(CFrame.new(mobHRP.Position + Vector3.new(0, 20, 0)))
+
+                        FarmPos = mobHRP.CFrame
+                        MonFarm = closest.Name
+
+                    until not _G.AutoRaidMobs or not closest.Parent or closest.Humanoid.Health <= 0
+
+                    bringmob = false
+                else
+                    -- Wait for mobs to spawn in raid, don’t tween away
+                    task.wait(1)
+                end
+            end)
+        end
+    end
+end)
+
+
+Raids:AddToggle({
+    Name = "Auto Next Island",
+    Flag = "Raids/AutoNextIsland",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        AutoNextIsland = Value
+        if not Value then
+            _G.AutoNear = false
+        end
+    end
+})
+
+spawn(function()
+    local VisitedIslands = {}
+    while task.wait() do
+        if AutoNextIsland then
+            pcall(function()
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local hrp = char.HumanoidRootPart
+                    local pos = hrp.Position
+                    local Locations = workspace["_WorldOrigin"].Locations
+
+                    -- Reset tracker if teleported back to raid area
+                    if (pos - Vector3.new(-6438.735, 250.645, -4501.506)).Magnitude < 1 or
+                       (pos - Vector3.new(-5017.408, 314.844, -2823.012)).Magnitude < 1 then
+                        VisitedIslands = {}
+                    end
+
+                    if Locations:FindFirstChild("Island 1") then
+                        _G.AutoNear = true
+                    end
+
+                    for i = 2, 5 do
+                        local islandName = "Island " .. i
+                        if Locations:FindFirstChild(islandName) and not VisitedIslands[islandName] then
+                            Tween(Locations[islandName].CFrame)
+                            VisitedIslands[islandName] = true
+                            AutoNextIsland = false
+                            wait()
+                            AutoNextIsland = true
+                            break
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 Raids:AddSection("Fruits");
