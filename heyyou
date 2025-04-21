@@ -10,15 +10,18 @@ local Window = redzlib:MakeWindow({
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
 
-
-local Discord = Window:MakeTab({"Discord", "Info"})
+local Discord = Window:MakeTab({
+    Title = "Information",
+    Description = "Info",
+    Icon = "Info",  -- Fixed the split "Icon"
+})
 
 Discord:AddDiscordInvite({
-   Name = "redz Hub | Community",
+   Name = "nova Hub | Community",
    Description = "Join our discord community to receive information about the next
 update",
-   Logo = "rbxassetid://15298567397",
-   Invite = "https://discord.gg/7aR7kNVt4g"
+   Logo = "rbxassetid://120931314112734",
+   Invite = "https://discord.gg/qx9rKaC35f"
 })
 
 local Main = Window:MakeTab({
