@@ -83,9 +83,12 @@ local Setting = Window:MakeTab({
 
 
 
-
-
-
+Discord:AddDiscordInvite({
+    Name = "nova Hub | Community",
+    Description = "Join our discord community to receive information about the next update",
+    Logo = "rbxassetid://120931314112734", -- Check if this ID is correct and exists
+    Invite = "https://discord.gg/qx9rKaC35f"
+})
 
 
 Main:AddToggle({
