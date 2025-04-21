@@ -5,19 +5,10 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "nova Hub : BloxFruit",
+    Title = "viper Hub (NOVA) : Blox-Fruit",
     SubTitle = "by Vipra",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
-
-local Discord = Window:MakeTab({Name = "Discord", Icon = "Info"})
-Discord:AddDiscordInvite({
-    Name = "nova Hub | Community",
-    Description = "Join our discord community to receive information about the next update",
-    Logo = "rbxassetid://120931314112734",
-    Invite = "https://discord.gg/qx9rKaC35f"
-})
-
 
 
 local Info = Window:MakeTab({
@@ -1700,7 +1691,7 @@ end)
 
 Raids:AddToggle({
     Name = "Auto Raids",
-    Flag = "Raids/Auto",
+    Flag = "Raids/AutoFarmNearestMob",
     Description = "Raid ",
     Default = false,
     Callback = function(Value)
