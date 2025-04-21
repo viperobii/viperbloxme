@@ -192,94 +192,77 @@ end)
 
 -- AUTO FARM NEAREST MOB TOGGLE
 Main:AddToggle({
-    Name = "Auto Farm Nearest",
-    Flag = "Raids/AutoFarmNearestMob",
+    Name = "Auto Farm Nearest Mob",
+    Flag = "Main/AutoFarmNearestMob",
     Description = "Nearest",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
         if not Value then 
             bringmob = false
-            -- Return to original position or stop tweening
+            -- Return to original position when turning off
+            wait()
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
             wait()
         end
     end
 })
 
--- Fixed Tween Function (speed 300)
-function TweenToPosition(Pos)
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-
-    local distance = (char.HumanoidRootPart.Position - Pos.Position).Magnitude
-    local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
-
-    local tween = game:GetService("TweenService"):Create(
-        char.HumanoidRootPart,
-        tweenInfo,
-        {CFrame = Pos}
-    )
-    tween:Play()
-    return tween
-end
-
--- Auto Farm Nearest Mob (Using Tween Only, No Teleport)
+-- AUTO FARM NEAREST MOB LOOP
 spawn(function()
     while task.wait() do
         if _G.AutoNear then
             pcall(function()
-                local plr = game.Players.LocalPlayer
-                local char = plr.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
-                local closestMob, closestDist = nil, math.huge
-                local maxRange = 100 -- only go to mobs within 100 studs
-
-                -- Look for mobs in range only
-                for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                        local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                        if dist < closestDist and dist <= maxRange then
-                            closestMob = mob
-                            closestDist = dist
+                local Closest = nil
+                local ClosestDistance = math.huge
+                
+                -- Find the closest enemy
+                for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
+                        if dist < ClosestDistance then
+                            Closest = enemy
+                            ClosestDistance = dist
                         end
                     end
                 end
 
-                if closestMob then
-                    -- Valid mob found in range
+                if Closest then
+                    -- Target and attack the closest mob
                     AutoHaki()
                     EquipTool(SelectWeapon)
-
-                    local mobRoot = closestMob:FindFirstChild("HumanoidRootPart")
-                    if mobRoot then
-                        mobRoot.Size = Vector3.new(60, 60, 60)
-                        mobRoot.Transparency = 1
-                        mobRoot.CanCollide = false
+                    
+                    -- Modify mob properties for easier farming
+                    if Closest:FindFirstChild("HumanoidRootPart") then
+                        Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                        Closest.HumanoidRootPart.Transparency = 1
+                        Closest.HumanoidRootPart.CanCollide = false
                     end
-
-                    if closestMob:FindFirstChild("Humanoid") then
-                        closestMob.Humanoid.WalkSpeed = 0
-                        closestMob.Humanoid.JumpPower = 0
+                    if Closest:FindFirstChild("Humanoid") then
+                        Closest.Humanoid.WalkSpeed = 0
+                        Closest.Humanoid.JumpPower = 0
                     end
-
-                    local aboveCFrame = CFrame.new(mobRoot.Position + Vector3.new(0, 30, 0))
-                    Tween(aboveCFrame)
-
+                    
+                    -- Position above the mob
+                    local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    
+                    -- Attack
+                    AttackNoCoolDown()
                     bringmob = true
-
-                    -- Attack until mob is dead
-                    repeat
-                        AttackNoCoolDown()
-                        task.wait(_G.Fast_Delay or 0.1)
-                    until not closestMob or not closestMob:FindFirstChild("Humanoid") or closestMob.Humanoid.Health <= 0
-
-                    bringmob = false
+                    
+                    -- Wait before next loop iteration
+                    wait(_G.Fast_Delay or 0.1)
+                    
+                    -- Check if mob is dead or no longer valid
+                    if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
+                        bringmob = false
+                        wait(0.5) -- Short wait before targeting next mob
+                    end
                 else
-                    -- No mobs nearby, do nothing
+                    -- No enemies found
                     bringmob = false
-                    task.wait(0.5)
+                    wait(0.5)
                 end
             end)
         end
@@ -1689,96 +1672,7 @@ spawn(function()
     end
 end)
 
-Raids:AddToggle({
-    Name = "Auto Raids",
-    Flag = "Raids/AutoFarmNearestMob",
-    Description = "Raid ",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoRaidMobs = Value
-        if not Value then 
-            bringmob = false
-        end
-    end
-})
 
--- TweenTo function
-local function TweenTo(pos, speed)
-    local ts = game:GetService("TweenService")
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
-
-    local distance = (hrp.Position - pos.Position).Magnitude
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = ts:Create(hrp, tweenInfo, {CFrame = pos})
-    tween:Play()
-    return tween -- Return the tween object instead of waiting for completion
-end
-
--- Main Auto Raid Logic
-spawn(function()
-    while task.wait() do
-        if _G.AutoRaidMobs then
-            pcall(function()
-                local player = game.Players.LocalPlayer
-                local char = player.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if not hrp then return end
-
-                local closest, closestDist = nil, 300
-                for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                        if mob:FindFirstChild("IsRaidMob") or string.find(mob.Name, "Order") or string.find(mob.Name, "Raid") then
-                            local dist = (hrp.Position - mob.HumanoidRootPart.Position).Magnitude
-                            if dist < closestDist then
-                                closest = mob
-                                closestDist = dist
-                            end
-                        end
-                    end
-                end
-
-                if closest then
-                    AutoHaki()
-                    EquipTool(SelectWeapon)
-                    
-                    local mobHRP = closest.HumanoidRootPart
-                    mobHRP.Size = Vector3.new(60, 60, 60)
-                    mobHRP.Transparency = 1
-                    mobHRP.CanCollide = false
-                    closest.Humanoid.WalkSpeed = 0
-                    closest.Humanoid.JumpPower = 0
-                    
-                    -- Create a position above the mob
-                    local targetPosition = CFrame.new(mobHRP.Position + Vector3.new(0, 20, 0))
-                    
-                    -- Use TweenTo but don't wait for completion
-                    local tween = TweenTo(targetPosition, 300)
-                    
-                    -- Attack while tweening
-                    AttackNoCoolDown()
-                    bringmob = true
-                    
-                    FarmPos = mobHRP.CFrame
-                    MonFarm = closest.Name
-                    
-                    -- Wait a short delay before next loop iteration
-                    task.wait(_G.Fast_Delay or 0.1)
-                    
-                    -- Check if mob is dead or farming turned off to break the loop
-                    if not _G.AutoRaidMobs or not closest.Parent or closest.Humanoid.Health <= 0 then
-                        bringmob = false
-                    end
-                else
-                    task.wait(1) -- Wait longer if no mobs found
-                end
-            end)
-        else
-            task.wait(0.5) -- Wait when farming is off
-        end
-    end
-end)
 
 
 Raids:AddToggle({
