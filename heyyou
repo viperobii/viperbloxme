@@ -131,7 +131,7 @@ v4.Notification = function(v131, v132, v133, v134)
     v149.AnchorPoint = Vector2.new(0.5, 0.5);
     v149.Position = UDim2.new(0.9, 0, 0.5, 0);
     v149.Size = UDim2.new(0, 90, 0, 90);
-    v149.Image = "rbxassetid://101883839381557";
+    v149.Image = "rbxassetid://";
     local v157 = Instance.new("TextLabel");
     v157.Parent = v135;
     v157.Name = "TextLabel_Tap";
@@ -1572,7 +1572,7 @@ v29.BorderSizePixel = 0;
 v29.Position = UDim2.new(0.120833337, 0, 0.0952890813, 0);
 v29.Size = UDim2.new(0, 53.5, 0, 53.5);
 v29.BackgroundTransparency = 1;
-v29.Image = "rbxassetid://123448871674913";
+v29.Image = "rbxassetid://11742382093";
 v29.Draggable = true;
 v29.MouseButton1Click:Connect(function()
     game:GetService("VirtualInputManager"):SendKeyEvent(true, 305, false, game);
@@ -3516,7 +3516,7 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
-local v52 = v3:Window("Rubu Roblox", "");
+local v52 = v3:Window("Nova Roblox", "");
 local v53 = v52:T("Tab Status", "rbxassetid://10734984606");
 local v54 = v52:T("Tab General", "rbxassetid://10723407389");
 local v55 = v52:T("Setting Other", "rbxassetid://10734950309");
@@ -3533,7 +3533,7 @@ local v65 = v52:T("Miscellaneous", "rbxassetid://10709782582");
 v53:Seperator("Join Discord");
 v53:Label("Everyone Goes Into Socialize");
 v53:Button("Copy Discord Link", function()
-    setclipboard("https://discord.com/invite/hcJ8PHtkfy");
+    setclipboard("https://discord.gg/qx9rKaC35f");
 end);
 v53:Seperator("Time");
 Time = v53:Label("Executer Time");
@@ -10942,8 +10942,8 @@ local v122 = require(game.ReplicatedStorage.Util.CameraShaker);
 v122:Stop();
 local v123 = game:GetService("Players");
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Rubu Roblox",
-    Text = "Loading Done!",
-    Icon = "rbxthumb://type=Asset&id=123448871674913&w=150&h=150",
+    Title = "Nova Roblox",
+    Text = "Loading Success!",
+    Icon = "rbxthumb://type=Asset&id=101883839381557&w=150&h=150",
     Duration = 10
 });
