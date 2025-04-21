@@ -16,13 +16,6 @@ local Discord = Window:MakeTab({
     Icon = "Info",  -- Fixed the split "Icon"
 })
 
-Discord:AddDiscordInvite({
-   Name = "nova Hub | Community",
-   Description = "Join our discord community to receive information about the next
-update",
-   Logo = "rbxassetid://120931314112734",
-   Invite = "https://discord.gg/qx9rKaC35f"
-})
 
 local Main = Window:MakeTab({
     Title = "Main Farm",
