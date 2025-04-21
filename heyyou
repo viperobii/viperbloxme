@@ -5,16 +5,20 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "viper Hub (NOVA) : Blox-Fruit",
+    Title = "nova Hub : Bloxfruit",
     SubTitle = "by Vipra",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
 
 
-local Info = Window:MakeTab({
-    Title = "Information",
-    Description = "Info",
-    Icon = "alert",  -- Fixed the split "Icon"
+local Discord = Window:MakeTab({"Discord", "Info"})
+
+Discord:AddDiscordInvite({
+   Name = "redz Hub | Community",
+   Description = "Join our discord community to receive information about the next
+update",
+   Logo = "rbxassetid://15298567397",
+   Invite = "https://discord.gg/7aR7kNVt4g"
 })
 
 local Main = Window:MakeTab({
@@ -78,13 +82,7 @@ local Setting = Window:MakeTab({
 })
 
 
-Info:AddButton({
-    Name = "Join Discord Updates",
-    Description = "Tap to open Discord invite in browser",
-    Callback = function()
-        game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/qx9rKaC35f")
-    end
-})
+
 
 
 
