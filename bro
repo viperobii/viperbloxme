@@ -3043,6 +3043,126 @@ function AutoHaki()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
     end
 end
+
+
+-- Auto Attack
+local _v1 = game.Players.LocalPlayer
+
+-- Use getgenv() to make variables accessible across scripts
+getgenv().FastAttack = true
+
+function _x1()
+    local _v2 = _v1.Character
+    if not _v2 then return end
+
+    local _v3 = nil
+    for _, _v4 in ipairs(_v2:GetChildren()) do
+        if _v4:IsA("Tool") then
+            _v3 = _v4
+            break
+        end
+    end
+    if not _v3 then return end
+
+    local function _x2(_v5)
+        return _v5 and _v5:FindFirstChild("Humanoid") and _v5.Humanoid.Health > 0
+    end
+
+    -- Modified function to get both enemies and players
+    local function _x3(_v6)
+        local targets = {}
+        local _v9 = _v2:GetPivot().Position
+        
+        -- Get enemies
+        if workspace:FindFirstChild("Enemies") then
+            local _v7 = workspace.Enemies:GetChildren()
+            for _, _v10 in ipairs(_v7) do
+                local _v11 = _v10:FindFirstChild("HumanoidRootPart")
+                if _v11 and _x2(_v10) and (_v11.Position - _v9).Magnitude <= _v6 then
+                    table.insert(targets, _v10)
+                end
+            end
+        end
+        
+        -- Get players (excluding yourself)
+        for _, player in ipairs(game.Players:GetPlayers()) do
+            if player ~= _v1 and player.Character then
+                local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+                if hrp and _x2(player.Character) and (hrp.Position - _v9).Magnitude <= _v6 then
+                    table.insert(targets, player.Character)
+                end
+            end
+        end
+        
+        return targets
+    end
+
+    if _v3:FindFirstChild("LeftClickRemote") then
+        local _v12 = 1  
+        local _v13 = _x3(60)
+        for _, _v14 in ipairs(_v13) do
+            local hrp = _v14:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local _v15 = (hrp.Position - _v2:GetPivot().Position).Unit
+                pcall(function()
+                    _v3.LeftClickRemote:FireServer(_v15, _v12)
+                end)
+                _v12 = _v12 + 1
+                if _v12 > 1000000000 then _v12 = 1 end
+            end
+        end
+    else
+        local _v16 = {}
+        local _v18 = _v2:GetPivot().Position
+        local _v19 = nil
+        
+        -- Get both enemies and players as targets
+        local _v13 = _x3(60)
+        
+        for _, _v20 in ipairs(_v13) do
+            -- Skip boats if in enemies folder
+            if not _v20:GetAttribute("IsBoat") and _x2(_v20) then
+                local _v21 = _v20:FindFirstChild("Head")
+                if _v21 and (_v18 - _v21.Position).Magnitude <= 60 then
+                    table.insert(_v16, { _v20, _v21 })
+                    _v19 = _v21
+                end
+            end
+        end
+
+        if not _v19 then return end
+
+        pcall(function()
+            local _v22 = game:GetService("ReplicatedStorage")
+            local _v23 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterAttack")
+            local _v24 = _v22:WaitForChild("Modules"):WaitForChild("Net"):WaitForChild("RE/RegisterHit")
+            
+            if #_v16 > 0 then
+                _v23:FireServer(0.000000001)
+                _v24:FireServer(_v19, _v16)
+            else
+                task.wait(0.000000001)
+            end
+        end)
+    end
+end
+
+-- Using getgenv() for global access
+getgenv().FastAttack = true
+
+spawn(function()
+    while wait(.1) do
+        if getgenv().FastAttack then
+            pcall(function()
+                repeat task.wait(0.1)
+                    _x1()
+                until not getgenv().FastAttack
+            end)
+        end
+    end
+end)
+
+
 function EquipWeapon(v366)
     if not Nill then
         if game.Players.LocalPlayer.Backpack:FindFirstChild(v366) then
@@ -4581,11 +4701,7 @@ v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
     _G.farmSkullSlayer = value
 end)
 
-v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
-    _G.farmTyrant = value
-end)
-
--- Farm Skull Slayer Logic
+-- Farm Skull Slayer Logic (with extra mobs)
 spawn(function()
     while task.wait() do
         if _G.farmSkullSlayer and World3 then
@@ -4595,7 +4711,8 @@ spawn(function()
                 topos(CFrame.new(- 16224, 9, 439))
                 
                 for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                    if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                    if (v.Name == "Skull Slayer" or v.Name == "Isle Outlaw" or v.Name == "Island Boy" or v.Name == "Sun-kissed Warrior" or v.Name == "Isle Champion" or v.Name == "Serpent Hunter")
+                    and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
                         repeat
                             task.wait()
                             AutoHaki()
@@ -4612,6 +4729,13 @@ spawn(function()
         end
     end
 end)
+
+
+v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
+    _G.farmTyrant = value
+end)
+
+
 
 -- Farm Tyrant of the Skies Logic
 spawn(function()
