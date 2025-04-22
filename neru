@@ -1,13 +1,6 @@
 -- Deobf By Arcesury 
 -- https://www.youtube.com/@Arcesury
 
-local correctKey = "ILOVEVIPER766541"
-local userKey = getgenv().Key or "ILOVEVIPER766541"
-
-if userKey ~= correctKey then
-    game.Players.LocalPlayer:Kick("Wrong Key Lol! Access Denied.")
-    return
-end
 
 
 
@@ -3525,7 +3518,18 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
-local v52 = v3:Window("Nova Roblox", "");
+
+local correctKey = "ILOVEVIPER766541"
+local userKey = getgenv().Key or "ILOVEVIPER766541"
+
+if userKey ~= correctKey then
+    game.Players.LocalPlayer:Kick("Wrong Key Lol! Access Denied.")
+    return
+end
+
+
+
+local v52 = v3:Window("Nova Rage", "");
 local v53 = v52:T("Tab Status", "rbxassetid://10734984606");
 local v54 = v52:T("Tab General", "rbxassetid://10723407389");
 local v55 = v52:T("Setting Other", "rbxassetid://10734950309");
@@ -4583,6 +4587,7 @@ end);
 
 v54:Seperator("Tyrant Of Skies");
 -- Auto Farm Skull Slayer
+
 v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
     _G.farmSkullSlayer = value
 end)
@@ -4596,6 +4601,10 @@ spawn(function()
     while task.wait() do
         if _G.farmSkullSlayer and World3 then
             pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                topos(CFrame.new(- 16224, 9, 439))
+                
                 for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
                         repeat
@@ -4620,6 +4629,10 @@ spawn(function()
     while task.wait() do
         if _G.farmTyrant and World3 then
             pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                topos(CFrame.new(- 16224, 9, 439))
+                
                 for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
                         repeat
@@ -11013,8 +11026,8 @@ local v122 = require(game.ReplicatedStorage.Util.CameraShaker);
 v122:Stop();
 local v123 = game:GetService("Players");
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Nova Roblox",
+    Title = "Nova Rage",
     Text = "Loading Done!",
-    Icon = "rbxthumb://type=Asset&id=123448871674913&w=150&h=150",
+    Icon = "rbxthumb://type=Asset&id=120931314112734&w=150&h=150",
     Duration = 10
 });
