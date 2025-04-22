@@ -1,4 +1,4 @@
--- Deobf By Arcesury 
+-- Deobf By Arcesur
 -- https://www.youtube.com/@Arcesury
 
 local correctKey = "ILOVEVIPER766541"
