@@ -3525,7 +3525,7 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
-local v52 = v3:Window("Nova Roblox", "");
+local v52 = v3:Window("Nova Rage", "");
 local v53 = v52:T("Tab Status", "rbxassetid://10734984606");
 local v54 = v52:T("Tab General", "rbxassetid://10723407389");
 local v55 = v52:T("Setting Other", "rbxassetid://10734950309");
@@ -11022,8 +11022,8 @@ local v122 = require(game.ReplicatedStorage.Util.CameraShaker);
 v122:Stop();
 local v123 = game:GetService("Players");
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Nova Roblox",
+    Title = "Nova Rage",
     Text = "Loading Done!",
-    Icon = "rbxthumb://type=Asset&id=123448871674913&w=150&h=150",
+    Icon = "rbxthumb://type=Asset&id=120931314112734&w=150&h=150",
     Duration = 10
 });
