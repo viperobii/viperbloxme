@@ -1,29 +1,18 @@
-repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer
+-- This checks if the key is already set in getgenv().Key
+local correctKey = "ILOVEVIPER766541"
+local userKey = getgenv().Key or ""
 
--- Wait for the key to be set by the loader (max 15 seconds)
-local timeout = 15
-local elapsed = 0
-while not getgenv().Key do
-    wait(0.1)
-    elapsed += 0.1
-    if elapsed >= timeout then break end
-end
-
--- Show what the key is (for debugging - optional)
-print("Entered Key:", getgenv().Key)
-
--- Check the key
-if getgenv().Key ~= "ILOVEVIPER766541" then
-    game.Players.LocalPlayer:Kick("Wrong Key Lol")
+if userKey ~= correctKey then
+    game.Players.LocalPlayer:Kick("Wrong Key! Access Denied.")
     return
 end
 
-
-
+-- If the key is correct, continue with your script
+-- Example: Load RedzLib
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/newredz/RedzLibV5/main/Source.lua"))()
-
--- Wait until the library is fully loaded
 repeat task.wait() until redzlib
+
+-- Your hub script continues here...
 
 -- Create the window
 local Window = redzlib:MakeWindow({
