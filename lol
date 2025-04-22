@@ -1,4 +1,4 @@
--- Deobf By Arcesur
+-- Deobf By Arcesury 
 -- https://www.youtube.com/@Arcesury
 
 local correctKey = "ILOVEVIPER766541"
@@ -4582,6 +4582,8 @@ spawn(function()
 end);
 
 v54:Seperator("Tyrant Of Skies");
+-- Auto Farm Skull Slayer
+
 v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
     _G.farmSkullSlayer = value
 end)
@@ -4590,13 +4592,23 @@ v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
     _G.farmTyrant = value
 end)
 
+-- Define Pos if it's not defined elsewhere
+local Pos = CFrame.new(0, 30, 0)
+
 -- Farm Skull Slayer Logic
 spawn(function()
     while task.wait() do
         if _G.farmSkullSlayer and World3 then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Skull Slayer")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
+                local boss = nil
+                for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        boss = v
+                        break
+                    end
+                end
+                
+                if boss then
                     repeat
                         task.wait()
                         AutoHaki()
@@ -4605,6 +4617,8 @@ spawn(function()
                         boss.Humanoid.WalkSpeed = 0
                         boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
                         topos(boss.HumanoidRootPart.CFrame * Pos)
+                        game:GetService("VirtualUser"):CaptureController()
+                        game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 672))
                         sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
                     until not _G.farmSkullSlayer or not boss.Parent or boss.Humanoid.Health <= 0
                 end
@@ -4618,8 +4632,15 @@ spawn(function()
     while task.wait() do
         if _G.farmTyrant and World3 then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Tyrant of the Skies")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
+                local boss = nil
+                for i, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        boss = v
+                        break
+                    end
+                end
+                
+                if boss then
                     repeat
                         task.wait()
                         AutoHaki()
@@ -4628,6 +4649,8 @@ spawn(function()
                         boss.Humanoid.WalkSpeed = 0
                         boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
                         topos(boss.HumanoidRootPart.CFrame * Pos)
+                        game:GetService("VirtualUser"):CaptureController()
+                        game:GetService("VirtualUser"):Button1Down(Vector2.new(1280, 672))
                         sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
                     until not _G.farmTyrant or not boss.Parent or boss.Humanoid.Health <= 0
                 end
