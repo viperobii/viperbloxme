@@ -3043,9 +3043,6 @@ function AutoHaki()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
     end
 end
-
-
-
 function EquipWeapon(v366)
     if not Nill then
         if game.Players.LocalPlayer.Backpack:FindFirstChild(v366) then
