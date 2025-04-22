@@ -3518,27 +3518,7 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
-
-local correctKey = "ILOVEVIPER766541" -- The correct key
-local userKey = getgenv().Key or "" -- The key entered by the user (stored in `getgenv()`)
-
--- Key check function
-local function checkKey()
-    if userKey ~= correctKey then
-        -- If the key is incorrect, kick the player
-        game.Players.LocalPlayer:Kick("Wrong Key Lol! Access Denied.")
-        return false
-    end
-    return true
-end
-
--- Call the checkKey function and proceed only if the key is correct
-if not checkKey() then
-    return -- If key is wrong, exit the script
-end
-
-
-local v52 = v3:Window("Nova Rage", "");
+local v52 = v3:Window("Nova Super", "");
 local v53 = v52:T("Tab Status", "rbxassetid://10734984606");
 local v54 = v52:T("Tab General", "rbxassetid://10723407389");
 local v55 = v52:T("Setting Other", "rbxassetid://10734950309");
@@ -11035,8 +11015,8 @@ local v122 = require(game.ReplicatedStorage.Util.CameraShaker);
 v122:Stop();
 local v123 = game:GetService("Players");
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Nova Rage",
+    Title = "Nova Roblox",
     Text = "Loading Done!",
-    Icon = "rbxthumb://type=Asset&id=120931314112734&w=150&h=150",
+    Icon = "rbxthumb://type=Asset&id=123448871674913&w=150&h=150",
     Duration = 10
 });
