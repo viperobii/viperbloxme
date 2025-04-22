@@ -1,18 +1,17 @@
 -- Deobf By Arcesury 
 -- https://www.youtube.com/@Arcesury
 
-getgenv().Key = ""
-
 repeat wait() until game:IsLoaded() and game.Players and game.Players.LocalPlayer
 
--- Wait until Key is set or timeout after 10 seconds
+-- Wait for Key to be set (max 10 seconds)
 local timeout = 10
 local elapsed = 0
 repeat
     wait(0.1)
     elapsed += 0.1
-until getgenv().Key or elapsed >= timeout
+until getgenv().Key and getgenv().Key ~= "" or elapsed >= timeout
 
+-- Kick if wrong or missing key
 if getgenv().Key ~= "ILOVEVIPER766541" then
     game.Players.LocalPlayer:Kick("Wrong Key Lol")
     return
