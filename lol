@@ -1,13 +1,29 @@
 -- Deobf By Arcesury 
 -- https://www.youtube.com/@Arcesury
 
+-- Define the correct key
 local correctKey = "ILOVEVIPER766541"
+
+-- Check for the user key in getgenv()
 local userKey = getgenv().Key or "ILOVEVIPER766541"
 
-if userKey ~= correctKey then
-    game.Players.LocalPlayer:Kick("Wrong Key Lol! Access Denied.")
-    return
+-- Function to kick the player if the key is incorrect
+local function checkKey()
+    if userKey ~= correctKey then
+        -- If the key is incorrect, kick the player and stop script execution
+        game.Players.LocalPlayer:Kick("Wrong Key Lol! Access Denied.")
+        return false  -- Return false to stop script execution
+    end
+    return true  -- Return true to proceed with script execution
 end
+
+-- Run the key check
+if not checkKey() then
+    return  -- Stop execution if the key is incorrect
+end
+
+-- Proceed with the rest of the script
+-- Your main script logic goes here
 
 
 
