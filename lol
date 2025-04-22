@@ -4581,6 +4581,73 @@ spawn(function()
     end
 end);
 
+v54:Seperator("Tyrant Of Skies");
+-- Auto Farm Skull Slayer
+
+v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
+    _G.farmSkullSlayer = value
+end)
+
+v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
+    _G.farmTyrant = value
+end)
+
+-- Farm Skull Slayer Logic
+spawn(function()
+    while task.wait() do
+        if _G.farmSkullSlayer and World3 then
+            pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                topos(CFrame.new(- 16224, 9, 439))
+                
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            topos(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- Farm Tyrant of the Skies Logic
+spawn(function()
+    while task.wait() do
+        if _G.farmTyrant and World3 then
+            pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                topos(CFrame.new(- 16224, 9, 439))
+                
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            topos(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
+        end
+    end
+end)
+
 
 
 v54:Seperator("Observation");
