@@ -4,6 +4,7 @@
 
 
 
+
 if not LPH_OBFUSCATED then
     function LPH_JIT_MAX(...)
         return ...;
@@ -3043,9 +3044,6 @@ function AutoHaki()
         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Buso");
     end
 end
-
-
-
 function EquipWeapon(v366)
     if not Nill then
         if game.Players.LocalPlayer.Backpack:FindFirstChild(v366) then
@@ -3521,27 +3519,7 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
-
-local correctKey = "ILOVEVIPER766541" -- The correct key
-local userKey = getgenv().Key or "" -- The key entered by the user (stored in `getgenv()`)
-
--- Key check function
-local function checkKey()
-    if userKey ~= correctKey then
-        -- If the key is incorrect, kick the player
-        game.Players.LocalPlayer:Kick("Wrong Key Lol! Access Denied.")
-        return false
-    end
-    return true
-end
-
--- Call the checkKey function and proceed only if the key is correct
-if not checkKey() then
-    return -- If key is wrong, exit the script
-end
-
-
-local v52 = v3:Window("Nova Rage", "");
+local v52 = v3:Window("Nova Rage", );
 local v53 = v52:T("Tab Status", "rbxassetid://10734984606");
 local v54 = v52:T("Tab General", "rbxassetid://10723407389");
 local v55 = v52:T("Setting Other", "rbxassetid://10734950309");
@@ -4597,7 +4575,72 @@ spawn(function()
     end
 end);
 
+v54:Seperator("Tyrant Of Skies");
+-- Auto Farm Skull Slayer
 
+v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
+    _G.farmSkullSlayer = value
+end)
+
+v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
+    _G.farmTyrant = value
+end)
+
+-- Farm Skull Slayer Logic
+spawn(function()
+    while task.wait() do
+        if _G.farmSkullSlayer and World3 then
+            pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                topos(CFrame.new(- 16224, 9, 439))
+                
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            topos(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- Farm Tyrant of the Skies Logic
+spawn(function()
+    while task.wait() do
+        if _G.farmTyrant and World3 then
+            pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                topos(CFrame.new(- 16224, 9, 439))
+                
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            topos(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 
 
@@ -10975,6 +11018,6 @@ local v123 = game:GetService("Players");
 game:GetService("StarterGui"):SetCore("SendNotification", {
     Title = "Nova Rage",
     Text = "Loading Done!",
-    Icon = "rbxthumb://type=Asset&id=120931314112734&w=150&h=150",
+    Icon = "rbxthumb://type=Asset&id=123448871674913&w=150&h=150",
     Duration = 10
 });
