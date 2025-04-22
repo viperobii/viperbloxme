@@ -4582,6 +4582,7 @@ spawn(function()
 end);
 
 v54:Seperator("Tyrant Of Skies");
+-- Auto Farm Skull Slayer
 v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
     _G.farmSkullSlayer = value
 end)
@@ -4595,18 +4596,19 @@ spawn(function()
     while task.wait() do
         if _G.farmSkullSlayer and World3 then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Skull Slayer")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
-                    repeat
-                        task.wait()
-                        AutoHaki()
-                        EquipWeapon(_G.SelectWeapon)
-                        boss.HumanoidRootPart.CanCollide = false
-                        boss.Humanoid.WalkSpeed = 0
-                        boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                        topos(boss.HumanoidRootPart.CFrame * Pos)
-                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                    until not _G.farmSkullSlayer or not boss.Parent or boss.Humanoid.Health <= 0
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            topos(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
+                    end
                 end
             end)
         end
@@ -4618,23 +4620,25 @@ spawn(function()
     while task.wait() do
         if _G.farmTyrant and World3 then
             pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Tyrant of the Skies")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
-                    repeat
-                        task.wait()
-                        AutoHaki()
-                        EquipWeapon(_G.SelectWeapon)
-                        boss.HumanoidRootPart.CanCollide = false
-                        boss.Humanoid.WalkSpeed = 0
-                        boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                        topos(boss.HumanoidRootPart.CFrame * Pos)
-                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                    until not _G.farmTyrant or not boss.Parent or boss.Humanoid.Health <= 0
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            topos(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
+                    end
                 end
             end)
         end
     end
 end)
+
 
 
 v54:Seperator("Observation");
