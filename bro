@@ -2,9 +2,6 @@
 -- https://www.youtube.com/@Arcesury
 
 
-
-
-
 if not LPH_OBFUSCATED then
     function LPH_JIT_MAX(...)
         return ...;
@@ -1575,7 +1572,7 @@ v29.BorderSizePixel = 0;
 v29.Position = UDim2.new(0.120833337, 0, 0.0952890813, 0);
 v29.Size = UDim2.new(0, 53.5, 0, 53.5);
 v29.BackgroundTransparency = 1;
-v29.Image = "rbxassetid://11742382093";
+v29.Image = "rbxassetid://123448871674913";
 v29.Draggable = true;
 v29.MouseButton1Click:Connect(function()
     game:GetService("VirtualInputManager"):SendKeyEvent(true, 305, false, game);
@@ -3519,7 +3516,7 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
-local v52 = v3:Window("Nova Rage", );
+local v52 = v3:Window("Rubu Roblox", "");
 local v53 = v52:T("Tab Status", "rbxassetid://10734984606");
 local v54 = v52:T("Tab General", "rbxassetid://10723407389");
 local v55 = v52:T("Setting Other", "rbxassetid://10734950309");
@@ -3701,39 +3698,55 @@ end);
 v54:Seperator("Farming");
 v54:Toggle("Auto Farm Level", _G.Farm, function(v406)
     _G.Level = v406;
-    StopTween(_G.Farm);
+    if not v406 then
+        StopTween(_G.Farm);
+    end
 end);
+
 spawn(function()
     while wait() do
         if _G.Level then
             pcall(function()
-                local v2032 = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text;
-                if not string.find(v2032, NameMon) then
+                -- Check if quest is active and matches target monster
+                local QuestTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
+                
+                if not string.find(QuestTitle, NameMon) and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
                     StartMagnet = false;
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
                 end
-                if (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false) then
+                
+                -- If no quest is active, get a new one
+                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
                     StartMagnet = false;
                     CheckQuest();
+                    
+                    -- Move to quest giver
                     if BypassTP then
-                        if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 3500) then
+                        if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 3500 then
                             BTP(CFrameQuest);
-                        elseif ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude < 3500) then
+                        else
                             TP1(CFrameQuest);
                         end
                     else
                         TP1(CFrameQuest);
                     end
-                    if ((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5) then
+                    
+                    -- Accept quest if close enough
+                    if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5 then
+                        wait(0.5) -- Small delay before accepting quest
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest);
                     end
-                elseif (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true) then
+                    
+                -- If quest is active
+                elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
                     CheckQuest();
+                    
+                    -- Check for monsters in workspace
                     if game:GetService("Workspace").Enemies:FindFirstChild(Mon) then
-                        for v2830, v2831 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if (v2831:FindFirstChild("HumanoidRootPart") and v2831:FindFirstChild("Humanoid") and (v2831.Humanoid.Health > 0)) then
-                                if (v2831.Name == Mon) then
-                                    if string.find(game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text, NameMon) then
+                        for _, v2831 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if v2831:FindFirstChild("HumanoidRootPart") and v2831:FindFirstChild("Humanoid") and v2831.Humanoid.Health > 0 then
+                                if v2831.Name == Mon then
+                                    if string.find(QuestTitle, NameMon) then
                                         repeat
                                             task.wait();
                                             EquipWeapon(_G.SelectWeapon);
@@ -3745,7 +3758,7 @@ spawn(function()
                                             v2831.Head.CanCollide = false;
                                             v2831.HumanoidRootPart.Size = Vector3.new(50, 50, 50);
                                             StartMagnet = true;
-                                        until not _G.Level or (v2831.Humanoid.Health <= 0) or not v2831.Parent or (game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false)
+                                        until not _G.Level or v2831.Humanoid.Health <= 0 or not v2831.Parent or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false
                                     else
                                         StartMagnet = false;
                                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
@@ -3754,11 +3767,16 @@ spawn(function()
                             end
                         end
                     else
-                        TP1(CFrameMon);
-                        UnEquipWeapon(_G.SelectWeapon);
+                        -- If no monsters in workspace, go to monster spawn location
                         StartMagnet = false;
+                        UnEquipWeapon(_G.SelectWeapon);
+                        
+                        -- Check if monster exists in ReplicatedStorage
                         if game:GetService("ReplicatedStorage"):FindFirstChild(Mon) then
                             TP1(game:GetService("ReplicatedStorage"):FindFirstChild(Mon).HumanoidRootPart.CFrame * CFrame.new(15, 10, 2));
+                        else
+                            -- If not found in either place, go to the monster CFrame
+                            TP1(CFrameMon);
                         end
                     end
                 end
@@ -3766,6 +3784,8 @@ spawn(function()
         end
     end
 end);
+
+
 if World1 then
     v54:Toggle("Auto Farm Fast (Farm Lv.1-300)", _G.FarmFast, function(v1774)
         _G.Farmfast = v1774;
@@ -4574,76 +4594,6 @@ spawn(function()
         end
     end
 end);
-
-v54:Seperator("Tyrant Of Skies");
--- Auto Farm Skull Slayer
-
-v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
-    _G.farmSkullSlayer = value
-end)
-
-v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
-    _G.farmTyrant = value
-end)
-
--- Farm Skull Slayer Logic
-spawn(function()
-    while task.wait() do
-        if _G.farmSkullSlayer and World3 then
-            pcall(function()
-                -- Teleport to location first
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
-                topos(CFrame.new(- 16224, 9, 439))
-                
-                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                    if v.Name == "Skull Slayer" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                        repeat
-                            task.wait()
-                            AutoHaki()
-                            EquipWeapon(_G.SelectWeapon)
-                            v.HumanoidRootPart.CanCollide = false
-                            v.Humanoid.WalkSpeed = 0
-                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                            topos(v.HumanoidRootPart.CFrame * Pos)
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
-                    end
-                end
-            end)
-        end
-    end
-end)
-
--- Farm Tyrant of the Skies Logic
-spawn(function()
-    while task.wait() do
-        if _G.farmTyrant and World3 then
-            pcall(function()
-                -- Teleport to location first
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
-                topos(CFrame.new(- 16224, 9, 439))
-                
-                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                    if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
-                        repeat
-                            task.wait()
-                            AutoHaki()
-                            EquipWeapon(_G.SelectWeapon)
-                            v.HumanoidRootPart.CanCollide = false
-                            v.Humanoid.WalkSpeed = 0
-                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                            topos(v.HumanoidRootPart.CFrame * Pos)
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
-                    end
-                end
-            end)
-        end
-    end
-end)
-
-
-
 v54:Seperator("Observation");
 v54:Toggle("Auto Farm Observation", _G.Observation, function(v425)
     _G.Observation = v425;
@@ -4798,8 +4748,7 @@ if World3 then
         "rip_indra True Form",
         "Longma",
         "Soul Reaper",
-        "Cake Queen",
-        "Tyrant of the Skies"
+        "Cake Queen"
     }, function(v1777)
         _G.SelectBoss = v1777;
     end);
@@ -11016,7 +10965,7 @@ local v122 = require(game.ReplicatedStorage.Util.CameraShaker);
 v122:Stop();
 local v123 = game:GetService("Players");
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Nova Rage",
+    Title = "Rubu Roblox",
     Text = "Loading Done!",
     Icon = "rbxthumb://type=Asset&id=123448871674913&w=150&h=150",
     Duration = 10
