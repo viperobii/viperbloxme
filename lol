@@ -4546,6 +4546,7 @@ end);
 v54:Toggle("Auto Dough King Hop", _G.doughkingHop, function(v424)
     _G.doughkingHop = v424;
 end);
+
 spawn(function()
     while wait() do
         if (_G.doughking and World3) then
@@ -4583,59 +4584,8 @@ end);
 
 v54:Seperator("Tyrant Of Skies");
 -- Auto Farm Skull Slayer
-v54:Toggle("Auto Farm Skull Slayer", _G.farmSkullSlayer, function(value)
-    _G.farmSkullSlayer = value
-end)
-
--- Auto Farm Tyrant of the Skies
-v54:Toggle("Auto Farm Tyrant of the Skies", _G.farmTyrant, function(value)
-    _G.farmTyrant = value
-end)
-
--- Farm Skull Slayer Logic
-spawn(function()
-    while task.wait() do
-        if _G.farmSkullSlayer and World3 then
-            pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Skull Slayer")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
-                    repeat
-                        task.wait()
-                        AutoHaki()
-                        EquipWeapon(_G.SelectWeapon)
-                        boss.HumanoidRootPart.CanCollide = false
-                        boss.Humanoid.WalkSpeed = 0
-                        boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                        topos(boss.HumanoidRootPart.CFrame * Pos)
-                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                    until not _G.farmSkullSlayer or not boss.Parent or boss.Humanoid.Health <= 0
-                end
-            end)
-        end
-    end
-end)
-
--- Farm Tyrant of the Skies Logic
-spawn(function()
-    while task.wait() do
-        if _G.farmTyrant and World3 then
-            pcall(function()
-                local boss = game:GetService("Workspace").Enemies:FindFirstChild("Tyrant of the Skies")
-                if boss and boss:FindFirstChild("Humanoid") and boss:FindFirstChild("HumanoidRootPart") and boss.Humanoid.Health > 0 then
-                    repeat
-                        task.wait()
-                        AutoHaki()
-                        EquipWeapon(_G.SelectWeapon)
-                        boss.HumanoidRootPart.CanCollide = false
-                        boss.Humanoid.WalkSpeed = 0
-                        boss.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                        topos(boss.HumanoidRootPart.CFrame * Pos)
-                        sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                    until not _G.farmTyrant or not boss.Parent or boss.Humanoid.Health <= 0
-                end
-            end)
-        end
-    end
+v54:Toggle("Auto Farm Skull Slayer & Tyrant", _G.FarmSkullAndTyrant or false, function(value)
+    _G.FarmSkullAndTyrant = value
 end)
 
 
