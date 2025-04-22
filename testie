@@ -1,5 +1,0 @@
--- Put your key here
-getgenv().Key = "ILOVEVIPER766541"
-
--- Load your protected hub file
-loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/yousamurai"))()
