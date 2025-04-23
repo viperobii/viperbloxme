@@ -90,71 +90,7 @@ Discord:AddDiscordInvite({
     Invite = "https://discord.gg/qx9rKaC35f"
 })
 
-Main:AddSection("Farm Mode")
 
-local v71 = {
-    "Melee",
-    "Sword",
-    "Fruit",
-    "Gun"
-};
-_G.SelectWeapon = "Melee";
-v54:Dropdown("Select Weapon", v71, function(v404)
-    _G.SelectWeapon = v404;
-end);
-
-
-_G.SelectWeapon = "Melee"
-
-Main:AddDropdown({
-    Name = "Select Weapon",
-    Flag = "Main/SelectWeapon",
-    Default = "Melee",
-    Options = { "Melee", "Sword", "Fruit", "Gun" },
-    Callback = function(option)
-        _G.SelectWeapon = option
-    end
-})
-
-task.spawn(function()
-    while wait() do
-        pcall(function()
-            if (_G.SelectWeapon == "Melee") then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if (tool.ToolTip == "Melee") then
-                        if game.Players.LocalPlayer.Backpack:FindFirstChild(tool.Name) then
-                            _G.SelectWeapon = tool.Name
-                        end
-                    end
-                end
-            elseif (_G.SelectWeapon == "Sword") then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if (tool.ToolTip == "Sword") then
-                        if game.Players.LocalPlayer.Backpack:FindFirstChild(tool.Name) then
-                            _G.SelectWeapon = tool.Name
-                        end
-                    end
-                end
-            elseif (_G.SelectWeapon == "Gun") then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if (tool.ToolTip == "Gun") then
-                        if game.Players.LocalPlayer.Backpack:FindFirstChild(tool.Name) then
-                            _G.SelectWeapon = tool.Name
-                        end
-                    end
-                end
-            elseif (_G.SelectWeapon == "Fruit") then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if (tool.ToolTip == "Blox Fruit") then
-                        if game.Players.LocalPlayer.Backpack:FindFirstChild(tool.Name) then
-                            _G.SelectWeapon = tool.Name
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
 
 Main:AddToggle({
     Name = "Auto Farm Level",
@@ -870,27 +806,56 @@ Setting:AddToggle({
 
 
 
-local v28 = Instance.new("ScreenGui");
-local v29 = Instance.new("ImageButton");
-local v30 = Instance.new("UICorner");
-v28.Name = "ToggleUI";
-v28.Parent = game.CoreGui;
-v28.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-v29.Name = "ToggleButton";
-v29.Parent = v28;
-v29.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-v29.BorderSizePixel = 0;
-v29.Position = UDim2.new(0.120833337, 0, 0.0952890813, 0);
-v29.Size = UDim2.new(0, 53.5, 0, 53.5);
-v29.BackgroundTransparency = 1;
-v29.Image = "rbxassetid://123448871674913";
-v29.Draggable = true;
-v29.MouseButton1Click:Connect(function()
-    game:GetService("VirtualInputManager"):SendKeyEvent(true, 305, false, game);
-    game:GetService("VirtualInputManager"):SendKeyEvent(false, 305, false, game);
-end);
-v30.CornerRadius = UDim.new(0, 10);
-v30.Parent = v29;
+local v22 = Instance.new("ScreenGui")
+local v23 = Instance.new("ImageButton")
+local v25 = Instance.new("ParticleEmitter")
+local v26 = game:GetService("TweenService")
+
+v22.Name = "RedzToggleUI"
+v22.Parent = game.CoreGui
+v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+v23.Name = "OpenToggle"
+v23.Parent = v22
+v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+v23.BorderSizePixel = 0
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)
+v23.Size = UDim2.new(0, 35, 0, 35)
+v23.Image = "rbxassetid://123448871674913"
+v23.Draggable = true
+
+v25.Parent = v23
+v25.LightEmission = 1
+v25.Size = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.1),
+    NumberSequenceKeypoint.new(1, 0)
+})
+v25.Lifetime = NumberRange.new(0.5, 1)
+v25.Rate = 0
+v25.Speed = NumberRange.new(5, 10)
+v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))
+
+v23.MouseButton1Down:Connect(function()
+    v25.Rate = 100
+
+    if Window.Enabled then
+        Window:Minimize(true)
+    else
+        Window:Minimize(false)
+    end
+
+    task.delay(1, function()
+        v25.Rate = 0
+    end)
+end)
+
+local entranceTween = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.1, 0, 0.1, 0),
+    Size = UDim2.new(0, 35, 0, 35),
+    BackgroundTransparency = 0.2
+})
+entranceTween:Play()
+
 if (game.PlaceId == 2753915549) then
     World1 = true;
 elseif (game.PlaceId == 4442272183) then
@@ -1494,7 +1459,7 @@ function CheckQuest()
             NameMon = "Serpent Hunter";
             CFrameQuest = CFrame.new(- 16665, 105, 1580);
             CFrameMon = CFrame.new(- 16542.4824, 146.675156, 1529.61401, - 0.999948919, 1.0729811e-8, 0.0101067368, 1.0128324e-8, 1, - 5.9564663e-8, - 0.0101067368, - 5.9459257e-8, - 0.999948919);
-        elseif ((MyLevel == 2575) or (MyLevel <= 2600)) then
+        elseif ((MyLevel == 2575) or (MyLevel <= 2650)) then
             Mon = "Skull Slayer";
             LevelQuest = 2;
             NameQuest = "TikiQuest3";
