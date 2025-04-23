@@ -285,6 +285,7 @@ Main:AddToggle({
 })
 
 spawn(function()
+    local hasTweened = false
     while task.wait() do
         if _G.AutoFarmBones then
             pcall(function()
@@ -295,13 +296,14 @@ spawn(function()
                     "Demonic Soul"
                 }
 
-Tween(CFrame.new(- 9480.80762, 142.130661, 5566.37305, - 0.00655503059, 4.5295423e-8, - 0.999978542, 2.0492047e-8, 1, 4.5162068e-8, 0.999978542, - 2.0195568e-8, - 0.00655503059))
-
+                if not hasTweened then
+                    Tween(CFrame.new(-9480.80762, 142.130661, 5566.37305, -0.00655503059, 4.5295423e-8, -0.999978542, 2.0492047e-8, 1, 4.5162068e-8, 0.999978542, -2.0195568e-8, -0.00655503059))
+                    hasTweened = true
+                end
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmBones then break end
 
-                    -- Wait until all mobs of this type are cleared
                     repeat
                         local mobFound = false
                         for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -321,6 +323,8 @@ Tween(CFrame.new(- 9480.80762, 142.130661, 5566.37305, - 0.00655503059, 4.529542
                     until not mobFound or not _G.AutoFarmBones
                 end
             end)
+        else
+            hasTweened = false
         end
     end
 end)
@@ -652,6 +656,63 @@ end)
 function FormatNumber(number)
     return math.floor(number + 0.5)
 end
+
+
+Player:AddSlider({
+    Name = "Walkspeed",
+    Flag = "Player/SpeedMultiplier",
+    Description = "Higher = Faster",
+    Range = {1, 300},
+    Suffix = "",
+    CurrentValue = 100,
+    Increment = 1,
+    Callback = function(Value)
+        _G.SpeedMultiplier = Value
+    end,
+})
+
+-- Initialize global variables
+_G.SpeedBoost = false
+_G.SpeedMultiplier = 100
+
+-- Loop for velocity-based speed modification
+task.spawn(function()
+    while true do
+        if _G.SpeedBoost then
+            pcall(function()
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+                    local humanoid = char.Humanoid
+                    local moveDirection = humanoid.MoveDirection
+
+                    if moveDirection.Magnitude > 0 then
+                        local velocity = moveDirection.Unit * _G.SpeedMultiplier
+                        velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
+                        char.HumanoidRootPart.Velocity = velocity
+                    end
+                end
+            end)
+        end
+        task.wait()
+    end
+end)
+
+Player:AddToggle({
+    Name = "Enable Walkspeed",
+    Flag = "Player/SpeedBoost",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.SpeedBoost = Value
+        if not Value then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.Velocity = Vector3.new(0, char.HumanoidRootPart.Velocity.Y, 0)
+            end
+        end
+    end,
+})
+
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
