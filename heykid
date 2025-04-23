@@ -94,154 +94,96 @@ Discord:AddDiscordInvite({
 
 Main:AddToggle({
     Name = "Auto Farm Level",
-    Flag = "Farm/AutoFarmLevel",
+    Flag = "Main/AutoFarmLevel",
+    Description = "Fast Farm With Dodge Skill Mobs",
     Default = false,
-    Callback = function(v406)
-        _G.Level = v406
-        if not v406 then
-            StopTween(_G.Farm)
+    Callback = function(Value)
+        _G.AutoLevel = Value
+        if not Value then
+            wait()
+            -- Ensure player is above the water level
+            local player = game:GetService("Players").LocalPlayer
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            if playerPosition.Y <= 0 then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+            end
+            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
+            wait()
         end
     end
 })
 
--- Anti-Stuck function to lift the character slightly if it's stuck on a platform
-function AntiStuck()
-    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        hrp.CFrame = hrp.CFrame + Vector3.new(0, 5, 0) -- lift up slightly
-    end
-end
-
--- Noclip function to allow movement through parts if needed
-noclip = true
-game:GetService("RunService").Stepped:Connect(function()
-    if noclip and game.Players.LocalPlayer.Character then
-        for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-            if v:IsA("BasePart") then
-                v.CanCollide = false
-            end
-        end
-    end
-end)
-
--- Main Auto Farm loop
 spawn(function()
-    while wait() do
-        if _G.Level then
+    while task.wait() do
+        if _G.AutoLevel then
             pcall(function()
-                -- Check if quest is active and matches target monster
-                local QuestTitle = game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
-                if not string.find(QuestTitle, NameMon) and game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+                CheckLevel()
+
+                local player = game:GetService("Players").LocalPlayer
+                local questGui = player.PlayerGui.Main.Quest
+
+                if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                end
+                    Tween(CFrameQ)
 
-                -- If no quest is active, get a new one
-                if game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false then
-                    CheckQuest()
-
-                    -- Move to quest giver with AntiStuck
-                    AntiStuck()  -- Lift off any stuck platform
-                    if BypassTP then
-                        if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 3500 then
-                            BTP(CFrameQuest)
-                        else
-                            TP1(CFrameQuest)
-                        end
-                    else
-                        TP1(CFrameQuest)
+                    -- Ensure player stays above water after tweening
+                    local playerPosition = player.Character.HumanoidRootPart.Position
+                    if playerPosition.Y <= 0 then
+                        player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
                     end
 
-                    -- Accept quest if close enough
-                    if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5 then
-                        wait(0.5)
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
+                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
+                        wait(0.5) -- Small delay before accepting quest
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
                     end
-
-                -- If quest is active
-                elseif game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == true then
-                    CheckQuest()
-
-                    -- Check for monsters in workspace
-                    if game:GetService("Workspace").Enemies:FindFirstChild(Mon) then
-                        for _, v2831 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if v2831:FindFirstChild("HumanoidRootPart") and v2831:FindFirstChild("Humanoid") and v2831.Humanoid.Health > 0 then
-                                if v2831.Name == Mon then
-                                    if string.find(QuestTitle, NameMon) then
-                                        repeat
-                                            task.wait()
-                                            EquipWeapon(_G.SelectWeapon)
-                                            AutoHaki()
-                                            PosMon = v2831.HumanoidRootPart.CFrame
-                                            TP1(v2831.HumanoidRootPart.CFrame * Pos)
-                                            v2831.HumanoidRootPart.CanCollide = false
-                                            v2831.Humanoid.WalkSpeed = 0
-                                            v2831.Head.CanCollide = false
-                                            v2831.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                                        until not _G.Level or v2831.Humanoid.Health <= 0 or not v2831.Parent or game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false
-                                    else
-                                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                                    end
-                                end
+                else
+                    -- Check if there are mobs to farm
+                    local foundMob = false
+                    
+                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            if string.find(enemy.Name, Ms) then
+                                foundMob = true
+                                
+                                -- Target and attack the mob
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+                                
+                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                enemy.HumanoidRootPart.Transparency = 1
+                                enemy.Humanoid.JumpPower = 0
+                                enemy.Humanoid.WalkSpeed = 0
+                                enemy.HumanoidRootPart.CanCollide = false
+                                
+                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
+                                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                                
+                                -- Attack
+                                AttackNoCoolDown()
+                                bringmob = true
+                                
+                                wait(0.1)
+                                break -- Focus on one mob at a time
                             end
                         end
-                    else
-                        -- If no monsters in workspace, go to monster spawn location
-                        UnEquipWeapon(_G.SelectWeapon)
+                    end
+                    
+                    -- If no mobs found, go to spawn location
+                    if not foundMob then
+                        bringmob = false
+                        -- Go to mob spawn location
+                        Tween(CFrameMon)
 
-                        -- Check if monster exists in ReplicatedStorage
-                        if game:GetService("ReplicatedStorage"):FindFirstChild(Mon) then
-                            TP1(game:GetService("ReplicatedStorage"):FindFirstChild(Mon).HumanoidRootPart.CFrame * CFrame.new(15, 10, 2))
-                        else
-                            -- If not found in either place, go to the monster CFrame
-                            TP1(CFrameMon)
+                        -- Ensure player stays above water during movement
+                        local playerPosition = player.Character.HumanoidRootPart.Position
+                        if playerPosition.Y <= 0 then
+                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
                         end
+
+                        wait(0.5)
                     end
                 end
             end)
-        end
-    end
-end)
-
-
-Main:AddToggle({
-    Name = "Auto Farm Nearest",
-    Flag = "Farm/AutoFarmNearest",
-    Default = false,
-    Callback = function(Value)
-        _G.FarmNearest = Value
-        if not Value then
-            StopTween(_G.FarmNearest)
-        end
-    end
-})
-
-spawn(function()
-    while wait() do
-        if _G.FarmNearest then
-            for v2033, v2034 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                if (v2034.Name and v2034:FindFirstChild("Humanoid")) then
-                    if (v2034.Humanoid.Health > 0) then
-                        repeat
-                            wait()
-                            EquipWeapon(_G.SelectWeapon)
-                            if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
-                                local v2832 = {
-                                    [1] = "Buso"
-                                }
-                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(v2832))
-                            end
-                            topos(v2034.HumanoidRootPart.CFrame * Pos)
-                            v2034.HumanoidRootPart.CanCollide = false
-                            Fastattack = true
-                            v2034.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                            AutoFarmNearestMagnet = true
-                            PosMon = v2034.HumanoidRootPart.CFrame
-                        until not _G.FarmNearest or not v2034.Parent or (v2034.Humanoid.Health <= 0)
-                        AutoFarmNearestMagnet = false
-                        Fastattack = false
-                    end
-                end
-            end
         end
     end
 end)
