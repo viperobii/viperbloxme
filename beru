@@ -178,7 +178,7 @@ spawn(function()
     end
 end)
 
--- AUTO FARM NEAREST MOB TOGGLE
+
 Main:AddToggle({
     Name = "Auto Farm Nearest Mob",
     Flag = "Main/AutoFarmNearestMob",
@@ -188,7 +188,6 @@ Main:AddToggle({
         _G.AutoNear = Value
         if not Value then 
             bringmob = false
-            -- Return to original position when turning off
             wait()
             Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
             wait()
@@ -231,24 +230,22 @@ spawn(function()
                         Closest.Humanoid.JumpPower = 0
                     end
                     
-                    -- Position above the mob
+                    -- Tween to mob position
                     local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
+                    Tween(CFrame.new(targetPos))
                     
                     -- Attack
                     AttackNoCoolDown()
                     bringmob = true
                     
-                    -- Wait before next loop iteration
                     wait(_G.Fast_Delay or 0.1)
-                    
-                    -- Check if mob is dead or no longer valid
+
+                    -- Check if mob is dead
                     if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
                         bringmob = false
-                        wait(0.5) -- Short wait before targeting next mob
+                        wait(0.5)
                     end
                 else
-                    -- No enemies found
                     bringmob = false
                     wait(0.5)
                 end
@@ -5343,23 +5340,19 @@ end
 TweenSpeed = 350
 
 function Tween(destinationCFrame)
-    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local speed = TweenSpeed
-
-    if distance >= 350 then
-        speed = TweenSpeed
-    end
+    local rootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+    local distance = (destinationCFrame.Position - rootPart.Position).Magnitude
+    local speed = TweenSpeed or 350
 
     local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
-        CFrame = destinationCFrame
-    })
-
+    local tween = game:GetService("TweenService"):Create(rootPart, tweenInfo, {CFrame = destinationCFrame})
     tween:Play()
 
-    if _G.StopTween then
-        tween:Cancel()
-    end
+    -- Yield until tween finishes
+    local finished = false
+    tween.Completed:Connect(function() finished = true end)
+
+    repeat task.wait() until finished
 end
 
 
