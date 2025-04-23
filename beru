@@ -156,7 +156,7 @@ task.spawn(function()
     end
 end)
 
-Farm:AddToggle({
+Main:AddToggle({
     Name = "Auto Farm Level",
     Flag = "Farm/AutoFarmLevel",
     Default = false,
