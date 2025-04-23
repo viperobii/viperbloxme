@@ -212,7 +212,7 @@ Main:AddSection("Bones Farm");
 Main:AddToggle({
     Name = "Auto Farm Bones",
     Flag = "Main/AutoFarmBones",
-    Description = "Farm Reborn Skeletons, Living Zombie, Demonic Soul, and Possessed Mummy for Bones (No Quest)",
+    Description = "",
     Default = false,
     Callback = function(Value)
         _G.AutoFarmBones = Value
@@ -226,24 +226,31 @@ spawn(function()
                 local mobs = {
                     "Reborn Skeleton",
                     "Living Zombie",
-                    "Demonic Soul",
-                    "Posessed Mummy"
+                    "Posessed Mummy",
+                    "Demonic Soul"
                 }
 
-                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                    if table.find(mobs, enemy.Name) and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        repeat
-                            if not _G.AutoFarmBones or not enemy.Parent then break end
-                            AutoHaki()
-                            EquipTool(_G.SelectWeapon or SelectWeapon)
-                            enemy.HumanoidRootPart.CanCollide = false
-                            enemy.Humanoid.WalkSpeed = 0
-                            if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                            Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                            AttackNoCoolDown()
-                            task.wait()
-                        until not _G.AutoFarmBones or not enemy or not enemy.Parent or enemy.Humanoid.Health <= 0
-                    end
+                for _, mobName in ipairs(mobs) do
+                    if not _G.AutoFarmBones then break end
+
+                    -- Wait until all mobs of this type are cleared
+                    repeat
+                        local mobFound = false
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                mobFound = true
+                                AutoHaki()
+                                EquipTool(_G.SelectWeapon or SelectWeapon)
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                AttackNoCoolDown()
+                                break
+                            end
+                        end
+                        task.wait()
+                    until not mobFound or not _G.AutoFarmBones
                 end
             end)
         end
