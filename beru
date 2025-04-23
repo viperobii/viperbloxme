@@ -182,7 +182,7 @@ end)
 Main:AddToggle({
     Name = "Auto Farm Nearest Mob",
     Flag = "Main/AutoFarmNearestMob",
-    Description = "Nearest",
+    Description = "Near",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
@@ -195,7 +195,7 @@ Main:AddToggle({
     end
 })
 
--- AUTO FARM NEAREST MOB LOOP
+-- AUTO FARM NEAREST MOB LOOP (with Tween)
 spawn(function()
     while task.wait() do
         if _G.AutoNear then
@@ -203,7 +203,6 @@ spawn(function()
                 local Closest = nil
                 local ClosestDistance = math.huge
                 
-                -- Find the closest enemy
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
@@ -215,11 +214,9 @@ spawn(function()
                 end
 
                 if Closest then
-                    -- Target and attack the closest mob
                     AutoHaki()
                     EquipTool(SelectWeapon)
-                    
-                    -- Modify mob properties for easier farming
+
                     if Closest:FindFirstChild("HumanoidRootPart") then
                         Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                         Closest.HumanoidRootPart.Transparency = 1
@@ -230,17 +227,15 @@ spawn(function()
                         Closest.Humanoid.JumpPower = 0
                     end
                     
-                    -- Tween to mob position
                     local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    Tween(CFrame.new(targetPos))
-                    
-                    -- Attack
+local targetTween = Tween(CFrame.new(targetPos))
+if targetTween then targetTween.Completed:Wait() end
+
                     AttackNoCoolDown()
                     bringmob = true
                     
                     wait(_G.Fast_Delay or 0.1)
-
-                    -- Check if mob is dead
+                    
                     if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
                         bringmob = false
                         wait(0.5)
@@ -5340,19 +5335,25 @@ end
 TweenSpeed = 350
 
 function Tween(destinationCFrame)
-    local rootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
-    local distance = (destinationCFrame.Position - rootPart.Position).Magnitude
-    local speed = TweenSpeed or 350
+    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local speed = TweenSpeed
+
+    if distance >= 350 then
+        speed = TweenSpeed
+    end
 
     local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(rootPart, tweenInfo, {CFrame = destinationCFrame})
+    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+        CFrame = destinationCFrame
+    })
+
     tween:Play()
 
-    -- Yield until tween finishes
-    local finished = false
-    tween.Completed:Connect(function() finished = true end)
+    if _G.StopTween then
+        tween:Cancel()
+    end
 
-    repeat task.wait() until finished
+    return tween -- This line is critical
 end
 
 
