@@ -2282,34 +2282,48 @@ end
 
 TweenSpeed = 350;
 
-function Tween(v211)
+local connection, tween
+function Tween(targetCFrame)
+    if not targetCFrame then
+        if tween then pcall(function() tween:Cancel() end) tween = nil end
+        if connection then pcall(function() connection:Disconnect() end) connection = nil end
+        return
+    end
+    if not game.Players.LocalPlayer.Character then
+        if tween then pcall(function() tween:Cancel() end) tween = nil end
+        if connection then pcall(function() connection:Disconnect() end) connection = nil end
+        return
+    end
 
-local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
 
-local v213 = TweenSpeed;
+    local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if not root or not humanoid then return end
+    if humanoid.Sit then humanoid.Sit = false end
 
-if (v212 >= 350) then
+    if (targetCFrame.Position - root.Position).Magnitude > 600 then
+        root.CFrame = root.CFrame + (targetCFrame.Position - root.Position).Unit * 600
+    else root.CFrame = targetCFrame
+    end
 
-v213 = TweenSpeed;
+    local pathPart = Instance.new("Part")
+    pathPart.Transparency = 1
+    pathPart.Anchored = true
+    pathPart.Parent = game.Workspace
+    pathPart.CFrame = root.CFrame
+    tween = game:GetService("TweenService"):Create(pathPart, TweenInfo.new((targetCFrame.Position - root.Position).Magnitude / getgenv().LocalConfig.Settings["Tween Speed"], Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {CFrame = targetCFrame})
 
-end
+    connection = game:GetService("RunService").Heartbeat:Connect(function()
+        root.CFrame = pathPart.CFrame
+    end)
 
-local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear);
+    tween:Play()
 
-local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
-
-CFrame = v211
-
-});
-
-v215:Play();
-
-if _G.StopTween then
-
-v215:Cancel();
-
-end
-
+    tween.Completed:Connect(function()
+        if connection then connection:Disconnect() connection = nil end
+        pathPart:Destroy()
+        tween = nil
+    end)
 end
 
 
