@@ -673,7 +673,7 @@ Player:AddSlider({
 
 -- Initialize global variables
 _G.SpeedBoost = false
-_G.SpeedMultiplier = 100
+_G.SpeedMultiplier = 3000
 
 -- Loop for velocity-based speed modification
 task.spawn(function()
