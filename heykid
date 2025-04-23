@@ -1528,6 +1528,8 @@ function Hop()
             end
         end
     end
+    
+    
     function Teleport()
         while wait() do
             pcall(function()
@@ -2935,3 +2937,95 @@ if _G.FastAttack then
         return v1766;
     end)();
 end
+
+
+Main:AddToggle({
+    Name = "Auto Farm Level",
+    Flag = "Main/AutoFarmLevel",
+    Description = "Fast Farm With Dodge Skill Mobs",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoLevel = Value
+        if not Value then
+            task.wait()
+            local player = game.Players.LocalPlayer
+            local hrp = player.Character.HumanoidRootPart
+            if hrp.Position.Y <= 0 then
+                hrp.CFrame = CFrame.new(hrp.Position.X, 5, hrp.Position.Z)
+            end
+            local tween = Tween(hrp.CFrame)
+            tween.Completed:Wait()
+        end
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoLevel then
+            pcall(function()
+                CheckLevel()
+
+                local player = game.Players.LocalPlayer
+                local questGui = player.PlayerGui.Main.Quest
+                local hrp = player.Character.HumanoidRootPart
+
+                if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
+                    game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AbandonQuest")
+
+                    local tween = Tween(CFrameQuest)
+                    tween.Completed:Wait()
+
+                    if hrp.Position.Y <= 0 then
+                        hrp.CFrame = CFrame.new(hrp.Position.X, 5, hrp.Position.Z)
+                    end
+
+                    if (CFrameQuest.Position - hrp.Position).Magnitude <= 5 then
+                        wait(0.5)
+                        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
+                    end
+                else
+                    local foundMob = false
+
+                    for _, enemy in pairs(workspace.Enemies:GetChildren()) do
+                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            if string.find(enemy.Name, NameMon) then
+                                foundMob = true
+
+                                AutoHaki()
+                                EquipTool(SelectWeapon)
+
+                                local hrpEnemy = enemy.HumanoidRootPart
+                                hrpEnemy.Size = Vector3.new(60, 60, 60)
+                                hrpEnemy.Transparency = 1
+                                enemy.Humanoid.JumpPower = 0
+                                enemy.Humanoid.WalkSpeed = 0
+                                hrpEnemy.CanCollide = false
+
+                                local targetPos = hrpEnemy.Position + Vector3.new(0, 30, 0)
+                                hrp.CFrame = CFrame.new(targetPos)
+
+                                AttackNoCoolDown()
+                                bringmob = true
+
+                                break
+                            end
+                        end
+                    end
+
+                    if not foundMob then
+                        bringmob = false
+
+                        local tween = Tween(CFrameMon)
+                        tween.Completed:Wait()
+
+                        if hrp.Position.Y <= 0 then
+                            hrp.CFrame = CFrame.new(hrp.Position.X, 5, hrp.Position.Z)
+                        end
+
+                        wait(0.5)
+                    end
+                end
+            end)
+        end
+    end
+end)
