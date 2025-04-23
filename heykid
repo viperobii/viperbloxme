@@ -429,33 +429,29 @@ end)
 
 
 Main:AddToggle({
-    Name = "Auto Farm All Tiki Mobs",
-    Flag = "Main/AutoFarmAllTikiMobs",
-    Description = "",
+    Name = "Auto Farm All Chocolate Mobs",
+    Flag = "Main/AutoFarmAllChocolateMobs",
+    Description = "Farms all mobs in Chocolate Island",
     Default = false,
     Callback = function(Value)
-        _G.AutoFarmTiki = Value
+        _G.AutoFarmChocolate = Value
     end
 })
 
 spawn(function()
     while task.wait() do
-        if _G.AutoFarmTiki then
+        if _G.AutoFarmChocolate then
             pcall(function()
                 local mobs = {
-                    "Skull Slayer",
-                    "Isle Outlaw",
-                    "Island Boy",
-                    "Sun-kissed Warrior",
-                    "Isle Champion",
-                    "Serpent Hunter"
+                    "Cocoa Warrior",
+                    "Chocolate Bar Battler",
+                    "Sweet Thief",
+                    "Candy Rebel"
                 }
-                
 
                 for _, mobName in ipairs(mobs) do
-                    if not _G.AutoFarmTiki then break end
+                    if not _G.AutoFarmChocolate then break end
 
-                    -- Wait until all mobs of this type are cleared
                     repeat
                         local mobFound = false
                         for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -472,7 +468,7 @@ spawn(function()
                             end
                         end
                         task.wait()
-                    until not mobFound or not _G.AutoFarmTiki
+                    until not mobFound or not _G.AutoFarmChocolate
                 end
             end)
         end
@@ -498,7 +494,6 @@ spawn(function()
                 local mobs = {
                     "Dough King"
                 }
-
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmDoughKing then break end
@@ -587,9 +582,17 @@ spawn(function()
             pcall(function()
                 local mobs = {
                     "Baking Staff",
-                    "Head Baker",
+                    "Peanut Scout",
+                    "Peanut President",
+                    "Ice Cream Chef",
+                    "Ice Cream Commander",
                     "Cookie Crafter",
-                    
+                    "Cake Guard",
+                    "Head Baker",
+                    "Cocoa Warrior",
+                    "Chocolate Bar Battler",
+                    "Sweet Thief",
+                    "Candy Rebel"
                 }
 
                 for _, mobName in ipairs(mobs) do
