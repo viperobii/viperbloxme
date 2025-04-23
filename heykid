@@ -182,7 +182,7 @@ end)
 Main:AddToggle({
     Name = "Auto Farm Nearest Mob",
     Flag = "Main/AutoFarmNearestMob",
-    Description = "",
+    Description = "Near",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
@@ -228,8 +228,10 @@ spawn(function()
                     end
                     
                     local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    Tween(CFrame.new(targetPos))
-
+                    
+                    -- Use the new Tween function to smoothly move to the mob's position
+                    Tween(targetPos)
+                    
                     AttackNoCoolDown()
                     bringmob = true
                     
@@ -811,41 +813,7 @@ Visual:AddToggle({
 })
 
 
--- Initialize the BoatSeats table first
-local BoatSeats = {}
-local selectedBoat = "Beast Hunter"  -- Default boat selection
 
-function Tween2(targetCFrame)
-    local player = game.Players.LocalPlayer
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    local TweenService = game:GetService("TweenService")
-    local distance = (hrp.Position - targetCFrame.Position).Magnitude
-    local speed = 300 -- this is your desired smooth speed
-
-    local duration = distance / speed -- controlled tweening like Auto Farm
-    local info = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-
-    local tween = TweenService:Create(hrp, info, {CFrame = targetCFrame})
-    tween:Play()
-    return tween
-end
-
--- Fly to Boat Dealer Toggle
-Sea:AddToggle({
-    Name = "Fly To BoatDealer Tiki Outpost",
-    Flag = "Sea/FlyToBoatDealerTiki",
-    Description = "",
-    Default = false,
-    Callback = function(Value)
-        _G.FlyToBoatDealer = Value
-        
-        if Value then
-            Tween2(CFrame.new(-16917.154296875, 7.757596015930176, 511.8203125))
-        end
-    end
-})
 
 -- Dropdown for Selecting Boats
 Sea:AddDropdown({
@@ -5301,56 +5269,38 @@ end)
 
 
 
-function Tween2(destinationCFrame)
-    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local speed = 350
+function Tween(destinationCFrame)
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
 
-    if distance >= 350 then
-        speed = 350
-    end
+    local root = char.HumanoidRootPart
+    local distance = (destinationCFrame.Position - root.Position).Magnitude
+    local speed = TweenSpeed or 350
+    local duration = distance / speed
 
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
+    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+    local tween = game:GetService("TweenService"):Create(root, tweenInfo, {
         CFrame = destinationCFrame
     })
-
-    tween:Play()
-
-    if _G.CancelTween2 then
-        tween:Cancel()
-    end
 
     _G.Clip2 = true
-    wait(distance / speed)
-    _G.Clip2 = false
-end
-
-function BTPZ(destinationCFrame)
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
-    task.wait()
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = destinationCFrame
-end
-
-TweenSpeed = 350
-
-function Tween(destinationCFrame)
-    local distance = (destinationCFrame.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local speed = TweenSpeed
-
-    if distance >= 350 then
-        speed = TweenSpeed
-    end
-
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local tween = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {
-        CFrame = destinationCFrame
-    })
-
     tween:Play()
 
-    if _G.StopTween then
-        tween:Cancel()
+    local finished = false
+    tween.Completed:Connect(function()
+        finished = true
+    end)
+
+    -- Wait for tween to finish or be cancelled
+    local start = tick()
+    while not finished and tick() - start < duration do
+        if _G.StopTween then
+            tween:Cancel()
+            break
+        end
+        task.wait()
     end
+    _G.Clip2 = false
 end
 
 
