@@ -104,21 +104,43 @@ Main:AddToggle({
     end
 })
 
+-- Anti-Stuck function to lift the character slightly if it's stuck on a platform
+function AntiStuck()
+    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        hrp.CFrame = hrp.CFrame + Vector3.new(0, 5, 0) -- lift up slightly
+    end
+end
+
+-- Noclip function to allow movement through parts if needed
+noclip = true
+game:GetService("RunService").Stepped:Connect(function()
+    if noclip and game.Players.LocalPlayer.Character then
+        for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+            if v:IsA("BasePart") then
+                v.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- Main Auto Farm loop
 spawn(function()
     while wait() do
         if _G.Level then
             pcall(function()
-                local QuestTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
-
-                if not string.find(QuestTitle, NameMon) and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
-                    StartMagnet = false
+                -- Check if quest is active and matches target monster
+                local QuestTitle = game.Players.LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
+                if not string.find(QuestTitle, NameMon) and game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == true then
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                 end
 
-                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
-                    StartMagnet = false
+                -- If no quest is active, get a new one
+                if game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false then
                     CheckQuest()
 
+                    -- Move to quest giver with AntiStuck
+                    AntiStuck()  -- Lift off any stuck platform
                     if BypassTP then
                         if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 3500 then
                             BTP(CFrameQuest)
@@ -129,14 +151,17 @@ spawn(function()
                         TP1(CFrameQuest)
                     end
 
+                    -- Accept quest if close enough
                     if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5 then
                         wait(0.5)
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
                     end
 
-                elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+                -- If quest is active
+                elseif game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == true then
                     CheckQuest()
 
+                    -- Check for monsters in workspace
                     if game:GetService("Workspace").Enemies:FindFirstChild(Mon) then
                         for _, v2831 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                             if v2831:FindFirstChild("HumanoidRootPart") and v2831:FindFirstChild("Humanoid") and v2831.Humanoid.Health > 0 then
@@ -152,22 +177,22 @@ spawn(function()
                                             v2831.Humanoid.WalkSpeed = 0
                                             v2831.Head.CanCollide = false
                                             v2831.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                                            StartMagnet = true
-                                        until not _G.Level or v2831.Humanoid.Health <= 0 or not v2831.Parent or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false
+                                        until not _G.Level or v2831.Humanoid.Health <= 0 or not v2831.Parent or game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible == false
                                     else
-                                        StartMagnet = false
                                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                                     end
                                 end
                             end
                         end
                     else
-                        StartMagnet = false
+                        -- If no monsters in workspace, go to monster spawn location
                         UnEquipWeapon(_G.SelectWeapon)
 
+                        -- Check if monster exists in ReplicatedStorage
                         if game:GetService("ReplicatedStorage"):FindFirstChild(Mon) then
                             TP1(game:GetService("ReplicatedStorage"):FindFirstChild(Mon).HumanoidRootPart.CFrame * CFrame.new(15, 10, 2))
                         else
+                            -- If not found in either place, go to the monster CFrame
                             TP1(CFrameMon)
                         end
                     end
@@ -806,27 +831,56 @@ Setting:AddToggle({
 
 
 
-local v28 = Instance.new("ScreenGui");
-local v29 = Instance.new("ImageButton");
-local v30 = Instance.new("UICorner");
-v28.Name = "ToggleUI";
-v28.Parent = game.CoreGui;
-v28.ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
-v29.Name = "ToggleButton";
-v29.Parent = v28;
-v29.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
-v29.BorderSizePixel = 0;
-v29.Position = UDim2.new(0.120833337, 0, 0.0952890813, 0);
-v29.Size = UDim2.new(0, 53.5, 0, 53.5);
-v29.BackgroundTransparency = 1;
-v29.Image = "rbxassetid://123448871674913";
-v29.Draggable = true;
-v29.MouseButton1Click:Connect(function()
-    game:GetService("VirtualInputManager"):SendKeyEvent(true, 305, false, game);
-    game:GetService("VirtualInputManager"):SendKeyEvent(false, 305, false, game);
-end);
-v30.CornerRadius = UDim.new(0, 10);
-v30.Parent = v29;
+local v22 = Instance.new("ScreenGui")
+local v23 = Instance.new("ImageButton")
+local v25 = Instance.new("ParticleEmitter")
+local v26 = game:GetService("TweenService")
+
+v22.Name = "RedzToggleUI"
+v22.Parent = game.CoreGui
+v22.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+v23.Name = "OpenToggle"
+v23.Parent = v22
+v23.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+v23.BorderSizePixel = 0
+v23.Position = UDim2.new(0.1, 0, 0.1, 0)
+v23.Size = UDim2.new(0, 35, 0, 35)
+v23.Image = "rbxassetid://123448871674913"
+v23.Draggable = true
+
+v25.Parent = v23
+v25.LightEmission = 1
+v25.Size = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0.1),
+    NumberSequenceKeypoint.new(1, 0)
+})
+v25.Lifetime = NumberRange.new(0.5, 1)
+v25.Rate = 0
+v25.Speed = NumberRange.new(5, 10)
+v25.Color = ColorSequence.new(Color3.fromRGB(255, 85, 255), Color3.fromRGB(85, 255, 255))
+
+v23.MouseButton1Down:Connect(function()
+    v25.Rate = 100
+
+    if Window.Enabled then
+        Window:Minimize(true)
+    else
+        Window:Minimize(false)
+    end
+
+    task.delay(1, function()
+        v25.Rate = 0
+    end)
+end)
+
+local entranceTween = v26:Create(v23, TweenInfo.new(0.5, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.1, 0, 0.1, 0),
+    Size = UDim2.new(0, 35, 0, 35),
+    BackgroundTransparency = 0.2
+})
+entranceTween:Play()
+
 if (game.PlaceId == 2753915549) then
     World1 = true;
 elseif (game.PlaceId == 4442272183) then
@@ -1430,7 +1484,7 @@ function CheckQuest()
             NameMon = "Serpent Hunter";
             CFrameQuest = CFrame.new(- 16665, 105, 1580);
             CFrameMon = CFrame.new(- 16542.4824, 146.675156, 1529.61401, - 0.999948919, 1.0729811e-8, 0.0101067368, 1.0128324e-8, 1, - 5.9564663e-8, - 0.0101067368, - 5.9459257e-8, - 0.999948919);
-        elseif ((MyLevel == 2575) or (MyLevel <= 2600)) then
+        elseif ((MyLevel == 2575) or (MyLevel <= 2650)) then
             Mon = "Skull Slayer";
             LevelQuest = 2;
             NameQuest = "TikiQuest3";
