@@ -272,6 +272,60 @@ spawn(function()
     end
 end)
 
+Main:AddToggle({
+    Name = "Auto Chest Fast (Reset)",
+    Flag = "Main/AutoCollectChest",
+    Description = "Bypass TP",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoCollectChest = Value
+
+        -- Reset position when turned off
+        if not Value and _G.LastChestPos then
+            BTPZ(_G.LastChestPos)
+        end
+    end
+})
+
+-- Bypass teleport function
+function BTPZ(cframe)
+    local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+    hrp.CFrame = cframe
+    task.wait()
+    hrp.CFrame = cframe
+end
+
+-- Auto collect chest logic
+spawn(function()
+    while task.wait() do
+        if _G.AutoCollectChest then
+            pcall(function()
+                local player = game:GetService("Players").LocalPlayer
+                local char = player.Character or player.CharacterAdded:Wait()
+                local root = char:WaitForChild("HumanoidRootPart")
+                _G.LastChestPos = root.CFrame -- Save original position
+
+                local tagged = game:GetService("CollectionService"):GetTagged("_ChestTagged")
+                local closest, shortest = nil, math.huge
+
+                for _, chest in pairs(tagged) do
+                    if not chest:GetAttribute("IsDisabled") then
+                        local dist = (chest:GetPivot().Position - root.Position).Magnitude
+                        if dist < shortest then
+                            shortest = dist
+                            closest = chest
+                        end
+                    end
+                end
+
+                if closest then
+                    BTPZ(closest:GetPivot())
+                end
+            end)
+        end
+    end
+end)
+
 Main:AddSection("Bones");
 
 Main:AddToggle({
