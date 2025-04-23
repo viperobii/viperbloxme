@@ -2282,46 +2282,40 @@ end
 
 TweenSpeed = 350;
 
-function Tween(v211)
-    local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local v213 = TweenSpeed
+function Tween(targetCFrame)
+    local char = game.Players.LocalPlayer.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    local hrp = char.HumanoidRootPart
 
-    if (v212 >= 350) then
-        v213 = TweenSpeed
+    local startPos = hrp.Position
+    local endPos = targetCFrame.Position
+
+    -- Maintain a safe Y height (e.g. 20 units above target)
+    if endPos.Y < 25 then
+        endPos = Vector3.new(endPos.X, 25, endPos.Z)
     end
 
-    local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear)
+    local distance = (startPos - endPos).Magnitude
+    local speed = TweenSpeed or 350
+    local tweenTime = distance / speed
 
-    local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
-        CFrame = v211
-    })
+    local info = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
+    local goal = {CFrame = CFrame.new(endPos)}
 
-    -- Before tweening, ensure no collisions
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
-    if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
-        game.Players.LocalPlayer.Character.Head.CanCollide = false
-    end
+    -- Disable collisions
+    hrp.CanCollide = false
+    if char:FindFirstChild("Head") then char.Head.CanCollide = false end
 
-    v215:Play()
+    local tween = game:GetService("TweenService"):Create(hrp, info, goal)
+    tween:Play()
 
-    -- Reset collision after tween completes
-    v215.Completed:Connect(function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
-        if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
-            game.Players.LocalPlayer.Character.Head.CanCollide = true
-        end
+    tween.Completed:Connect(function()
+        -- Reset collision
+        hrp.CanCollide = true
+        if char:FindFirstChild("Head") then char.Head.CanCollide = true end
     end)
 
-    if _G.StopTween then
-        v215:Cancel()
-    end
-end
-
-function IsInWater(position)
-    local ray = Ray.new(position + Vector3.new(0, 5, 0), Vector3.new(0, -10, 0)) -- Ray cast downwards
-    local part, position = game.Workspace:FindPartOnRay(ray, game.Players.LocalPlayer.Character)
-    
-    return part and part:IsDescendantOf(game:GetService("Workspace").Water)
+    if _G.StopTween then tween:Cancel() end
 end
 
 
