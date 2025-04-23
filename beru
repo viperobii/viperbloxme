@@ -505,7 +505,7 @@ Player:AddToggle({
     end
 })
 
--- Smooth follow loop (real-time)
+-- Real-time tween follow loop
 spawn(function()
     while task.wait(0.1) do
         pcall(function()
@@ -513,7 +513,7 @@ spawn(function()
                 local target = game.Players[_G.SelectPly]
                 if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                     AutoHaki()
-                    SmoothFollow(target.Character.HumanoidRootPart.CFrame)
+                    Tween(target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)) -- optional offset
                 end
             end
         end)
