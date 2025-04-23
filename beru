@@ -102,15 +102,10 @@ Main:AddToggle({
     Callback = function(Value)
         _G.AutoLevel = Value
         if not Value then
-            wait()
-            -- Ensure player is above the water level
-            local player = game:GetService("Players").LocalPlayer
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            if playerPosition.Y <= 0 then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+            local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
+            if hrp.Position.Y <= 0 then
+                hrp.CFrame = CFrame.new(hrp.Position.X, 5, hrp.Position.Z)
             end
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
         end
     end
 })
@@ -119,69 +114,50 @@ spawn(function()
     while task.wait() do
         if _G.AutoLevel then
             pcall(function()
+                local player = game.Players.LocalPlayer
+                local hrp = player.Character.HumanoidRootPart
+
                 CheckLevel()
 
-                local player = game:GetService("Players").LocalPlayer
                 local questGui = player.PlayerGui.Main.Quest
+                local questTitle = questGui.Container.QuestTitle.Title.Text
 
-                if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
+                -- If wrong quest or no quest, abandon and go to quest giver
+                if not string.find(questTitle, NameMon) or not questGui.Visible then
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                    Tween(CFrameQ)
+                    Tween(CFrameQuest)
 
-                    -- Ensure player stays above water after tweening
-                    local playerPosition = player.Character.HumanoidRootPart.Position
-                    if playerPosition.Y <= 0 then
-                        player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                    end
-
-                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
-                        wait(0.5) -- Small delay before accepting quest
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
+                    if (hrp.Position - CFrameQuest.Position).Magnitude <= 5 then
+                        wait(0.5)
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
                     end
                 else
-                    -- Check if there are mobs to farm
-                    local foundMob = false
-                    
-                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            if string.find(enemy.Name, Ms) then
-                                foundMob = true
+                    -- Quest is active and correct
+                    local found = false
+
+                    for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                        if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                            if string.find(mob.Name, Mon) then
+                                found = true
                                 
-                                -- Target and attack the mob
-                                AutoHaki()
                                 EquipTool(SelectWeapon)
-                                
-                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                enemy.HumanoidRootPart.Transparency = 1
-                                enemy.Humanoid.JumpPower = 0
-                                enemy.Humanoid.WalkSpeed = 0
-                                enemy.HumanoidRootPart.CanCollide = false
-                                
-                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                                
-                                -- Attack
+                                AutoHaki()
+
+                                mob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                mob.Humanoid.WalkSpeed = 0
+                                mob.HumanoidRootPart.CanCollide = false
+
+                                hrp.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 30, 0)
                                 AttackNoCoolDown()
-                                bringmob = true
-                                
-                                wait(0.1)
-                                break -- Focus on one mob at a time
+
+                                break
                             end
                         end
                     end
-                    
-                    -- If no mobs found, go to spawn location
-                    if not foundMob then
-                        bringmob = false
-                        -- Go to mob spawn location
+
+                    -- If no mobs found in workspace, go to spawn area
+                    if not found then
                         Tween(CFrameMon)
-
-                        -- Ensure player stays above water during movement
-                        local playerPosition = player.Character.HumanoidRootPart.Position
-                        if playerPosition.Y <= 0 then
-                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
-                        end
-
                         wait(0.5)
                     end
                 end
@@ -1530,6 +1506,16 @@ function Hop()
             end
         end
     end
+    
+    function Tween(cframe)
+    local tween_s = game:GetService("TweenService")
+    local tweeninfo = TweenInfo.new((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - cframe.Position).Magnitude / 350, Enum.EasingStyle.Linear)
+    local tween = tween_s:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweeninfo, {CFrame = cframe})
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+
     function Teleport()
         while wait() do
             pcall(function()
