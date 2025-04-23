@@ -345,7 +345,105 @@ Main:AddToggle({
 })
 
 
+Main:AddToggle({
+    Name = "Auto Pray",
+    Flag = "Main/AutoPray",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoPray = Value
+        if Value then
+            spawn(function()
+                while _G.AutoPray do
+                    pcall(function()
+                        local args = {
+                            [1] = "gravestoneEvent",
+                            [2] = 1
+                        }
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+                    end)
+                    wait(1)
+                end
+            end)
+        end
+    end
+})
 
+Main:AddSection("Tiki Boss")
+
+Main:AddToggle({
+    Name = "Auto Farm Tyrant of the Skies",
+    Flag = "Farm/AutoFarmTyrantOfTheSkies",
+    Default = false,
+    Callback = function(value)
+        _G.farmTyrant = value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.farmTyrant and World3 then
+            pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                Tween(CFrame.new(-16224, 9, 439))
+                
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            Tween(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+Main:AddToggle({
+    Name = "Auto Farm All Tiki Mobs",
+    Flag = "Farm/AutoFarmAllTikiMobs",
+    Default = false,
+    Callback = function(value)
+        _G.farmSkullSlayer = value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.farmSkullSlayer and World3 then
+            pcall(function()
+                -- Teleport to location first
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+                Tween(CFrame.new(-16224, 9, 439))
+                
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if (v.Name == "Skull Slayer" or v.Name == "Isle Outlaw" or v.Name == "Island Boy" or v.Name == "Sun-kissed Warrior" or v.Name == "Isle Champion" or v.Name == "Serpent Hunter")
+                    and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        repeat
+                            task.wait()
+                            AutoHaki()
+                            EquipWeapon(_G.SelectWeapon)
+                            v.HumanoidRootPart.CanCollide = false
+                            v.Humanoid.WalkSpeed = 0
+                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            Tween(v.HumanoidRootPart.CFrame * Pos)
+                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                        until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
+                    end
+                end
+            end)
+        end
+    end
+end)
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
