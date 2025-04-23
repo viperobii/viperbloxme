@@ -178,17 +178,16 @@ spawn(function()
     end
 end)
 
--- AUTO FARM NEAREST MOB TOGGLE
+
 Main:AddToggle({
     Name = "Auto Farm Nearest Mob",
     Flag = "Main/AutoFarmNearestMob",
-    Description = "Nearest",
+    Description = "",
     Default = false,
     Callback = function(Value)
         _G.AutoNear = Value
         if not Value then 
             bringmob = false
-            -- Return to original position when turning off
             wait()
             Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
             wait()
@@ -196,7 +195,7 @@ Main:AddToggle({
     end
 })
 
--- AUTO FARM NEAREST MOB LOOP
+-- AUTO FARM NEAREST MOB LOOP (with Tween)
 spawn(function()
     while task.wait() do
         if _G.AutoNear then
@@ -204,7 +203,6 @@ spawn(function()
                 local Closest = nil
                 local ClosestDistance = math.huge
                 
-                -- Find the closest enemy
                 for _, enemy in pairs(workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         local dist = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - enemy.HumanoidRootPart.Position).Magnitude
@@ -216,11 +214,9 @@ spawn(function()
                 end
 
                 if Closest then
-                    -- Target and attack the closest mob
                     AutoHaki()
                     EquipTool(SelectWeapon)
-                    
-                    -- Modify mob properties for easier farming
+
                     if Closest:FindFirstChild("HumanoidRootPart") then
                         Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                         Closest.HumanoidRootPart.Transparency = 1
@@ -231,24 +227,19 @@ spawn(function()
                         Closest.Humanoid.JumpPower = 0
                     end
                     
-                    -- Position above the mob
                     local targetPos = Closest.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                    
-                    -- Attack
+                    Tween(CFrame.new(targetPos))
+
                     AttackNoCoolDown()
                     bringmob = true
                     
-                    -- Wait before next loop iteration
                     wait(_G.Fast_Delay or 0.1)
                     
-                    -- Check if mob is dead or no longer valid
                     if not Closest or not Closest:FindFirstChild("Humanoid") or Closest.Humanoid.Health <= 0 or not Closest.Parent then
                         bringmob = false
-                        wait(0.5) -- Short wait before targeting next mob
+                        wait(0.5)
                     end
                 else
-                    -- No enemies found
                     bringmob = false
                     wait(0.5)
                 end
@@ -4370,7 +4361,7 @@ CFrameQ = CFrame.new(- 16665.19140625, 104.59640502929688, 1579.6943359375);
 
 CFrameMon = CFrame.new(- 16621.4140625, 121.40631103515625, 1290.6881103515625);
 
-elseif ((v197 == 2575) or (v197 <= 2599) or (SelectMonster == "Skull Slayer") or (v197 == 2600)) then
+elseif ((v197 == 2575) or (v197 <= 2649) or (SelectMonster == "Skull Slayer") or (v197 == 2650)) then
 
 Ms = "Skull Slayer";
 
