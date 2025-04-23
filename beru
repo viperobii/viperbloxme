@@ -2280,42 +2280,40 @@ game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
 
 end
 
-TweenSpeed = 350;
+TweenSpeed = 350
 
 function Tween(targetCFrame)
-    local char = game.Players.LocalPlayer.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local hrp = char.HumanoidRootPart
+    local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not root or not targetCFrame then return end
 
-    local startPos = hrp.Position
-    local endPos = targetCFrame.Position
+    local targetAbove = targetCFrame * CFrame.new(0, 40, 0) -- Raise 20 studs above
 
-    -- Maintain a safe Y height (e.g. 20 units above target)
-    if endPos.Y < 25 then
-        endPos = Vector3.new(endPos.X, 25, endPos.Z)
+    local distance = (targetAbove.Position - root.Position).Magnitude
+    local tweenInfo = TweenInfo.new(distance / TweenSpeed, Enum.EasingStyle.Linear)
+
+    local tween = game:GetService("TweenService"):Create(root, tweenInfo, {
+        CFrame = targetAbove
+    })
+
+    -- Disable collision during tween
+    root.CanCollide = false
+    if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
+        game.Players.LocalPlayer.Character.Head.CanCollide = false
     end
 
-    local distance = (startPos - endPos).Magnitude
-    local speed = TweenSpeed or 350
-    local tweenTime = distance / speed
-
-    local info = TweenInfo.new(tweenTime, Enum.EasingStyle.Linear)
-    local goal = {CFrame = CFrame.new(endPos)}
-
-    -- Disable collisions
-    hrp.CanCollide = false
-    if char:FindFirstChild("Head") then char.Head.CanCollide = false end
-
-    local tween = game:GetService("TweenService"):Create(hrp, info, goal)
     tween:Play()
 
     tween.Completed:Connect(function()
-        -- Reset collision
-        hrp.CanCollide = true
-        if char:FindFirstChild("Head") then char.Head.CanCollide = true end
+        -- Enable collision again
+        root.CanCollide = true
+        if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
+            game.Players.LocalPlayer.Character.Head.CanCollide = true
+        end
     end)
 
-    if _G.StopTween then tween:Cancel() end
+    if _G.StopTween then
+        tween:Cancel()
+    end
 end
 
 
