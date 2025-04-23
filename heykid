@@ -92,94 +92,101 @@ Discord:AddDiscordInvite({
 
 
 
-Main:AddToggle("Auto Farm Level", _G.Farm, function(v406)
-    _G.Level = v406;
-    if not v406 then
-        StopTween(_G.Farm);
+Main:AddSection("Farm")
+
+Main:AddToggle({
+    Name = "Auto Farm Level",
+    Flag = "Main/AutoFarmLevel",
+    Description = "Fast Farm With Dodge Skill Mobs",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoLevel = Value
+
+        if not Value then
+            task.wait()
+            local player = game:GetService("Players").LocalPlayer
+            local pos = player.Character.HumanoidRootPart.Position
+            if pos.Y <= 0 then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(pos.X, 5, pos.Z)
+            end
+            Tween(player.Character.HumanoidRootPart.CFrame)
+        end
     end
-end);
+})
 
 spawn(function()
-    while wait() do
-        if _G.Level then
+    while task.wait() do
+        if _G.AutoLevel then
             pcall(function()
-                -- Check if quest is active and matches target monster
-                local QuestTitle = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Container.QuestTitle.Title.Text
-                
-                if not string.find(QuestTitle, NameMon) and game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
-                    StartMagnet = false;
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
+                CheckLevel()
+
+                local player = game:GetService("Players").LocalPlayer
+                local questGui = player.PlayerGui.Main.Quest
+                local QuestTitle = questGui.Container.QuestTitle.Title.Text
+
+                if not string.find(QuestTitle, NameMon) and questGui.Visible then
+                    StartMagnet = false
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                 end
-                
-                -- If no quest is active, get a new one
-                if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
-                    StartMagnet = false;
-                    CheckQuest();
-                    
-                    -- Move to quest giver
+
+                if not questGui.Visible then
+                    StartMagnet = false
+                    CheckQuest()
+
                     if BypassTP then
-                        if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 3500 then
-                            BTP(CFrameQuest);
+                        if (player.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude > 3500 then
+                            BTP(CFrameQuest)
                         else
-                            TP1(CFrameQuest);
+                            TP1(CFrameQuest)
                         end
                     else
-                        TP1(CFrameQuest);
+                        TP1(CFrameQuest)
                     end
-                    
-                    -- Accept quest if close enough
-                    if (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5 then
-                        wait(0.5) -- Small delay before accepting quest
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest);
+
+                    if (player.Character.HumanoidRootPart.Position - CFrameQuest.Position).Magnitude <= 5 then
+                        wait(0.5)
+                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, LevelQuest)
                     end
-                    
-                -- If quest is active
-                elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
-                    CheckQuest();
-                    
-                    -- Check for monsters in workspace
-                    if game:GetService("Workspace").Enemies:FindFirstChild(Mon) then
-                        for _, v2831 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if v2831:FindFirstChild("HumanoidRootPart") and v2831:FindFirstChild("Humanoid") and v2831.Humanoid.Health > 0 then
-                                if v2831.Name == Mon then
-                                    if string.find(QuestTitle, NameMon) then
-                                        repeat
-                                            task.wait();
-                                            EquipWeapon(_G.SelectWeapon);
-                                            AutoHaki();
-                                            PosMon = v2831.HumanoidRootPart.CFrame;
-                                            TP1(v2831.HumanoidRootPart.CFrame * Pos);
-                                            v2831.HumanoidRootPart.CanCollide = false;
-                                            v2831.Humanoid.WalkSpeed = 0;
-                                            v2831.Head.CanCollide = false;
-                                            v2831.HumanoidRootPart.Size = Vector3.new(50, 50, 50);
-                                            StartMagnet = true;
-                                        until not _G.Level or v2831.Humanoid.Health <= 0 or not v2831.Parent or game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false
-                                    else
-                                        StartMagnet = false;
-                                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest");
-                                    end
+                elseif questGui.Visible then
+                    CheckQuest()
+
+                    if game.Workspace.Enemies:FindFirstChild(Mon) then
+                        for _, mob in pairs(game.Workspace.Enemies:GetChildren()) do
+                            if mob.Name == Mon and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                if string.find(QuestTitle, NameMon) then
+                                    repeat
+                                        task.wait()
+                                        EquipWeapon(_G.SelectWeapon)
+                                        AutoHaki()
+                                        PosMon = mob.HumanoidRootPart.CFrame
+                                        TP1(PosMon * Pos)
+                                        mob.HumanoidRootPart.CanCollide = false
+                                        mob.Head.CanCollide = false
+                                        mob.Humanoid.WalkSpeed = 0
+                                        mob.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                                        StartMagnet = true
+                                    until not _G.AutoLevel or mob.Humanoid.Health <= 0 or not mob.Parent or not questGui.Visible
+                                else
+                                    StartMagnet = false
+                                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                                 end
                             end
                         end
                     else
-                        -- If no monsters in workspace, go to monster spawn location
-                        StartMagnet = false;
-                        UnEquipWeapon(_G.SelectWeapon);
-                        
-                        -- Check if monster exists in ReplicatedStorage
+                        StartMagnet = false
+                        UnEquipWeapon(_G.SelectWeapon)
+
                         if game:GetService("ReplicatedStorage"):FindFirstChild(Mon) then
-                            TP1(game:GetService("ReplicatedStorage"):FindFirstChild(Mon).HumanoidRootPart.CFrame * CFrame.new(15, 10, 2));
+                            TP1(game:GetService("ReplicatedStorage")[Mon].HumanoidRootPart.CFrame * CFrame.new(15, 10, 2))
                         else
-                            -- If not found in either place, go to the monster CFrame
-                            TP1(CFrameMon);
+                            TP1(CFrameMon)
                         end
                     end
                 end
-            end);
+            end)
         end
     end
-end);
+end)
 
 Player:AddSection("Anti Slow");
 
