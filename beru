@@ -450,14 +450,6 @@ spawn(function()
                     "Isle Champion",
                     "Serpent Hunter"
                 }
-
-                -- Teleport to the area and tween to main spot
-                if not hasTweened then
-                    
-                   Tween(CFrame.new(-16224, 9, 439))
-                    
-                    hasTweened = true
-                end
                 
 
                 for _, mobName in ipairs(mobs) do
@@ -483,8 +475,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmTiki
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
@@ -509,11 +499,6 @@ spawn(function()
                     "Dough King"
                 }
 
-                -- Teleport once to area near Dough King
-                if not hasTweened then
-                    Tween(CFrame.new(-9500, 70, 6132)) -- Adjust position if needed
-                    hasTweened = true
-                end
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmDoughKing then break end
@@ -537,8 +522,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmDoughKing
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
@@ -562,11 +545,6 @@ spawn(function()
                     "Cake Prince"
                 }
 
-                if not hasTweened then
-                    Tween(CFrame.new(-2015, 122, -12318)) -- Adjust if Cake Prince location is different
-                    hasTweened = true
-                end
-
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmCakePrince then break end
 
@@ -589,8 +567,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmCakePrince
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
@@ -624,12 +600,6 @@ spawn(function()
                     "Candy Rebel"
                 }
 
-                -- Teleport to Cake Island base spot
-                if not hasTweened then
-                    Tween(CFrame.new(-2021, 123, -12194)) -- adjust if needed
-                    hasTweened = true
-                end
-
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmCakeIsland then break end
 
@@ -652,8 +622,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmCakeIsland
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
