@@ -435,6 +435,12 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmTiki = Value
+
+        if Value then
+            -- Go to the specified position ONCE when toggled
+            local tikiPos = CFrame.new(-16641.6016, 195.906006, 1034.14697, 0.999388874, 0, 0.0349550731, 0, 1, 0, -0.0349550731, 0, 0.999388874)
+            Tween(tikiPos)
+        end
     end
 })
 
@@ -454,7 +460,6 @@ spawn(function()
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
 
-                    -- Wait until all mobs of this type are cleared
                     repeat
                         local mobFound = false
                         for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -465,15 +470,12 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                
-                                -- THIS is the key fix: teleport to mob no matter where you are
                                 Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-
                                 AttackNoCoolDown()
                                 break
                             end
                         end
-                        task.wait(0.2)
+                        task.wait()
                     until not mobFound or not _G.AutoFarmTiki
                 end
             end)
@@ -490,6 +492,12 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmDoughKing = Value
+
+        if Value then
+            -- Only teleport once when the toggle is turned ON
+            local doughKingCFrame = CFrame.new(87.94276428222656, 73.55451202392578, -12319.46484375)
+            Tween(doughKingCFrame)
+        end
     end
 })
 
@@ -535,6 +543,12 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmCakePrince = Value
+
+        if Value then
+            -- Only teleport once when the toggle is turned ON
+            local cakePrinceCFrame = CFrame.new(1884.7747802734375, 19.327526092529297, -11666.8974609375)
+            Tween(cakePrinceCFrame)
+        end
     end
 })
 
@@ -579,6 +593,12 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmCakeIsland = Value
+
+        if Value then
+            -- Only teleport once when the toggle is turned ON
+            local cakeIslandCFrame = CFrame.new(2062.7475585938, 50.473892211914, -10232.568359375)
+            Tween(cakeIslandCFrame)
+        end
     end
 })
 
@@ -619,7 +639,7 @@ spawn(function()
                                 break
                             end
                         end
-                        task.wait(0.2)
+                        task.wait()
                     until not mobFound or not _G.AutoFarmCakeIsland
                 end
             end)
@@ -975,7 +995,7 @@ game:GetService("Players").LocalPlayer.Idled:Connect(function()
 end)
 
 -- Get Player Level
-function CheckLevel()
+function checkLevel()
 
 local v197 = game:GetService("Players").LocalPlayer.Data.Level.Value;
 
