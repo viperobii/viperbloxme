@@ -2235,36 +2235,39 @@ end
 
 
 function Tween2(v204)
-    local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local v206 = 350
 
-    if (v205 >= 350) then
-        v206 = 350
-    end
+local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
 
-    local targetPosition = v204.Position
-    local currentPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+local v206 = 350;
 
-    -- Ensure we only tween upwards if the target is higher than the current position
-    if targetPosition.Y < currentPosition.Y then
-        targetPosition = Vector3.new(targetPosition.X, currentPosition.Y, targetPosition.Z)
-    end
+if (v205 >= 350) then
 
-    local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear)
+v206 = 350;
 
-    local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
-        CFrame = CFrame.new(targetPosition)
-    })
+end
 
-    v208:Play()
+local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear);
 
-    if _G.CancelTween2 then
-        v208:Cancel()
-    end
+local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
 
-    _G.Clip2 = true
-    wait(v205 / v206)
-    _G.Clip2 = false
+CFrame = v204
+
+});
+
+v208:Play();
+
+if _G.CancelTween2 then
+
+v208:Cancel();
+
+end
+
+_G.Clip2 = true;
+
+wait(v205 / v206);
+
+_G.Clip2 = false;
+
 end
 
 function BTPZ(v209)
@@ -2279,46 +2282,37 @@ end
 
 TweenSpeed = 350;
 
-function Tween(v211)
-    local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local v213 = TweenSpeed
+function Tween(targetCFrame)
+    local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
 
-    if (v212 >= 350) then
-        v213 = TweenSpeed
+    -- Force Y height above water (minimum Y = 5)
+    local targetPos = targetCFrame.Position
+    if targetPos.Y < 5 then
+        targetPos = Vector3.new(targetPos.X, 5, targetPos.Z)
     end
 
-    local targetPosition = v211.Position
-    local currentPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+    local distance = (targetPos - root.Position).Magnitude
+    local info = TweenInfo.new(distance / TweenSpeed, Enum.EasingStyle.Linear)
 
-    -- Ensure we only tween upwards if the target is higher than the current position
-    if targetPosition.Y < currentPosition.Y then
-        targetPosition = Vector3.new(targetPosition.X, currentPosition.Y, targetPosition.Z)
-    end
-
-    local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear)
-
-    local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
-        CFrame = CFrame.new(targetPosition)
-    })
-
-    -- Before tweening, ensure no collisions
-    game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+    -- Set no clip before tween
+    root.CanCollide = false
     if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
         game.Players.LocalPlayer.Character.Head.CanCollide = false
     end
 
-    v215:Play()
+    local tween = game:GetService("TweenService"):Create(root, info, {CFrame = CFrame.new(targetPos)})
+    tween:Play()
 
-    -- Reset collision after tween completes
-    v215.Completed:Connect(function()
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
-        if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
-            game.Players.LocalPlayer.Character.Head.CanCollide = true
-        end
+    tween.Completed:Connect(function()
+        -- Restore collision
+        if root then root.CanCollide = true end
+        local head = game.Players.LocalPlayer.Character:FindFirstChild("Head")
+        if head then head.CanCollide = true end
     end)
 
     if _G.StopTween then
-        v215:Cancel()
+        tween:Cancel()
     end
 end
 
