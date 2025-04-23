@@ -661,10 +661,10 @@ end
 Player:AddSlider({
     Name = "Walkspeed",
     Flag = "Player/SpeedMultiplier",
-    Description = "Higher = Faster",
+    Description = "",
     Range = {1, 300},
     Suffix = "",
-    CurrentValue = 100,
+    CurrentValue = 300,
     Increment = 1,
     Callback = function(Value)
         _G.SpeedMultiplier = Value
@@ -673,22 +673,20 @@ Player:AddSlider({
 
 -- Initialize global variables
 _G.SpeedBoost = false
-_G.SpeedMultiplier = 3000
+_G.SpeedMultiplier = 300
 
--- Loop for velocity-based speed modification
+-- Velocity-based speed boost
 task.spawn(function()
     while true do
         if _G.SpeedBoost then
             pcall(function()
                 local char = game.Players.LocalPlayer.Character
                 if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
-                    local humanoid = char.Humanoid
-                    local moveDirection = humanoid.MoveDirection
-
-                    if moveDirection.Magnitude > 0 then
-                        local velocity = moveDirection.Unit * _G.SpeedMultiplier
-                        velocity = Vector3.new(velocity.X, char.HumanoidRootPart.Velocity.Y, velocity.Z)
-                        char.HumanoidRootPart.Velocity = velocity
+                    local moveDir = char.Humanoid.MoveDirection
+                    if moveDir.Magnitude > 0 then
+                        local boost = moveDir.Unit * (_G.SpeedMultiplier * 3.5)
+                        boost = Vector3.new(boost.X, char.HumanoidRootPart.Velocity.Y, boost.Z)
+                        char.HumanoidRootPart.Velocity = boost
                     end
                 end
             end)
