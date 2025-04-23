@@ -24,6 +24,11 @@ local Main = Window:MakeTab({
     Icon = "home",  -- Fixed the split "Icon"
 })
 
+local Player = Window:MakeTab({
+    Title = "Combat",
+    Description = "Info",
+    Icon = "swords",  -- Fixed the split "Icon"
+})
 
 
 Discord:AddDiscordInvite({
@@ -467,6 +472,182 @@ spawn(function()
         end
     end
 end)
+
+
+
+-- Player Window
+
+local playerList = {}
+for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+    table.insert(playerList, player.Name)
+end
+
+Player:AddSection("Combat")
+
+Player:AddDropdown({
+    Name = "Select Player",
+    Flag = "Player/SelectPlayers",
+    Description = "Choose a player to target",
+    Options = playerList,
+    Callback = function(option)
+        _G.SelectPly = option
+    end
+})
+
+-- Toggle for Auto Kill Player
+Player:AddToggle({
+    Name = "Auto Kill Player",
+    Flag = "Player/AutoKillPlayer",
+    Description = "Teleports to selected player",
+    Default = false,
+    Callback = function(value)
+        _G.TeleportPly = value
+    end
+})
+
+-- Smooth follow loop (real-time)
+spawn(function()
+    while task.wait(0.1) do
+        pcall(function()
+            if _G.TeleportPly and _G.SelectPly and game.Players:FindFirstChild(_G.SelectPly) then
+                local target = game.Players[_G.SelectPly]
+                if target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    AutoHaki()
+                    SmoothFollow(target.Character.HumanoidRootPart.CFrame)
+                end
+            end
+        end)
+    end
+end)
+
+
+
+Player:AddToggle({
+    Name = "Spectate Player",
+    Flag = "Player/SpectatePlayer",
+    Description = "Enable or disable spectating",
+    Default = false,
+    Callback = function(Value)
+        _G.SpectatePlayer = Value
+        if Value then
+            SpectatePlayer()
+        else
+            StopSpectating()
+        end
+    end
+})
+
+
+_G.Spectating = false
+_G.SelectPly = nil
+
+function SpectatePlayer()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+
+    if not _G.SelectPly or _G.SelectPly == "" then
+        warn("No player selected!")
+        StopSpectating()
+        return
+    end
+
+    local targetPlayer = game:GetService("Players"):FindFirstChild(_G.SelectPly)
+    if not targetPlayer or not targetPlayer.Character then 
+        warn("Invalid player selected or player not in-game!")
+        StopSpectating()
+        return
+    end
+
+    camera.CameraSubject = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = true
+
+    local connection
+    connection = targetPlayer.CharacterRemoving:Connect(function()
+        if _G.Spectating then
+            StopSpectating()
+            connection:Disconnect()
+        end
+    end)
+
+    print("Now spectating:", _G.SelectPly)
+end
+
+function StopSpectating()
+    local localPlayer = game:GetService("Players").LocalPlayer
+    local camera = game:GetService("Workspace").Camera
+    camera.CameraSubject = localPlayer.Character:FindFirstChildOfClass("Humanoid")
+    _G.Spectating = false
+    print("Stopped spectating.")
+end
+
+
+Player:AddSection("Player")
+
+Player:AddToggle({
+    Name = "NoClip",
+    Flag = "Player/NoClip",
+    Description = "Walk through walls",
+    Default = true,
+    Callback = function(Value)
+        _G.NoClip = Value
+
+        if _G.NoClip and not _G.NoClipLoop then
+            _G.NoClipLoop = task.spawn(function()
+                while _G.NoClip do
+                    local char = game.Players.LocalPlayer.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        for _, part in pairs(char:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                    task.wait(0.1)
+                end
+                _G.NoClipLoop = nil
+            end)
+        end
+
+        if not _G.NoClip and _G.NoClipLoop then
+            local char = game.Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+})
+
+
+Player:AddToggle({
+    Name = "Walk on Water",
+    Flag = "Player/WalkonWater",
+    Description = "",
+    Default = true,
+    Callback = function(Value)
+        _G.WalkonWater = Value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        pcall(function()
+            if _G.WalkonWater then
+                game:GetService("Workspace").Map["WaterBase-Plane"].Size = Vector3.new(1000, 112, 1000)
+            else
+                game:GetService("Workspace").Map["WaterBase-Plane"].Size = Vector3.new(1000, 80, 1000)
+            end
+        end)
+    end
+end)
+
+-- Add this function to format numbers (replacement for v20)
+function FormatNumber(number)
+    return math.floor(number + 0.5)
+end
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
