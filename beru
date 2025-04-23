@@ -2280,41 +2280,43 @@ game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = v209;
 
 end
 
-TweenSpeed = 350
+TweenSpeed = 350;
 
-function Tween(targetCFrame)
-    local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not root or not targetCFrame then return end
+function Tween(v211)
+    local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local v213 = TweenSpeed
 
-    local targetAbove = targetCFrame * CFrame.new(0, 40, 0) -- Raise 20 studs above
+    if (v212 >= 350) then
+        v213 = TweenSpeed
+    end
 
-    local distance = (targetAbove.Position - root.Position).Magnitude
-    local tweenInfo = TweenInfo.new(distance / TweenSpeed, Enum.EasingStyle.Linear)
+    local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear)
 
-    local tween = game:GetService("TweenService"):Create(root, tweenInfo, {
-        CFrame = targetAbove
+    local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
+        CFrame = v211
     })
 
-    -- Disable collision during tween
-    root.CanCollide = false
+    -- Before tweening, ensure no collisions
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
     if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
         game.Players.LocalPlayer.Character.Head.CanCollide = false
     end
 
-    tween:Play()
+    v215:Play()
 
-    tween.Completed:Connect(function()
-        -- Enable collision again
-        root.CanCollide = true
+    -- Reset collision after tween completes
+    v215.Completed:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
         if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
             game.Players.LocalPlayer.Character.Head.CanCollide = true
         end
     end)
 
     if _G.StopTween then
-        tween:Cancel()
+        v215:Cancel()
     end
 end
+
 
 
 -- Auto Attack Function
