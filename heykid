@@ -89,15 +89,12 @@ Main:AddToggle({
     Callback = function(Value)
         _G.AutoLevel = Value
         if not Value then
-            wait()
-            -- Ensure player is above the water level
             local player = game:GetService("Players").LocalPlayer
-            local playerPosition = player.Character.HumanoidRootPart.Position
-            if playerPosition.Y <= 0 then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            if root and root.Position.Y <= 0 then
+                root.CFrame = CFrame.new(root.Position.X, 5, root.Position.Z)
             end
-            Tween(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame)
-            wait()
+            Tween(root.CFrame)
         end
     end
 })
@@ -111,65 +108,56 @@ spawn(function()
                 local player = game:GetService("Players").LocalPlayer
                 local questGui = player.PlayerGui.Main.Quest
 
+                -- Get quest if not correct or not started
                 if not string.find(questGui.Container.QuestTitle.Title.Text, NameMon) or not questGui.Visible then
                     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
                     Tween(CFrameQ)
 
-                    -- Ensure player stays above water after tweening
-                    local playerPosition = player.Character.HumanoidRootPart.Position
-                    if playerPosition.Y <= 0 then
-                        player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    if root and root.Position.Y <= 0 then
+                        root.CFrame = CFrame.new(root.Position.X, 5, root.Position.Z)
                     end
 
-                    if (CFrameQ.Position - player.Character.HumanoidRootPart.Position).Magnitude <= 5 then
-                        wait(0.5) -- Small delay before accepting quest
+                    if (CFrameQ.Position - root.Position).Magnitude <= 5 then
+                        wait(0.5)
                         game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", NameQuest, QuestLv)
                     end
                 else
-                    -- Check if there are mobs to farm
                     local foundMob = false
-                    
+
                     for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                         if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                             if string.find(enemy.Name, Ms) then
                                 foundMob = true
-                                
-                                -- Target and attack the mob
                                 AutoHaki()
                                 EquipTool(SelectWeapon)
-                                
-                                enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                enemy.HumanoidRootPart.Transparency = 1
-                                enemy.Humanoid.JumpPower = 0
+
+                                local HRP = enemy.HumanoidRootPart
+                                HRP.Size = Vector3.new(60, 60, 60)
+                                HRP.Transparency = 1
+                                HRP.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
-                                enemy.HumanoidRootPart.CanCollide = false
-                                
-                                local targetPos = enemy.HumanoidRootPart.Position + Vector3.new(0, 30, 0)
-                                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPos)
-                                
-                                -- Attack
-                                AttackNoCoolDown()
-                                bringmob = true
-                                
-                                wait(0.1)
-                                break -- Focus on one mob at a time
+                                enemy.Humanoid.JumpPower = 0
+
+                                repeat
+                                    player.Character.HumanoidRootPart.CFrame = HRP.CFrame * CFrame.new(0, 30, 0)
+                                    AttackNoCoolDown()
+                                    task.wait()
+                                until not enemy or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0 or not _G.AutoLevel
                             end
                         end
                     end
-                    
-                    -- If no mobs found, go to spawn location
+
                     if not foundMob then
                         bringmob = false
-                        -- Go to mob spawn location
                         Tween(CFrameMon)
 
-                        -- Ensure player stays above water during movement
-                        local playerPosition = player.Character.HumanoidRootPart.Position
-                        if playerPosition.Y <= 0 then
-                            player.Character.HumanoidRootPart.CFrame = CFrame.new(playerPosition.X, 5, playerPosition.Z)
+                        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                        if root and root.Position.Y <= 0 then
+                            root.CFrame = CFrame.new(root.Position.X, 5, root.Position.Z)
                         end
 
-                        wait(0.5)
+                        task.wait()
                     end
                 end
             end)
@@ -546,7 +534,7 @@ Main:AddToggle({
 
         if Value then
             -- Only teleport once when the toggle is turned ON
-            local cakePrinceCFrame = CFrame.new(1884.7747802734375, 19.327526092529297, -11666.8974609375)
+            local cakePrinceCFrame = CFrame.new(87.94276428222656, 73.55451202392578, -12319.46484375)
             Tween(cakePrinceCFrame)
         end
     end
@@ -595,8 +583,7 @@ Main:AddToggle({
         _G.AutoFarmCakeIsland = Value
 
         if Value then
-            -- Only teleport once when the toggle is turned ON
-            local cakeIslandCFrame = CFrame.new(2062.7475585938, 50.473892211914, -10232.568359375)
+            local cakeIslandCFrame = CFrame.new(87.94276428222656, 73.55451202392578, -12319.46484375)
             Tween(cakeIslandCFrame)
         end
     end
@@ -607,40 +594,35 @@ spawn(function()
         if _G.AutoFarmCakeIsland then
             pcall(function()
                 local mobs = {
-                    "Baking Staff",
-                    "Peanut Scout",
-                    "Peanut President",
-                    "Ice Cream Chef",
-                    "Ice Cream Commander",
-                    "Cookie Crafter",
-                    "Cake Guard",
-                    "Head Baker",
-                    "Cocoa Warrior",
-                    "Chocolate Bar Battler",
-                    "Sweet Thief",
-                    "Candy Rebel"
+                    ["Baking Staff"] = true,
+                    ["Peanut Scout"] = true,
+                    ["Peanut President"] = true,
+                    ["Ice Cream Chef"] = true,
+                    ["Ice Cream Commander"] = true,
+                    ["Cookie Crafter"] = true,
+                    ["Cake Guard"] = true,
+                    ["Head Baker"] = true,
+                    ["Cocoa Warrior"] = true,
+                    ["Chocolate Bar Battler"] = true,
+                    ["Sweet Thief"] = true,
+                    ["Candy Rebel"] = true
                 }
 
-                for _, mobName in ipairs(mobs) do
+                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if not _G.AutoFarmCakeIsland then break end
 
-                    repeat
-                        local mobFound = false
-                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                                mobFound = true
-                                AutoHaki()
-                                EquipTool(_G.SelectWeapon or SelectWeapon)
-                                enemy.HumanoidRootPart.CanCollide = false
-                                enemy.Humanoid.WalkSpeed = 0
-                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                                AttackNoCoolDown()
-                                break
-                            end
-                        end
-                        task.wait()
-                    until not mobFound or not _G.AutoFarmCakeIsland
+                    if mobs[enemy.Name] and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        AutoHaki()
+                        EquipTool(_G.SelectWeapon or SelectWeapon)
+                        enemy.HumanoidRootPart.CanCollide = false
+                        enemy.Humanoid.WalkSpeed = 0
+                        if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                        Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                        repeat
+                            AttackNoCoolDown()
+                            task.wait()
+                        until not enemy or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0 or not _G.AutoFarmCakeIsland
+                    end
                 end
             end)
         end
