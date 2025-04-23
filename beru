@@ -295,6 +295,9 @@ spawn(function()
                     "Demonic Soul"
                 }
 
+Tween(CFrame.new(- 9480.80762, 142.130661, 5566.37305, - 0.00655503059, 4.5295423e-8, - 0.999978542, 2.0492047e-8, 1, 4.5162068e-8, 0.999978542, - 2.0195568e-8, - 0.00655503059))
+
+
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmBones then break end
 
