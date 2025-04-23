@@ -371,25 +371,32 @@ Main:AddToggle({
 
 Main:AddSection("Tiki Boss")
 
-Main:AddToggle({
-    Name = "Auto Farm Tyrant of the Skies",
-    Flag = "Farm/AutoFarmTyrantOfTheSkies",
-    Default = false,
-    Callback = function(value)
-        _G.farmTyrant = value
-    end
+-- Define Position offset for attacking
+local Pos = CFrame.new(0, 30, 0) -- Adjust this value as needed
+
+Main:AddToggle({ 
+    Name = "Auto Farm Tyrant of the Skies", 
+    Flag = "Farm/AutoFarmTyrantOfTheSkies", 
+    Default = false, 
+    Callback = function(value) 
+        _G.farmTyrant = value 
+    end 
 })
 
-spawn(function()
-    while task.wait() do
-        if _G.farmTyrant and World3 then
-            pcall(function()
-                -- Teleport to location first
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+spawn(function() 
+    while task.wait() do 
+        if _G.farmTyrant and World3 then 
+            pcall(function() 
+                -- Teleport to location first 
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282)) 
+                wait(1) -- Add a slight delay after teleporting
                 Tween(CFrame.new(-16224, 9, 439))
-                
+                wait(1) -- Add another delay after reaching location
+
+                local foundEnemy = false
                 for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        foundEnemy = true
                         repeat
                             task.wait()
                             AutoHaki()
@@ -402,32 +409,40 @@ spawn(function()
                         until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
                     end
                 end
+                
+                if not foundEnemy then
+                    -- If enemy not found, wait a bit before trying again
+                    wait(2)
+                end
             end)
         end
     end
 end)
 
-
-Main:AddToggle({
-    Name = "Auto Farm All Tiki Mobs",
-    Flag = "Farm/AutoFarmAllTikiMobs",
-    Default = false,
-    Callback = function(value)
-        _G.farmSkullSlayer = value
-    end
+Main:AddToggle({ 
+    Name = "Auto Farm All Tiki Mobs", 
+    Flag = "Farm/AutoFarmAllTikiMobs", 
+    Default = false, 
+    Callback = function(value) 
+        _G.farmSkullSlayer = value 
+    end 
 })
 
-spawn(function()
-    while task.wait() do
-        if _G.farmSkullSlayer and World3 then
-            pcall(function()
-                -- Teleport to location first
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, - 282))
+spawn(function() 
+    while task.wait() do 
+        if _G.farmSkullSlayer and World3 then 
+            pcall(function() 
+                -- Teleport to location first 
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282)) 
+                wait(1) -- Add a slight delay after teleporting
                 Tween(CFrame.new(-16224, 9, 439))
-                
+                wait(1) -- Add another delay after reaching location
+
+                local foundEnemy = false
                 for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if (v.Name == "Skull Slayer" or v.Name == "Isle Outlaw" or v.Name == "Island Boy" or v.Name == "Sun-kissed Warrior" or v.Name == "Isle Champion" or v.Name == "Serpent Hunter")
                     and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        foundEnemy = true
                         repeat
                             task.wait()
                             AutoHaki()
@@ -439,6 +454,11 @@ spawn(function()
                             sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
                         until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
                     end
+                end
+                
+                if not foundEnemy then
+                    -- If enemy not found, wait a bit before trying again
+                    wait(2)
                 end
             end)
         end
