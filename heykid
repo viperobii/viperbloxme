@@ -429,29 +429,32 @@ end)
 
 
 Main:AddToggle({
-    Name = "Auto Farm All Chocolate Mobs",
-    Flag = "Main/AutoFarmAllChocolateMobs",
-    Description = "Farms all mobs in Chocolate Island",
+    Name = "Auto Farm All Tiki Mobs",
+    Flag = "Main/AutoFarmAllTikiMobs",
+    Description = "",
     Default = false,
     Callback = function(Value)
-        _G.AutoFarmChocolate = Value
+        _G.AutoFarmTiki = Value
     end
 })
 
 spawn(function()
     while task.wait() do
-        if _G.AutoFarmChocolate then
+        if _G.AutoFarmTiki then
             pcall(function()
                 local mobs = {
-                    "Cocoa Warrior",
-                    "Chocolate Bar Battler",
-                    "Sweet Thief",
-                    "Candy Rebel"
+                    "Skull Slayer",
+                    "Isle Outlaw",
+                    "Island Boy",
+                    "Sun-kissed Warrior",
+                    "Isle Champion",
+                    "Serpent Hunter"
                 }
 
                 for _, mobName in ipairs(mobs) do
-                    if not _G.AutoFarmChocolate then break end
+                    if not _G.AutoFarmTiki then break end
 
+                    -- Wait until all mobs of this type are cleared
                     repeat
                         local mobFound = false
                         for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -462,13 +465,16 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                
+                                -- THIS is the key fix: teleport to mob no matter where you are
                                 Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+
                                 AttackNoCoolDown()
                                 break
                             end
                         end
-                        task.wait()
-                    until not mobFound or not _G.AutoFarmChocolate
+                        task.wait(0.2)
+                    until not mobFound or not _G.AutoFarmTiki
                 end
             end)
         end
@@ -613,7 +619,7 @@ spawn(function()
                                 break
                             end
                         end
-                        task.wait()
+                        task.wait(0.2)
                     until not mobFound or not _G.AutoFarmCakeIsland
                 end
             end)
