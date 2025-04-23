@@ -272,59 +272,7 @@ spawn(function()
     end
 end)
 
-Main:AddToggle({
-    Name = "Auto Chest Fast (Reset)",
-    Flag = "Main/AutoCollectChest",
-    Description = "Bypass TP",
-    Default = false,
-    Callback = function(Value)
-        _G.AutoCollectChest = Value
 
-        -- Reset position when turned off
-        if not Value and _G.LastChestPos then
-            BTPZ(_G.LastChestPos)
-        end
-    end
-})
-
--- Bypass teleport function
-function BTPZ(cframe)
-    local hrp = game.Players.LocalPlayer.Character.HumanoidRootPart
-    hrp.CFrame = cframe
-    task.wait()
-    hrp.CFrame = cframe
-end
-
--- Auto collect chest logic
-spawn(function()
-    while task.wait() do
-        if _G.AutoCollectChest then
-            pcall(function()
-                local player = game:GetService("Players").LocalPlayer
-                local char = player.Character or player.CharacterAdded:Wait()
-                local root = char:WaitForChild("HumanoidRootPart")
-                _G.LastChestPos = root.CFrame -- Save original position
-
-                local tagged = game:GetService("CollectionService"):GetTagged("_ChestTagged")
-                local closest, shortest = nil, math.huge
-
-                for _, chest in pairs(tagged) do
-                    if not chest:GetAttribute("IsDisabled") then
-                        local dist = (chest:GetPivot().Position - root.Position).Magnitude
-                        if dist < shortest then
-                            shortest = dist
-                            closest = chest
-                        end
-                    end
-                end
-
-                if closest then
-                    BTPZ(closest:GetPivot())
-                end
-            end)
-        end
-    end
-end)
 
 Main:AddSection("Bones");
 
@@ -504,8 +452,13 @@ spawn(function()
                 }
 
                 -- Teleport to the area and tween to main spot
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282))
-                Tween(CFrame.new(-16224, 9, 439))
+                if not hasTweened then
+                    
+                   Tween(CFrame.new(-16224, 9, 439))
+                    
+                    hasTweened = true
+                end
+                
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
@@ -528,6 +481,209 @@ spawn(function()
                         end
                         task.wait()
                     until not mobFound or not _G.AutoFarmTiki
+                end
+            end)
+        else
+            hasTweened = false
+        end
+    end
+end)
+
+Main:AddSection("Cake")
+
+Main:AddToggle({
+    Name = "Auto Farm Dough King",
+    Flag = "Main/AutoFarmDoughKing",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarmDoughKing = Value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarmDoughKing then
+            pcall(function()
+                local mobs = {
+                    "Dough King"
+                }
+
+                -- Teleport once to area near Dough King
+                if not hasTweened then
+                    Tween(CFrame.new(-9500, 70, 6132)) -- Adjust position if needed
+                    hasTweened = true
+                end
+
+                for _, mobName in ipairs(mobs) do
+                    if not _G.AutoFarmDoughKing then break end
+
+                    repeat
+                        local mobFound = false
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                mobFound = true
+                                AutoHaki()
+                                EquipTool(_G.SelectWeapon or SelectWeapon)
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                AttackNoCoolDown()
+                                break
+                            end
+                        end
+                        task.wait()
+                    until not mobFound or not _G.AutoFarmDoughKing
+                end
+            end)
+        else
+            hasTweened = false
+        end
+    end
+end)
+
+
+Main:AddToggle({
+    Name = "Auto Farm Cake Prince",
+    Flag = "Main/AutoFarmCakePrince",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarmCakePrince = Value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarmCakePrince then
+            pcall(function()
+                local mobs = {
+                    "Cake Prince"
+                }
+
+                if not hasTweened then
+                    Tween(CFrame.new(-2015, 122, -12318)) -- Adjust if Cake Prince location is different
+                    hasTweened = true
+                end
+
+                for _, mobName in ipairs(mobs) do
+                    if not _G.AutoFarmCakePrince then break end
+
+                    repeat
+                        local mobFound = false
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                mobFound = true
+                                AutoHaki()
+                                EquipTool(_G.SelectWeapon or SelectWeapon)
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                AttackNoCoolDown()
+                                break
+                            end
+                        end
+                        task.wait()
+                    until not mobFound or not _G.AutoFarmCakePrince
+                end
+            end)
+        else
+            hasTweened = false
+        end
+    end
+end)
+
+Main:AddToggle({
+    Name = "Auto Farm Cake Island Mobs",
+    Flag = "Main/AutoFarmCakeIslandMobs",
+    Description = "Farms all mobs in Cake Island",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoFarmCakeIsland = Value
+    end
+})
+
+spawn(function()
+    while task.wait() do
+        if _G.AutoFarmCakeIsland then
+            pcall(function()
+                local mobs = {
+                    "Baking Staff",
+                    "Peanut Scout",
+                    "Peanut President",
+                    "Ice Cream Chef",
+                    "Ice Cream Commander",
+                    "Cookie Crafter",
+                    "Cake Guard",
+                    "Head Baker",
+                    "Cocoa Warrior",
+                    "Chocolate Bar Battler",
+                    "Sweet Thief",
+                    "Candy Rebel"
+                }
+
+                -- Teleport to Cake Island base spot
+                if not hasTweened then
+                    Tween(CFrame.new(-2021, 123, -12194)) -- adjust if needed
+                    hasTweened = true
+                end
+
+                for _, mobName in ipairs(mobs) do
+                    if not _G.AutoFarmCakeIsland then break end
+
+                    repeat
+                        local mobFound = false
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                mobFound = true
+                                AutoHaki()
+                                EquipTool(_G.SelectWeapon or SelectWeapon)
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                AttackNoCoolDown()
+                                break
+                            end
+                        end
+                        task.wait()
+                    until not mobFound or not _G.AutoFarmCakeIsland
+                end
+            end)
+        else
+            hasTweened = false
+        end
+    end
+end)
+
+
+Main:AddToggle({
+    Name = "Auto Summon Cake Prince",
+    Flag = "Main/AutoSummonCakePrince",
+    Description = "Auto Summon Cake Prince",
+    Default = true,
+    Callback = function(Value)
+        _G.SpawnCakePrince = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.SpawnCakePrince then
+            pcall(function()
+                -- Assuming "CakePrinceSpawner" is the object that spawns the Cake Prince
+                local spawnData = {
+                    [1] = "CakePrinceSpawner",
+                    [2] = true -- This will trigger the spawn
+                }
+                
+                -- You may need to change this to the actual code that triggers the spawn
+                local spawner = game.Workspace:FindFirstChild("CakePrinceSpawner")
+                if spawner then
+                    -- Call the function or event to spawn the Cake Prince
+                    spawner:Fire(spawnData) -- Replace with actual method to spawn
                 end
             end)
         end
