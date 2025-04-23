@@ -369,76 +369,89 @@ Main:AddToggle({
     end
 })
 
-Main:AddSection("Tiki Boss")
+Main:AddSection("Tiki")
 
-Main:AddToggle({
-    Name = "Auto Farm Tyrant of the Skies",
-    Flag = "Farm/AutoFarmTyrantOfTheSkies",
-    Default = false,
-    Callback = function(value)
-        _G.farmTyrant = value
-    end
+Main:AddToggle({ 
+    Name = "Auto Farm Tyrant of the Skies", 
+    Flag = "Farm/AutoFarmTyrantOfTheSkies", 
+    Default = false, 
+    Callback = function(value) 
+        _G.farmTyrant = value 
+    end 
 })
 
-spawn(function()
-    while task.wait() do
-        if _G.farmTyrant and World3 then
-            pcall(function()
-                local Pos = Vector3.new(0, 20, 0)
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282))
+spawn(function() 
+    while task.wait() do 
+        if _G.farmTyrant and World3 then 
+            pcall(function() 
+                -- Teleport to location first 
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282)) 
+                wait(0.5)
                 Tween(CFrame.new(-16224, 9, 439))
-
-                for _, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                
+                local mobFound = false
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if v.Name == "Tyrant of the Skies" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        mobFound = true
                         repeat
                             task.wait()
                             AutoHaki()
-                            EquipWeapon(_G.SelectWeapon)
+                            EquipTool(_G.SelectWeapon or SelectWeapon)
                             v.HumanoidRootPart.CanCollide = false
                             v.Humanoid.WalkSpeed = 0
-                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                            Tween(CFrame.new(v.HumanoidRootPart.Position + Pos))
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        until not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
+                            if v:FindFirstChild("Head") then v.Head.CanCollide = false end
+                            Tween(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            AttackNoCoolDown()
+                        until not mobFound or not _G.farmTyrant or not v.Parent or v.Humanoid.Health <= 0
                     end
+                end
+                
+                if not mobFound then
+                    wait(1)
                 end
             end)
         end
     end
 end)
 
-
-Main:AddToggle({
-    Name = "Auto Farm All Tiki Mobs",
-    Flag = "Farm/AutoFarmAllTikiMobs",
-    Default = false,
-    Callback = function(value)
-        _G.farmSkullSlayer = value
-    end
+Main:AddToggle({ 
+    Name = "Auto Farm All Tiki Mobs", 
+    Flag = "Farm/AutoFarmAllTikiMobs", 
+    Default = false, 
+    Callback = function(value) 
+        _G.farmSkullSlayer = value 
+    end 
 })
 
-spawn(function()
-    while task.wait() do
-        if _G.farmSkullSlayer and World3 then
-            pcall(function()
-                local Pos = Vector3.new(0, 20, 0)
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282))
+spawn(function() 
+    while task.wait() do 
+        if _G.farmSkullSlayer and World3 then 
+            pcall(function() 
+                -- Teleport to location first 
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282)) 
+                wait(0.5)
                 Tween(CFrame.new(-16224, 9, 439))
-
-                for _, v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                
+                local mobFound = false
+                for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if (v.Name == "Skull Slayer" or v.Name == "Isle Outlaw" or v.Name == "Island Boy" or v.Name == "Sun-kissed Warrior" or v.Name == "Isle Champion" or v.Name == "Serpent Hunter")
                     and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") and v.Humanoid.Health > 0 then
+                        mobFound = true
                         repeat
                             task.wait()
                             AutoHaki()
-                            EquipWeapon(_G.SelectWeapon)
+                            EquipTool(_G.SelectWeapon or SelectWeapon)
                             v.HumanoidRootPart.CanCollide = false
                             v.Humanoid.WalkSpeed = 0
-                            v.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
-                            Tween(CFrame.new(v.HumanoidRootPart.Position + Pos))
-                            sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                        until not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
+                            if v:FindFirstChild("Head") then v.Head.CanCollide = false end
+                            Tween(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            AttackNoCoolDown()
+                        until not mobFound or not _G.farmSkullSlayer or not v.Parent or v.Humanoid.Health <= 0
                     end
+                end
+                
+                if not mobFound then
+                    wait(1)
                 end
             end)
         end
