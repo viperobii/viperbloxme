@@ -450,7 +450,6 @@ spawn(function()
                     "Isle Champion",
                     "Serpent Hunter"
                 }
-                
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
@@ -466,7 +465,10 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                
+                                -- THIS is the key fix: teleport to mob no matter where you are
                                 Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+
                                 AttackNoCoolDown()
                                 break
                             end
@@ -498,7 +500,6 @@ spawn(function()
                 local mobs = {
                     "Dough King"
                 }
-
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmDoughKing then break end
