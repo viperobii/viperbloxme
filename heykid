@@ -206,7 +206,7 @@ spawn(function()
                         task.wait(_G.Fast_Delay or 0.1)
                         AutoHaki()
                         EquipTool(SelectWeapon)
-                        Tween(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
+                        Tween(enemy.HumanoidRootPart.CFrame)
                         AttackNoCoolDown()
                         if Closest:FindFirstChild("HumanoidRootPart") then
                             Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
@@ -304,7 +304,7 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                Tween(enemy.HumanoidRootPart.CFrame)
                                 AttackNoCoolDown()
                                 break
                             end
@@ -401,7 +401,7 @@ spawn(function()
                             enemy.HumanoidRootPart.CanCollide = false
                             enemy.Humanoid.WalkSpeed = 0
                             if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                            Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            Tween(enemy.HumanoidRootPart.CFrame)
                             AttackNoCoolDown()
                             break
                         end
@@ -455,7 +455,7 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                Tween(enemy.HumanoidRootPart.CFrame)
                                 AttackNoCoolDown()
                                 break
                             end
@@ -2282,50 +2282,39 @@ end
 
 TweenSpeed = 350;
 
-local connection, tween
 function Tween(targetCFrame)
-    if not targetCFrame then
-        if tween then pcall(function() tween:Cancel() end) tween = nil end
-        if connection then pcall(function() connection:Disconnect() end) connection = nil end
-        return
-    end
-    if not game.Players.LocalPlayer.Character then
-        if tween then pcall(function() tween:Cancel() end) tween = nil end
-        if connection then pcall(function() connection:Disconnect() end) connection = nil end
-        return
-    end
-
+    if not targetCFrame then return end
 
     local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    if not root or not humanoid then return end
-    if humanoid.Sit then humanoid.Sit = false end
+    if not root then return end
 
-    if (targetCFrame.Position - root.Position).Magnitude > 600 then
-        root.CFrame = root.CFrame + (targetCFrame.Position - root.Position).Unit * 600
-    else root.CFrame = targetCFrame
+    -- Set desired position above target (35 studs up)
+    local aboveCFrame = CFrame.new(targetCFrame.Position.X, targetCFrame.Position.Y + 35, targetCFrame.Position.Z)
+    local distance = (aboveCFrame.Position - root.Position).Magnitude
+    local speed = getgenv().TweenSpeed or 350
+
+    -- Tween setup
+    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
+    local goal = { CFrame = aboveCFrame }
+
+    local tween = game:GetService("TweenService"):Create(root, tweenInfo, goal)
+
+    -- Make sure you don't get stuck midair
+    root.CanCollide = false
+    if root.Parent:FindFirstChild("Head") then
+        root.Parent.Head.CanCollide = false
     end
-
-    local pathPart = Instance.new("Part")
-    pathPart.Transparency = 1
-    pathPart.Anchored = true
-    pathPart.Parent = game.Workspace
-    pathPart.CFrame = root.CFrame
-    tween = game:GetService("TweenService"):Create(pathPart, TweenInfo.new((targetCFrame.Position - root.Position).Magnitude / getgenv().LocalConfig.Settings["Tween Speed"], Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {CFrame = targetCFrame})
-
-    connection = game:GetService("RunService").Heartbeat:Connect(function()
-        root.CFrame = pathPart.CFrame
-    end)
 
     tween:Play()
 
+    -- Optional: Re-enable collision after reaching
     tween.Completed:Connect(function()
-        if connection then connection:Disconnect() connection = nil end
-        pathPart:Destroy()
-        tween = nil
+        root.CanCollide = true
+        if root.Parent:FindFirstChild("Head") then
+            root.Parent.Head.CanCollide = true
+        end
     end)
 end
-
 
 
 -- Auto Attack Function
