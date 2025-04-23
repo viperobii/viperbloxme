@@ -206,7 +206,7 @@ spawn(function()
                         task.wait(_G.Fast_Delay or 0.1)
                         AutoHaki()
                         EquipTool(SelectWeapon)
-                        Tween(enemy.HumanoidRootPart.CFrame)
+                        Tween(CFrame.new(Closest.HumanoidRootPart.Position + Vector3.new(0, 20, 0)))
                         AttackNoCoolDown()
                         if Closest:FindFirstChild("HumanoidRootPart") then
                             Closest.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
@@ -304,7 +304,7 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame)
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
                                 AttackNoCoolDown()
                                 break
                             end
@@ -401,7 +401,7 @@ spawn(function()
                             enemy.HumanoidRootPart.CanCollide = false
                             enemy.Humanoid.WalkSpeed = 0
                             if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                            Tween(enemy.HumanoidRootPart.CFrame)
+                            Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
                             AttackNoCoolDown()
                             break
                         end
@@ -455,7 +455,7 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame)
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
                                 AttackNoCoolDown()
                                 break
                             end
@@ -2235,39 +2235,36 @@ end
 
 
 function Tween2(v204)
+    local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local v206 = 350
 
-local v205 = (v204.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude;
+    if (v205 >= 350) then
+        v206 = 350
+    end
 
-local v206 = 350;
+    local targetPosition = v204.Position
+    local currentPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
 
-if (v205 >= 350) then
+    -- Ensure we only tween upwards if the target is higher than the current position
+    if targetPosition.Y < currentPosition.Y then
+        targetPosition = Vector3.new(targetPosition.X, currentPosition.Y, targetPosition.Z)
+    end
 
-v206 = 350;
+    local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear)
 
-end
+    local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
+        CFrame = CFrame.new(targetPosition)
+    })
 
-local v207 = TweenInfo.new(v205 / v206, Enum.EasingStyle.Linear);
+    v208:Play()
 
-local v208 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v207, {
+    if _G.CancelTween2 then
+        v208:Cancel()
+    end
 
-CFrame = v204
-
-});
-
-v208:Play();
-
-if _G.CancelTween2 then
-
-v208:Cancel();
-
-end
-
-_G.Clip2 = true;
-
-wait(v205 / v206);
-
-_G.Clip2 = false;
-
+    _G.Clip2 = true
+    wait(v205 / v206)
+    _G.Clip2 = false
 end
 
 function BTPZ(v209)
@@ -2282,39 +2279,49 @@ end
 
 TweenSpeed = 350;
 
-function Tween(targetCFrame)
-    if not targetCFrame then return end
+function Tween(v211)
+    local v212 = (v211.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    local v213 = TweenSpeed
 
-    local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-
-    -- Set desired position above target (35 studs up)
-    local aboveCFrame = CFrame.new(targetCFrame.Position.X, targetCFrame.Position.Y + 35, targetCFrame.Position.Z)
-    local distance = (aboveCFrame.Position - root.Position).Magnitude
-    local speed = getgenv().TweenSpeed or 350
-
-    -- Tween setup
-    local tweenInfo = TweenInfo.new(distance / speed, Enum.EasingStyle.Linear)
-    local goal = { CFrame = aboveCFrame }
-
-    local tween = game:GetService("TweenService"):Create(root, tweenInfo, goal)
-
-    -- Make sure you don't get stuck midair
-    root.CanCollide = false
-    if root.Parent:FindFirstChild("Head") then
-        root.Parent.Head.CanCollide = false
+    if (v212 >= 350) then
+        v213 = TweenSpeed
     end
 
-    tween:Play()
+    local targetPosition = v211.Position
+    local currentPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
 
-    -- Optional: Re-enable collision after reaching
-    tween.Completed:Connect(function()
-        root.CanCollide = true
-        if root.Parent:FindFirstChild("Head") then
-            root.Parent.Head.CanCollide = true
+    -- Ensure we only tween upwards if the target is higher than the current position
+    if targetPosition.Y < currentPosition.Y then
+        targetPosition = Vector3.new(targetPosition.X, currentPosition.Y, targetPosition.Z)
+    end
+
+    local v214 = TweenInfo.new(v212 / v213, Enum.EasingStyle.Linear)
+
+    local v215 = game:GetService("TweenService"):Create(game.Players.LocalPlayer.Character.HumanoidRootPart, v214, {
+        CFrame = CFrame.new(targetPosition)
+    })
+
+    -- Before tweening, ensure no collisions
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+    if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
+        game.Players.LocalPlayer.Character.Head.CanCollide = false
+    end
+
+    v215:Play()
+
+    -- Reset collision after tween completes
+    v215.Completed:Connect(function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = true
+        if game.Players.LocalPlayer.Character:FindFirstChild("Head") then
+            game.Players.LocalPlayer.Character.Head.CanCollide = true
         end
     end)
+
+    if _G.StopTween then
+        v215:Cancel()
+    end
 end
+
 
 
 -- Auto Attack Function
