@@ -5,13 +5,13 @@ repeat task.wait() until redzlib
 
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "Nova.GG : Dead-Rails",
-    SubTitle = "by Viper x Tanny",
+    Title = "Nova.GG : Blox-Fruits",
+    SubTitle = "by Viper",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
 
 local Main = Window:MakeTab({
-    Title = "Tab Main Farm",
+    Title = "Main",
     Description = "Info",
     Icon = "home",  -- Fixed the split "Icon"
 })
@@ -212,76 +212,51 @@ Main:AddSection("Bones Farm");
 Main:AddToggle({
     Name = "Auto Farm Bones",
     Flag = "Main/AutoFarmBones",
-    Description = "Farms Reborn Skeleton, Living Zombie, Demonic Soul, and Posessed Mummy for Bones",
+    Description = "Farm all Reborn Skeletons, then Living Zombies, etc. (No Quest)",
     Default = false,
     Callback = function(Value)
-        _G.Bone = Value
-        if not Value then BonesBring = false end
+        _G.AutoFarmBones = Value
     end
 })
 
-local BoneMobs = {
-    ["Reborn Skeleton"] = true,
-    ["Living Zombie"] = true,
-    ["Demonic Soul"] = true,
-    ["Posessed Mummy"] = true,
-}
-
-local BoneQuestData = {
-    ["Reborn Skeleton"] = {Quest = "HauntedQuest1", QuestLv = 1, Pos = CFrame.new(-9480.8, 142.13, 5566.37)},
-    ["Living Zombie"]   = {Quest = "HauntedQuest1", QuestLv = 2, Pos = CFrame.new(-9480.8, 142.13, 5566.37)},
-    ["Demonic Soul"]    = {Quest = "HauntedQuest2", QuestLv = 1, Pos = CFrame.new(-9515.75, 174.85, 6079.41)},
-    ["Posessed Mummy"]  = {Quest = "HauntedQuest2", QuestLv = 2, Pos = CFrame.new(-9515.75, 174.85, 6079.41)},
-}
-
 spawn(function()
     while task.wait() do
-        if _G.Bone then
+        if _G.AutoFarmBones then
             pcall(function()
-                local player = game.Players.LocalPlayer
-                local questGui = player.PlayerGui.Main.Quest
-                local activeMob, mobData
+                local mobs = {
+                    "Demonic Soul",
+                    "Living Zombie",
+                    "Posessed Mummy",
+                    "Reborn Skeleton"
+                }
 
-                -- Find an available bone mob
-                for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                    if BoneMobs[mob.Name] and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                        activeMob = mob
-                        mobData = BoneQuestData[mob.Name]
-                        break
-                    end
-                end
+                for _, mobName in ipairs(mobs) do
+                    if not _G.AutoFarmBones then break end
 
-                if activeMob and mobData then
-                    -- Quest Check
-                    if not questGui.Visible or not string.find(questGui.Container.QuestTitle.Title.Text, activeMob.Name) then
-                        BonesBring = false
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-                        local qTween = Tween(mobData.Pos)
-                        if qTween then qTween.Completed:Wait() end
-                        task.wait(0.5)
-                        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest", mobData.Quest, mobData.QuestLv)
-                        task.wait(0.5)
+                    local targets = {}
+
+                    -- gather all mobs of this type first
+                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            table.insert(targets, enemy)
+                        end
                     end
 
-                    repeat
-                        if not _G.Bone or not activeMob.Parent then break end
-                        AutoHaki()
-                        EquipTool(_G.SelectWeapon or "Combat")
-                        Tween(activeMob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                        AttackNoCoolDown()
-                        BonesBring = true
-                        activeMob.HumanoidRootPart.CanCollide = false
-                        activeMob.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                        activeMob.HumanoidRootPart.Transparency = 1
-                        activeMob.Humanoid.WalkSpeed = 0
-                        activeMob.Humanoid.JumpPower = 0
-                        task.wait()
-                    until not _G.Bone or not activeMob or not activeMob.Parent or activeMob.Humanoid.Health <= 0
-                    BonesBring = false
-                else
-                    -- No mob found, move to respawn area
-                    Tween(CFrame.new(-9506.23, 172.13, 6117.08)) -- general Haunted Castle farm area
-                    task.wait(1)
+                    -- farm each one
+                    for _, enemy in ipairs(targets) do
+                        if not _G.AutoFarmBones or not enemy or not enemy.Parent then break end
+                        repeat
+                            if not _G.AutoFarmBones or not enemy or not enemy.Parent then break end
+                            AutoHaki()
+                            EquipTool(_G.SelectWeapon or SelectWeapon)
+                            enemy.HumanoidRootPart.CanCollide = false
+                            enemy.Humanoid.WalkSpeed = 0
+                            if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                            Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                            AttackNoCoolDown()
+                            task.wait()
+                        until not _G.AutoFarmBones or not enemy or not enemy.Parent or enemy.Humanoid.Health <= 0
+                    end
                 end
             end)
         end
