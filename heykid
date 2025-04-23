@@ -202,6 +202,50 @@ spawn(function()
     end
 end)
 
+
+Main:AddToggle({
+    Name = "Auto Farm Nearest",
+    Flag = "Farm/AutoFarmNearest",
+    Default = false,
+    Callback = function(Value)
+        _G.FarmNearest = Value
+        if not Value then
+            StopTween(_G.FarmNearest)
+        end
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.FarmNearest then
+            for v2033, v2034 in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                if (v2034.Name and v2034:FindFirstChild("Humanoid")) then
+                    if (v2034.Humanoid.Health > 0) then
+                        repeat
+                            wait()
+                            EquipWeapon(_G.SelectWeapon)
+                            if not game.Players.LocalPlayer.Character:FindFirstChild("HasBuso") then
+                                local v2832 = {
+                                    [1] = "Buso"
+                                }
+                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(v2832))
+                            end
+                            topos(v2034.HumanoidRootPart.CFrame * Pos)
+                            v2034.HumanoidRootPart.CanCollide = false
+                            Fastattack = true
+                            v2034.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                            AutoFarmNearestMagnet = true
+                            PosMon = v2034.HumanoidRootPart.CFrame
+                        until not _G.FarmNearest or not v2034.Parent or (v2034.Humanoid.Health <= 0)
+                        AutoFarmNearestMagnet = false
+                        Fastattack = false
+                    end
+                end
+            end
+        end
+    end
+end)
+
 Player:AddSection("Anti Slow");
 
 -- Speed Multiplier Slider
