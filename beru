@@ -595,6 +595,7 @@ Main:AddToggle({
         _G.AutoFarmCakeIsland = Value
 
         if Value then
+            -- Only teleport once when the toggle is turned ON
             local cakeIslandCFrame = CFrame.new(87.94276428222656, 73.55451202392578, -12319.46484375)
             Tween(cakeIslandCFrame)
         end
@@ -606,35 +607,40 @@ spawn(function()
         if _G.AutoFarmCakeIsland then
             pcall(function()
                 local mobs = {
-                    ["Baking Staff"] = true,
-                    ["Peanut Scout"] = true,
-                    ["Peanut President"] = true,
-                    ["Ice Cream Chef"] = true,
-                    ["Ice Cream Commander"] = true,
-                    ["Cookie Crafter"] = true,
-                    ["Cake Guard"] = true,
-                    ["Head Baker"] = true,
-                    ["Cocoa Warrior"] = true,
-                    ["Chocolate Bar Battler"] = true,
-                    ["Sweet Thief"] = true,
-                    ["Candy Rebel"] = true
+                    "Baking Staff",
+                    "Peanut Scout",
+                    "Peanut President",
+                    "Ice Cream Chef",
+                    "Ice Cream Commander",
+                    "Cookie Crafter",
+                    "Cake Guard",
+                    "Head Baker",
+                    "Cocoa Warrior",
+                    "Chocolate Bar Battler",
+                    "Sweet Thief",
+                    "Candy Rebel"
                 }
 
-                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmCakeIsland then break end
 
-                    if mobs[enemy.Name] and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                        AutoHaki()
-                        EquipTool(_G.SelectWeapon or SelectWeapon)
-                        enemy.HumanoidRootPart.CanCollide = false
-                        enemy.Humanoid.WalkSpeed = 0
-                        if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                        Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                        repeat
-                            AttackNoCoolDown()
-                            task.wait()
-                        until not enemy or not enemy:FindFirstChild("Humanoid") or enemy.Humanoid.Health <= 0 or not _G.AutoFarmCakeIsland
-                    end
+                    repeat
+                        local mobFound = false
+                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                                mobFound = true
+                                AutoHaki()
+                                EquipTool(_G.SelectWeapon or SelectWeapon)
+                                enemy.HumanoidRootPart.CanCollide = false
+                                enemy.Humanoid.WalkSpeed = 0
+                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                AttackNoCoolDown()
+                                break
+                            end
+                        end
+                        task.wait()
+                    until not mobFound or not _G.AutoFarmCakeIsland
                 end
             end)
         end
