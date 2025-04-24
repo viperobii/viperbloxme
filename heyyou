@@ -984,56 +984,7 @@ Player:AddToggle({
 })
 
 
-Setting:AddToggle({
-    Name = "Bring Mobs",
-    Flag = "Setting/BringMobs",
-    Description = "",
-    Default = false,
-    Callback = function(value)
-        getgenv().BringMob = value
-        if value then
-            spawn(function()
-                while getgenv().BringMob do
-                    pcall(function()
-                        for _, mob in pairs(workspace.Enemies:GetChildren()) do
-                            if mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                                local root = mob:FindFirstChild("HumanoidRootPart")
-                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1500 then
-                                    -- Bring mob to FarmPos
-                                    root.CFrame = FarmPos
-                                    
-                                    -- Disable collision and movement
-                                    root.Size = Vector3.new(60, 60, 60)
-                                    root.Transparency = 1
-                                    root.CanCollide = false
 
-                                    if mob:FindFirstChild("Head") then
-                                        mob.Head.CanCollide = false
-                                    end
-
-                                    mob.Humanoid.WalkSpeed = 0
-                                    mob.Humanoid.JumpPower = 0
-                                    
-                                    local animator = mob.Humanoid:FindFirstChildOfClass("Animator")
-                                    if animator then
-                                        animator:Destroy()
-                                    end
-                                    
-                                    mob.Humanoid:ChangeState(11) -- Staggered
-                                    mob.Humanoid:ChangeState(14) -- Platform stand
-
-                                    -- Extend Simulation Radius
-                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
-                                end
-                            end
-                        end
-                    end)
-                    task.wait()
-                end
-            end)
-        end
-    end
-})
 
 Items:AddSection("Buy Melee");
 
@@ -1188,6 +1139,130 @@ Items:AddButton({
 })
 
 
+Setting:AddTextBox({
+    Name = "Job ID",  -- Title of the input box
+    Flag = "Main/JobID",  -- Unique identifier for the input field
+    Placeholder = "Input Job ID",  -- Placeholder text when the input is empty
+    Default = "",  -- Default value
+    Numeric = false,  -- Set to false since it's not a numeric input
+    Finished = false,  -- Whether the input is finished or not
+    Callback = function(v301)  -- Callback when the input is finished
+        _G.Job = v301  -- Store the value in a global variable _G.Job
+    end
+})
+
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+Setting:AddToggle({
+    Name = "Join Job ID",
+    Flag = "Setting/JoinJobID",
+    Default = false,
+    Callback = function(state)
+        _G.Join = state
+
+        if _G.Join and _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, _G.Job, player)
+            end)
+        end
+    end
+})
+
+Setting:AddButton({
+    Name = "Copy Job ID",
+    Flag = "Setting/CopyJobID",
+    Description = "",
+    Callback = function()
+        if setclipboard then
+            setclipboard(tostring(game.JobId))
+        else
+            warn("Clipboard function not supported.")
+        end
+    end
+})
+
+Setting:AddToggle({
+    Name = "Spam Join Job ID",
+    Flag = "Setting/SpamJoinJobID",
+    Default = false,
+    Callback = function(value)
+        _G.Join = value
+        if _G.Join then
+            spawn(function()
+                while _G.Join do
+                    if _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
+                        pcall(function()
+                            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, _G.Job, game.Players.LocalPlayer)
+                        end)
+                    end
+                    task.wait() -- 0 delay spam (1 frame)
+                end
+            end)
+        end
+    end
+})
+
+
+Setting:AddSection("Mobs")
+
+
+Setting:AddDropdown({
+    Name = "Bring Mob Mode",
+    Flag = "Setting/BringMobMode",
+    Default = "Low",
+    Options = { "Low", "Normal", "Super Bring" },
+    Callback = function(Value)
+        if Value == "Low" then
+            _G.BringMode = 250
+        elseif Value == "Normal" then
+            _G.BringMode = 300
+        elseif Value == "Super Bring" then
+            _G.BringMode = 350
+        end
+    end
+})
+
+
+Setting:AddToggle({
+    Name = "Bring Mob",
+    Flag = "Setting/BringMob",
+    Description = "<font color='rgb(255, 0, 0)'>Sometimes Work & Sometimes Not</font>",
+    Default = false,
+    Callback = function(Value)
+        _G.BringMonster = Value
+    end
+})
+
+
+spawn(function()
+    while task.wait() do
+        pcall(function()
+            if _G.BringMonster and _G.Level and StartMagnet then
+                for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if mob.Name == Mon and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                        local dist = (mob.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        if dist <= _G.BringMode then
+                            mob.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            mob.HumanoidRootPart.CFrame = PosMon
+                            mob.Humanoid:ChangeState(14)
+                            mob.HumanoidRootPart.CanCollide = false
+                            mob.Head.CanCollide = false
+                            if mob.Humanoid:FindFirstChild("Animator") then
+                                mob.Humanoid.Animator:Destroy()
+                            end
+                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+
+
 Setting:AddSection("Stats");
 
 Setting:AddToggle({
@@ -1293,6 +1368,92 @@ spawn(function()
     end
 end)
 
+Setting:AddSection("Miscellaneous")
+
+Setting:AddToggle({
+    Name = "Full Bright",
+    Flag = "Setting/FullBright",
+    Description = "Turned On This If It's Night Dark",
+    Default = false,
+    Callback = function(Value)
+        if getgenv().FullBrightConnection then
+            getgenv().FullBrightConnection:Disconnect()
+            getgenv().FullBrightConnection = nil
+        end
+
+        if Value then
+            getgenv().FullBrightConnection = game:GetService("RunService").Stepped:Connect(function()
+                game.Lighting.Brightness = 3
+                game.Lighting.ClockTime = 14
+                game.Lighting.FogEnd = 9e9
+                game.Lighting.GlobalShadows = false
+                game.Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+            end)
+        else
+            game.Lighting.Brightness = 1
+            game.Lighting.ClockTime = 12
+            game.Lighting.FogEnd = 500
+            game.Lighting.GlobalShadows = true
+            game.Lighting.OutdoorAmbient = Color3.fromRGB(100, 100, 100)
+        end
+    end
+})
+
+
+
+getgenv().FpsBoost = false
+getgenv().OriginalFpsSettings = {}
+
+Setting:AddToggle({
+    Name = "FPS Boost",
+    Flag = "Settings/FPSBoost",
+    Default = false,
+    Callback = function(Value)
+        getgenv().FpsBoost = Value
+        if Value then
+            local Lighting = game:GetService("Lighting")
+            getgenv().OriginalFpsSettings.FogEnd = Lighting.FogEnd
+            getgenv().OriginalFpsSettings.Brightness = Lighting.Brightness
+            getgenv().OriginalFpsSettings.GlobalShadows = Lighting.GlobalShadows
+            getgenv().OriginalFpsSettings.Ambient = Lighting.Ambient
+
+            Lighting.FogEnd = 100
+            Lighting.Brightness = 0
+            Lighting.GlobalShadows = false
+            Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("BasePart") then
+                    obj.Material = Enum.Material.Plastic
+                    obj.Reflectance = 0
+                    obj.CastShadow = false
+                elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                    obj:Destroy()
+                end
+            end
+
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("PostEffect") then
+                    v.Enabled = false
+                end
+            end
+
+        else
+            local Lighting = game:GetService("Lighting")
+            local settings = getgenv().OriginalFpsSettings
+            Lighting.FogEnd = settings.FogEnd or 100000
+            Lighting.Brightness = settings.Brightness or 2
+            Lighting.GlobalShadows = settings.GlobalShadows ~= false
+            Lighting.Ambient = settings.Ambient or Color3.fromRGB(128, 128, 128)
+
+            -- Notify that some visuals like decals might not restore
+            warn("FPS Boost disabled - some visuals may not return without rejoin.")
+        end
+    end
+})
+
+
+Trial:AddSection("Temple")
 
 Trial:AddToggle({
     Name = "Teleport NPC Great Tree",
@@ -1385,6 +1546,162 @@ Trial:AddToggle({
 })
 
 
+Trial:AddSection("Trial");
+
+-- Add toggle for Auto Trial
+Trial:AddToggle({
+    Name = "Auto Trial",
+    Flag = "Trial/AutoTrial",
+    Description = "For Ghoul Trial, Double Jump First And Turn On Auto Trial (Instant Kill Mobs)",
+    Default = false,
+    Callback = function(Value)
+        _G.AutoQuestRace = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.AutoQuestRace then
+            pcall(function()
+                local Player = game:GetService("Players").LocalPlayer
+                local PlayerRace = Player.Data.Race.Value
+                
+                if PlayerRace == "Human" then
+                    -- Human Trial
+                    for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
+                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            pcall(function()
+                                repeat
+                                    wait()
+                                    mob.Humanoid.Health = 0
+                                    mob.HumanoidRootPart.CanCollide = false
+                                    sethiddenproperty(Player, "SimulationRadius", math.huge)
+                                until not _G.AutoQuestRace or not mob.Parent or mob.Humanoid.Health <= 0
+                            end)
+                        end
+                    end
+                    
+                elseif PlayerRace == "Skypiea" then
+                    -- Skypiea Trial
+                    for _, part in pairs(game:GetService("Workspace").Map.SkyTrial.Model:GetDescendants()) do
+                        if part.Name == "snowisland_Cylinder.081" then
+                            BTPZ(part.CFrame * CFrame.new(0, 0, 0))
+                        end
+                    end
+                    
+                elseif PlayerRace == "Fishman" then
+                    -- Fishman Trial
+                    for _, part in pairs(game:GetService("Workspace").SeaBeasts.SeaBeast1:GetDescendants()) do
+                        if part.Name == "HumanoidRootPart" then
+                            -- Define Pos if not already defined
+                            if not Pos then
+                                Pos = CFrame.new(0, 30, 0)
+                            end
+                            
+                            Tween(part.CFrame * Pos)
+                            
+                            -- Use all weapon types for attack sequence
+                            local weaponTypes = {"Melee", "Blox Fruit", "Sword", "Gun"}
+                            
+                            for _, weaponType in pairs(weaponTypes) do
+                                -- Equip appropriate weapon
+                                for _, tool in pairs(Player.Backpack:GetChildren()) do
+                                    if tool:IsA("Tool") and tool.ToolTip == weaponType then
+                                        Player.Character.Humanoid:EquipTool(tool)
+                                        break
+                                    end
+                                end
+                                
+                                -- Attack sequence with each weapon (Z, X, C)
+                                local keys = {122, 120, 99} -- Z, X, C in ASCII
+                                for _, key in pairs(keys) do
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, Player.Character.HumanoidRootPart)
+                                    game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, Player.Character.HumanoidRootPart)
+                                    wait(0.2)
+                                end
+                                
+                                wait(0.5) -- Wait before switching weapons
+                            end
+                        end
+                    end
+                    
+                elseif PlayerRace == "Cyborg" then
+                    -- Cyborg Trial
+                    Tween(CFrame.new(28654, 14898.7832, -30))
+                    
+                elseif PlayerRace == "Ghoul" then
+                    -- Ghoul Trial
+                    for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
+                        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                            pcall(function()
+                                repeat
+                                    wait()
+                                    mob.Humanoid.Health = 0
+                                    mob.HumanoidRootPart.CanCollide = false
+                                    sethiddenproperty(Player, "SimulationRadius", math.huge)
+                                until not _G.AutoQuestRace or not mob.Parent or mob.Humanoid.Health <= 0
+                            end)
+                        end
+                    end
+                    
+                elseif PlayerRace == "Mink" then
+                    -- Mink Trial
+                    for _, object in pairs(game:GetService("Workspace"):GetDescendants()) do
+                        if object.Name == "StartPoint" then
+                            Tween(object.CFrame * CFrame.new(0, 10, 0))
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+Trial:AddToggle({
+    Name = "Auto Kill Players In Trial",
+    Flag = "Trial/AutoKillTrial",
+    Description = "Manual Use Skill To Win Only Melee Skills",
+    Default = false,
+    Callback = function(value)
+        getgenv().AutoKillTrial = value
+        spawn(function()
+            while wait() do
+                pcall(function()
+                    if getgenv().AutoKillTrial then
+                        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+                            if player.Name ~= game.Players.LocalPlayer.Name and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+                                if (player.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100 and player.Character.Humanoid.Health > 0 then
+                                    repeat
+                                        wait(getgenv().Fast_Delay or 0.1)
+                                        EquipTool(SelectWeapon)
+                                        AutoHaki()
+                                        Tween(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
+                                        player.Character.HumanoidRootPart.CanCollide = false
+                                        player.Character.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
+                                        AttackNoCoolDown()
+                                    until not getgenv().AutoKillTrial or not player.Parent or player.Character.Humanoid.Health <= 0
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    end
+})
+
+
+Trial:AddSection("Helper")
+
+Trial:AddButton({
+    Name = "Viper Fly Character",
+    Flag = "Trial/ViperFly",
+    Description = "Use For Draco Trial And Normal Trial Ez Win",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/translator"))()
+    end
+})
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
