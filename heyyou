@@ -420,6 +420,8 @@ Main:AddToggle({
 
 Main:AddSection("Tiki")
 
+local hasTeleportedToTyrant = false  -- Flag to ensure teleport happens only once
+
 Main:AddToggle({
     Name = "Auto Farm Tyrant of the Skies",
     Flag = "Main/AutoFarmTyrantOfTheSkies",
@@ -427,6 +429,9 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmTyrant = Value
+        if Value == false then
+            hasTeleportedToTyrant = false -- Reset teleport flag when turning off
+        end
     end
 })
 
@@ -434,29 +439,37 @@ spawn(function()
     while task.wait() do
         if _G.AutoFarmTyrant then
             pcall(function()
+                -- First teleport to Tyrant of the Skies area once when enabled
+                if not hasTeleportedToTyrant then
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
+                    Tween(CFrame.new(-16224, 9, 439))  -- Tween to the main spot for farming
+                    hasTeleportedToTyrant = true  -- Set the flag to true after teleporting
+                    task.wait(1)  -- Wait for the teleportation to complete
+                end
+                
                 local mobName = "Tyrant of the Skies"
+                local mobFound = false
 
-                -- Teleport to the area and tween to main spot
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
-                Tween(CFrame.new(-16224, 9, 439))
-
-                repeat
-                    local mobFound = false
-                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            mobFound = true
-                            AutoHaki()
-                            EquipTool(_G.SelectWeapon or SelectWeapon)
-                            enemy.HumanoidRootPart.CanCollide = false
-                            enemy.Humanoid.WalkSpeed = 0
-                            if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                            Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                            AttackNoCoolDown()
-                            break
-                        end
+                -- Scan for Tyrant of the Skies mob
+                for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and
+                       enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        mobFound = true
+                        AutoHaki()
+                        EquipTool(_G.SelectWeapon or SelectWeapon)
+                        enemy.HumanoidRootPart.CanCollide = false
+                        enemy.Humanoid.WalkSpeed = 0
+                        if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
+                        Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                        AttackNoCoolDown()
+                        break
                     end
-                    task.wait()
-                until not mobFound or not _G.AutoFarmTyrant
+                end
+
+                -- Wait briefly if no mob found to prevent excessive looping
+                if not mobFound then
+                    task.wait(1)
+                end
             end)
         end
     end
