@@ -1655,8 +1655,7 @@ spawn(function()
                 end
             end)
         end
-    end
-end)
+   
 
 
 Trial:AddToggle({
@@ -1693,9 +1692,6 @@ Trial:AddToggle({
 })
 
 
-Trial:AddSection(
-Helper")
-
 Trial:AddButton({
     Name = "Viper Fly Character",
     Flag = "Trial/ViperFly",
@@ -1703,6 +1699,7 @@ Trial:AddButton({
     Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/translator"))()
     end
+})   end
 })
 
 local v22 = Instance.new("ScreenGui")
