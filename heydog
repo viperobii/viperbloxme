@@ -1270,48 +1270,13 @@ end)
 
 
 
-Setting:AddToggle({
-    Name = "Auto Activate Race V3",
-    Flag = "Setting/AutoActivateRaceV3",
-    Callback = function(value)
-        getgenv().AutoT = value
-        if value then
-            spawn(function()
-                while getgenv().AutoT do
-                    pcall(function()
-                        game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("ActivateAbility")
-                    end)
-                    wait()
-                end
-            end)
-        end
-    end
-})
 
 
 
 
 
-Setting:AddToggle({
-    Name = "Auto Activate V4",
-    Flag = "Setting/AutoActivateV4",
-    Callback = function(value)
-        getgenv().AutoY = value
-        if value then
-            spawn(function()
-                while getgenv().AutoY do
-                    pcall(function()
-                        local char = game.Players.LocalPlayer.Character
-                        if char:FindFirstChild("RaceEnergy") and char.RaceEnergy.Value >= 1 and char:FindFirstChild("RaceTransformed") and not char.RaceTransformed.Value then
-                            local args = { [1] = true }
-                            game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Awakening").RemoteFunction:InvokeServer(unpack(args))
-                        end
-                    end)
-                end
-            end)
-        end
-    end
-})
+
+
 
 
 
@@ -1423,60 +1388,6 @@ end)
 Setting:AddSection("Miscellaneous")
 
 
-Setting:AddToggle({
-    Name = "No Fog",
-    Flag = "Settings/NoFog",
-    Default = false,
-    Callback = function(Value)
-        local lighting = game:GetService("Lighting")
-        getgenv().FogConnection = getgenv().FogConnection or nil
-        getgenv().OriginalFogEnd = getgenv().OriginalFogEnd or lighting.FogEnd
-        getgenv().OriginalFogStart = getgenv().OriginalFogStart or lighting.FogStart
-        getgenv().OriginalFogColor = getgenv().OriginalFogColor or lighting.FogColor
-        getgenv().OriginalAtmosphere = getgenv().OriginalAtmosphere or (lighting:FindFirstChildOfClass("Atmosphere") and lighting:FindFirstChildOfClass("Atmosphere"):Clone())
-
-        local function removeFog()
-            if lighting:FindFirstChildOfClass("Atmosphere") then
-                lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
-            end
-            lighting.FogEnd = 1e6
-            lighting.FogStart = 1e6
-            getgenv().FogConnection = game:GetService("RunService").RenderStepped:Connect(function()
-                lighting.FogEnd = 1e6
-                lighting.FogStart = 1e6
-                if lighting:FindFirstChildOfClass("Atmosphere") then
-                    lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
-                end
-            end)
-        end
-
-        local function restoreFog()
-            if getgenv().FogConnection then
-                getgenv().FogConnection:Disconnect()
-                getgenv().FogConnection = nil
-            end
-            lighting.FogEnd = getgenv().OriginalFogEnd
-            lighting.FogStart = getgenv().OriginalFogStart
-            lighting.FogColor = getgenv().OriginalFogColor
-            if getgenv().OriginalAtmosphere and not lighting:FindFirstChildOfClass("Atmosphere") then
-                local restored = getgenv().OriginalAtmosphere:Clone()
-                restored.Parent = lighting
-            end
-        end
-
-        if Value then
-            removeFog()
-        else
-            restoreFog()
-        end
-
-        game.Players.LocalPlayer.OnTeleport:Connect(function()
-            if getgenv().FogConnection then
-                getgenv().FogConnection:Disconnect()
-            end
-        end)
-    end
-})
 
 
 Setting:AddToggle({
