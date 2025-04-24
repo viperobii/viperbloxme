@@ -569,62 +569,6 @@ spawn(function()
 end)
 
 
-Main:AddToggle({
-    Name = "Auto Kill Elite Hunter",
-    Flag = "Auto/EliteHunter",
-    Default = false,
-    Callback = function(value)
-        _G.Elitehunter = value
-        if value then
-            spawn(function()
-                while task.wait() do
-                    if _G.Elitehunter and World3 then
-                        pcall(function()
-                            local QuestGui = game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest
-                            if QuestGui.Visible then
-                                local title = QuestGui.Container.QuestTitle.Title.Text
-                                if string.find(title, "Diablo") or string.find(title, "Deandre") or string.find(title, "Urban") then
-                                    local Enemies = game:GetService("Workspace").Enemies
-                                    for _, enemy in pairs(Enemies:GetChildren()) do
-                                        if enemy.Name == "Diablo" or enemy.Name == "Deandre" or enemy.Name == "Urban" then
-                                            if enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                                                repeat
-                                                    task.wait()
-                                                    AutoHaki()
-                                                    EquipTool(_G.SelectWeapon or SelectWeapon)
-                                                    enemy.HumanoidRootPart.CanCollide = false
-                                                    enemy.Humanoid.WalkSpeed = 0
-                                                    if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                                    Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                                                    AttackNoCoolDown()
-                                                until not _G.Elitehunter or enemy.Humanoid.Health <= 0 or not enemy.Parent
-                                            end
-                                        end
-                                    end
-                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Diablo") then
-                                    Tween(game:GetService("ReplicatedStorage").Diablo.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
-                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Deandre") then
-                                    Tween(game:GetService("ReplicatedStorage").Deandre.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
-                                elseif game:GetService("ReplicatedStorage"):FindFirstChild("Urban") then
-                                    Tween(game:GetService("ReplicatedStorage").Urban.HumanoidRootPart.CFrame * CFrame.new(2, 20, 2))
-                                end
-                            elseif _G.EliteHunterHop and game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter") == "I don't have anything for you right now. Come back later." then
-                                hop()
-                            else
-                                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("EliteHunter")
-                            end
-                        end)
-                    end
-                end
-            end)
-        else
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AbandonQuest")
-            StopTween(_G.Elitehunter)
-        end
-    end
-})
-
-
 Main:AddSection("Cake")
 
 Main:AddToggle({
