@@ -45,14 +45,14 @@ Discord:AddDiscordInvite({
 Main:AddDropdown({
     Name = "UI Scale",
     Flag = "Main/UIScale",
-    Default = "large",
+    Default = "bigger",
     Options = { "small", "medium", "large", "bigger" },
     Callback = function(option)
         local scales = {
-            small = 1400,   -- smaller UI
-            medium = 1000,  -- slightly smaller
-            large = 500,    -- default size, no change
-            bigger = 600    -- larger UI
+            small = 950,   -- smaller UI
+            medium = 750,  -- slightly smaller
+            large = 550,    -- default size, no change
+            bigger = 450    -- larger UI
         }
         if scales[option] then
             redzlib:SetScale(scales[option])
@@ -437,7 +437,7 @@ spawn(function()
                 local mobName = "Tyrant of the Skies"
 
                 -- Teleport to the area and tween to main spot
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282))
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
                 Tween(CFrame.new(-16224, 9, 439))
 
                 repeat
