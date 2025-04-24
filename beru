@@ -15674,19 +15674,18 @@ end);
 
 end);
 
-v16.Race:AddButton({
-
-Title = "Teleport Temple Of Time",
-
-Description = "",
-
-Callback = function()
-
-game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace._WorldOrigin.Locations["Temple of Time"].TeleportSpawn.Position)
-
-end
-
+v16.Race:AddToggle({
+    Title = "Teleport Temple Of Time",
+    Flag = "Race/TeleportTempleOfTime",
+    Description = "Teleport inside Temple of Time",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace._WorldOrigin.Locations["Temple of Time"].TeleportSpawn.Position)
+        end
+    end
 });
+
 
 v16.Race:AddButton({
 
