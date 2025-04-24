@@ -428,9 +428,6 @@ spawn(function()
 end)
 
 
-
-local hasTweened = false
-
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
     Flag = "Main/AutoFarmAllTikiMobs",
@@ -455,11 +452,15 @@ spawn(function()
                     "Serpent Hunter"
                 }
 
+                -- Teleport only once, before starting to farm mobs
                 if not hasTweened then
-    Tween(CFrame.new(-16960, 392, 1507)) -- teleport once
-    hasTweened = true
-end
+                    -- Here you can either put a default location for the teleport or leave it empty to just go to mobs
+                    -- Example of default location, if you want:
+                    -- Tween(CFrame.new(0, 0, 0)) -- You can remove the coordinates if no specific location
+                    hasTweened = true
+                end
 
+                -- Start farming mobs once teleportation is done
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
 
@@ -473,7 +474,14 @@ end
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                
+                                -- Move towards the mob if it's far away
+                                local distance = (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                                if distance > 50 then
+                                    -- If the mob is far, teleport to it (adjust distance as needed)
+                                    Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                                end
+                                
                                 AttackNoCoolDown()
                                 break
                             end
@@ -485,6 +493,7 @@ end
         end
     end
 end)
+
 
 Main:AddSection("Cake")
 
