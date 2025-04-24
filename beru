@@ -432,8 +432,6 @@ end)
 
 
 
-local hasTweened = false
-
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
     Flag = "Main/AutoFarmAllTikiMobs",
@@ -441,9 +439,6 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmTiki = Value
-        if Value == false then
-            hasTweened = false -- Only reset when turning off
-        end
     end
 })
 
@@ -452,38 +447,32 @@ spawn(function()
         if _G.AutoFarmTiki then
             pcall(function()
                 local mobs = {
-                    "Sun-kissed Warrior",
+                    "Skull Slayer",
                     "Isle Outlaw",
                     "Island Boy",
-                    "Skull Slayer",
+                    "Sun-kissed Warrior",
                     "Isle Champion",
                     "Serpent Hunter"
                 }
-
-                -- Teleport to the Tiki location once per toggle activation
-                if not hasTweened then
-                    Tween(CFrame.new(-16021, 8, 696)) -- tp once to the location
-                    hasTweened = true
-                    task.wait(1) -- Small delay to ensure teleport completes
-                end
-
-                -- Check for any available mob from the list
+                
+                -- Scan for any Tiki mob in the entire workspace
+                local foundMob = false
                 local targetMob = nil
+                
                 for _, mobName in ipairs(mobs) do
-                    if not _G.AutoFarmTiki then break end
-                    
                     for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                        if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                        if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and 
+                           enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                             targetMob = enemy
+                            foundMob = true
                             break
                         end
                     end
-                    
-                    if targetMob then break end
+                    if foundMob then break end
                 end
                 
-                -- If a mob was found, attack it
-                if targetMob and _G.AutoFarmTiki then
+                -- If we found a mob, attack it
+                if foundMob and targetMob then
                     AutoHaki()
                     EquipTool(_G.SelectWeapon or SelectWeapon)
                     targetMob.HumanoidRootPart.CanCollide = false
@@ -491,6 +480,11 @@ spawn(function()
                     if targetMob:FindFirstChild("Head") then targetMob.Head.CanCollide = false end
                     Tween(targetMob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
                     AttackNoCoolDown()
+                end
+                
+                -- Brief wait if no mob was found to prevent excessive looping
+                if not foundMob then
+                    task.wait(1)
                 end
             end)
         end
