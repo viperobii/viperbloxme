@@ -3,7 +3,11 @@ local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/newre
 -- Wait until the library is fully loaded
 repeat task.wait() until redzlib
 
-  
+task.wait(1) -- just in case the UI hasn't rendered yet
+local defaultScale = UIScale.Scale
+local defaultBase = math.floor(ViewportSize.Y / defaultScale)
+print("Default Base Scale Value:", defaultBase)
+
 -- Create the window
 local Window = redzlib:MakeWindow({
     Title = "Nova.GG : Blox-Fruits",
@@ -40,23 +44,7 @@ Discord:AddDiscordInvite({
 })
 
 
-Main:AddDropdown({
-    Name = "UI Scale",
-    Flag = "Main/UIScale",
-    Default = "large",
-    Options = { "small", "medium", "large", "bigger" },
-    Callback = function(option)
-        local scales = {
-            small = 900,
-            medium = 600,
-            large = 300,
-            bigger = 200,
-        }
-        if scales[option] then
-            redzlib:SetScale(scales[option])
-        end
-    end
-})
+
 
 
 Main:AddSection("Weapon")
