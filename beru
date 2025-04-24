@@ -49,10 +49,10 @@ Main:AddDropdown({
     Options = { "small", "medium", "large", "bigger" },
     Callback = function(option)
         local scales = {
-            small = 1400,   -- smaller UI
-            medium = 1000,  -- slightly smaller
-            large = 400,    -- default size, no change
-            bigger = 600    -- larger UI
+            small = 950,   -- smaller UI
+            medium = 750,  -- slightly smaller
+            large = 550,    -- default size, no change
+            bigger = 450    -- larger UI
         }
         if scales[option] then
             redzlib:SetScale(scales[option])
@@ -60,8 +60,6 @@ Main:AddDropdown({
     end
 })
 
-
-Main:AddSection("Weapon")
 
 Main:AddDropdown({
     Name = "Select Weapon",
