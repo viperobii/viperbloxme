@@ -3,6 +3,8 @@ local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/newre
 -- Wait until the library is fully loaded
 repeat task.wait() until redzlib
 
+redzlib:SetTheme("Darker")
+  
 -- Create the window
 local Window = redzlib:MakeWindow({
     Title = "Nova.GG : Blox-Fruits",
@@ -36,6 +38,25 @@ Discord:AddDiscordInvite({
     Description = "Join our discord community to receive information about the next update",
     Logo = "rbxassetid://120931314112734", -- Check if this ID is correct and exists
     Invite = "https://discord.gg/brrYwzpWg7"
+})
+
+
+Main:AddDropdown({
+    Name = "UI Scale",
+    Flag = "Main/UIScale",
+    Default = "large",
+    Options = { "small", "medium", "large", "bigger" },
+    Callback = function(option)
+        local scales = {
+            small = 1400,
+            medium = 1000,
+            large = 800,
+            bigger = 600,
+        }
+        if scales[option] then
+            redzlib:SetScale(scales[option])
+        end
+    end
 })
 
 
