@@ -1292,6 +1292,28 @@ Setting:AddToggle({
 
 
 
+Setting:AddToggle({
+    Name = "Auto Activate V4",
+    Flag = "Setting/AutoActivateV4",
+    Callback = function(value)
+        getgenv().AutoY = value
+        if value then
+            spawn(function()
+                while getgenv().AutoY do
+                    pcall(function()
+                        local char = game.Players.LocalPlayer.Character
+                        if char:FindFirstChild("RaceEnergy") and char.RaceEnergy.Value >= 1 and char:FindFirstChild("RaceTransformed") and not char.RaceTransformed.Value then
+                            local args = { [1] = true }
+                            game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Awakening").RemoteFunction:InvokeServer(unpack(args))
+                        end
+                    end)
+                end
+            end)
+        end
+    end
+})
+
+
 
 Setting:AddSection("Stats");
 
@@ -1546,15 +1568,14 @@ Raids:AddSection("Setting Raids");
 Raids:AddDropdown({
     Name = "Select Raid",
     Flag = "Raids/SelectChip",
-    Default = "nil",
+    Default = "Flame",
     Options = {
-         "Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
+        "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
     },
     Callback = function(option)
         SelectChip = option
     end
 })
-
 
 Raids:AddToggle({
     Name = "Auto Buy Chip",
