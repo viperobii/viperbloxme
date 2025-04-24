@@ -1297,7 +1297,7 @@ end)
 Trial:AddToggle({
     Name = "Teleport NPC Great Tree",
     Flag = "Trial/TeleportNPCGreatTree",
-    Description = "Use This Because Bloxfruit Update Anti<font color='rgb(255, 0, 0)'>Cheat System</font>",
+    Description = "Use This Because Bloxfruit Update The <font color='rgb(255, 0, 0)'>Anti Cheat</font>",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -1309,7 +1309,7 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport Temple Of Time",
     Flag = "Trial/TeleportTempleOfTime",
-    Description = "Enable or Disable teleport to Temple Of Time",
+    Description = "Discontinued Reason <font color='rgb(255, 0, 0)'>Anti Cheat</font>",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -1321,11 +1321,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To Pull Lever",
     Flag = "Trial/TeleportPullLever",
-    Description = "Enable or Disable teleport to Pull Lever",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            
             Tween2(CFrame.new(28575.181640625, 14936.6279296875, 72.31636810302734))
         end
     end
@@ -1334,11 +1334,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To Ancient One",
     Flag = "Trial/TeleportAncientOne",
-    Description = "Enable or Disable teleport to Ancient One",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            
             Tween2(CFrame.new(28981.552734375, 14888.4267578125, -120.245849609375))
         end
     end
@@ -1347,11 +1347,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To TempleClock",
     Flag = "Trial/TeleportTempleClock",
-    Description = "Enable or Disable teleport to TempleClock (Only works at Temple of Time)",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(29536.826171875, 15068.751953125, -86.30783081054688))
+           
             Tween2(CFrame.new(29536.826171875, 15068.751953125, -86.30783081054688))
         end
     end
@@ -1360,11 +1360,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To Race Door",
     Flag = "Trial/TeleportRaceDoor",
-    Description = "Enable or Disable teleport to Race Door",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            
             if game:GetService("Players").LocalPlayer.Data.Race.Value == "Human" then
                 Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
             elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Skypiea" then
