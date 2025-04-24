@@ -47,30 +47,23 @@ Main:AddDropdown({
     Default = "Melee",
     Options = { "Melee", "Sword", "Blox Fruits" },
     Callback = function(option)
-        SelectWeapon = option
+        getgenv().WeaponType = option
     end
 })
 
 
 task.spawn(function()
-    while task.wait() do
+    while task.wait(1) do
         pcall(function()
-            if SelectWeapon == "Melee" then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if tool.ToolTip == "Melee" then
-                        SelectWeapon = tool.Name
-                    end
-                end
-            elseif SelectWeapon == "Sword" then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if tool.ToolTip == "Sword" then
-                        SelectWeapon = tool.Name
-                    end
-                end
-            elseif SelectWeapon == "Blox Fruits" then
-                for _, tool in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-                    if tool.ToolTip == "Blox Fruit" then
-                        SelectWeapon = tool.Name
+            local backpack = game.Players.LocalPlayer.Backpack
+            for _, tool in pairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") and tool:FindFirstChild("ToolTip") then
+                    if getgenv().WeaponType == "Melee" and tool.ToolTip == "Melee" then
+                        getgenv().SelectWeapon = tool.Name
+                    elseif getgenv().WeaponType == "Sword" and tool.ToolTip == "Sword" then
+                        getgenv().SelectWeapon = tool.Name
+                    elseif getgenv().WeaponType == "Blox Fruits" and tool.ToolTip == "Blox Fruit" then
+                        getgenv().SelectWeapon = tool.Name
                     end
                 end
             end
@@ -136,7 +129,12 @@ spawn(function()
                                 
                                 -- Target and attack the mob
                                 AutoHaki()
-                                EquipTool(SelectWeapon)
+                                if getgenv().SelectWeapon then
+    local tool = game.Players.LocalPlayer.Backpack:FindFirstChild(getgenv().SelectWeapon)
+    if tool then
+        game.Players.LocalPlayer.Character.Humanoid:EquipTool(tool)
+    end
+end
                                 
                                 enemy.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
                                 enemy.HumanoidRootPart.Transparency = 1
