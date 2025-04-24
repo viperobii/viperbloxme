@@ -432,6 +432,8 @@ end)
 
 
 
+local hasTeleportedToTikiIsland = false
+
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
     Flag = "Main/AutoFarmAllTikiMobs",
@@ -439,6 +441,9 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmTiki = Value
+        if Value == false then
+            hasTeleportedToTikiIsland = false -- Reset when turning off
+        end
     end
 })
 
@@ -446,13 +451,20 @@ spawn(function()
     while task.wait() do
         if _G.AutoFarmTiki then
             pcall(function()
+                -- First teleport to Tiki Island once when enabled
+                if not hasTeleportedToTikiIsland then
+                    Tween(CFrame.new(-16224, 9, 439))
+                    hasTeleportedToTikiIsland = true
+                    task.wait(1) -- Wait for teleport to complete
+                end
+                
                 local mobs = {
-                    "Skull Slayer",
+                    "Sun-kissed Warrior",
                     "Isle Outlaw",
                     "Island Boy",
-                    "Sun-kissed Warrior",
+                    "Serpent Hunter",
                     "Isle Champion",
-                    "Serpent Hunter"
+                    "Skull Slayer"
                 }
                 
                 -- Scan for any Tiki mob in the entire workspace
