@@ -456,9 +456,9 @@ spawn(function()
                 }
 
                 if not hasTweened then
-                    Tween(CFrame.new(-16224, 9, 439)) -- teleport once
-                    hasTweened = true
-                end
+    Tween(CFrame.new(-16960, 392, 1507)) -- teleport once
+    hasTweened = true
+end
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
