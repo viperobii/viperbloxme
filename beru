@@ -6,7 +6,7 @@ repeat task.wait() until redzlib
   
 -- Create the window
 local Window = redzlib:MakeWindow({
-    Title = "nova Hub : Blox Fruits",
+    Title = "Nova.GG : Blox-Fruits",
     SubTitle = "by Viper",
     SaveFolder = "redz Hub | Blox Fruits.lua"
 })
@@ -35,12 +35,6 @@ local Trial = Window:MakeTab({
     Title = "Race V4",
     Description = "Info",
     Icon = "palm",  -- Fixed the split "Icon"
-})
-
-local Raids = Window:MakeTab({
-    Title = "Fruit/Raid",
-    Description = "Settings",
-    Icon = "cherry",
 })
 
 local Items = Window:MakeTab({
@@ -1242,7 +1236,6 @@ Setting:AddToggle({
 })
 
 
-
 spawn(function()
     while task.wait() do
         pcall(function()
@@ -1267,10 +1260,6 @@ spawn(function()
         end)
     end
 end)
-
-
-
-
 
 
 
@@ -1380,63 +1369,6 @@ spawn(function()
 end)
 
 Setting:AddSection("Miscellaneous")
-
-
-Setting:AddToggle({
-    Name = "No Fog",
-    Flag = "Settings/NoFog",
-    Default = false,
-    Callback = function(Value)
-        local lighting = game:GetService("Lighting")
-        getgenv().FogConnection = getgenv().FogConnection or nil
-        getgenv().OriginalFogEnd = getgenv().OriginalFogEnd or lighting.FogEnd
-        getgenv().OriginalFogStart = getgenv().OriginalFogStart or lighting.FogStart
-        getgenv().OriginalFogColor = getgenv().OriginalFogColor or lighting.FogColor
-        getgenv().OriginalAtmosphere = getgenv().OriginalAtmosphere or (lighting:FindFirstChildOfClass("Atmosphere") and lighting:FindFirstChildOfClass("Atmosphere"):Clone())
-
-        local function removeFog()
-            if lighting:FindFirstChildOfClass("Atmosphere") then
-                lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
-            end
-            lighting.FogEnd = 1e6
-            lighting.FogStart = 1e6
-            getgenv().FogConnection = game:GetService("RunService").RenderStepped:Connect(function()
-                lighting.FogEnd = 1e6
-                lighting.FogStart = 1e6
-                if lighting:FindFirstChildOfClass("Atmosphere") then
-                    lighting:FindFirstChildOfClass("Atmosphere"):Destroy()
-                end
-            end)
-        end
-
-        local function restoreFog()
-            if getgenv().FogConnection then
-                getgenv().FogConnection:Disconnect()
-                getgenv().FogConnection = nil
-            end
-            lighting.FogEnd = getgenv().OriginalFogEnd
-            lighting.FogStart = getgenv().OriginalFogStart
-            lighting.FogColor = getgenv().OriginalFogColor
-            if getgenv().OriginalAtmosphere and not lighting:FindFirstChildOfClass("Atmosphere") then
-                local restored = getgenv().OriginalAtmosphere:Clone()
-                restored.Parent = lighting
-            end
-        end
-
-        if Value then
-            removeFog()
-        else
-            restoreFog()
-        end
-
-        game.Players.LocalPlayer.OnTeleport:Connect(function()
-            if getgenv().FogConnection then
-                getgenv().FogConnection:Disconnect()
-            end
-        end)
-    end
-})
-
 
 Setting:AddToggle({
     Name = "Full Bright",
