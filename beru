@@ -1563,14 +1563,13 @@ Setting:AddToggle({
 
 
 
-Raids:AddSection("Setting Raids");
-
 Raids:AddDropdown({
     Name = "Select Raid",
     Flag = "Raids/SelectChip",
-    Default = "nil",
+    Default = "Flame", -- Pick one from the list or leave it as nil (no quotes)
     Options = {
-         "Flame", "Ice", "Quake", "Light", "Dark", "Spider", "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
+        "Flame", "Ice", "Quake", "Light", "Dark", "Spider",
+        "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
     },
     Callback = function(option)
         SelectChip = option
