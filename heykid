@@ -432,7 +432,7 @@ end)
 
 
 
-local hasTweened = false
+local hasTeleportedToTikiIsland = false
 
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
@@ -442,7 +442,7 @@ Main:AddToggle({
     Callback = function(Value)
         _G.AutoFarmTiki = Value
         if Value == false then
-            hasTweened = false -- Reset only when turning off
+            hasTeleportedToTikiIsland = false -- Reset when turning off
         end
     end
 })
@@ -451,6 +451,13 @@ spawn(function()
     while task.wait() do
         if _G.AutoFarmTiki then
             pcall(function()
+                -- First teleport to Tiki Island once when enabled
+                if not hasTeleportedToTikiIsland then
+                    Tween(CFrame.new(-16224, 9, 439))
+                    hasTeleportedToTikiIsland = true
+                    task.wait(1) -- Wait for teleport to complete
+                end
+                
                 local mobs = {
                     "Skull Slayer",
                     "Isle Outlaw",
@@ -462,48 +469,34 @@ spawn(function()
                 
                 -- Scan for any Tiki mob in the entire workspace
                 local foundMob = false
-                local closestMob = nil
-                local closestDistance = math.huge
+                local targetMob = nil
                 
                 for _, mobName in ipairs(mobs) do
                     for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                         if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and 
                            enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                            
-                            -- Calculate distance for closest mob
-                            local distance = (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                            if distance < closestDistance then
-                                closestDistance = distance
-                                closestMob = enemy
-                                foundMob = true
-                            end
+                            targetMob = enemy
+                            foundMob = true
+                            break
                         end
                     end
+                    if foundMob then break end
                 end
                 
                 -- If we found a mob, attack it
-                if foundMob and closestMob then
+                if foundMob and targetMob then
                     AutoHaki()
                     EquipTool(_G.SelectWeapon or SelectWeapon)
-                    closestMob.HumanoidRootPart.CanCollide = false
-                    closestMob.Humanoid.WalkSpeed = 0
-                    if closestMob:FindFirstChild("Head") then closestMob.Head.CanCollide = false end
-                    Tween(closestMob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    targetMob.HumanoidRootPart.CanCollide = false
+                    targetMob.Humanoid.WalkSpeed = 0
+                    if targetMob:FindFirstChild("Head") then targetMob.Head.CanCollide = false end
+                    Tween(targetMob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
                     AttackNoCoolDown()
-                else
-                    -- If no mob is found and we haven't teleported yet
-                    if not hasTweened then
-                        -- Teleport to a general area where Tiki mobs might spawn
-                        -- Optional: Remove this line if you don't want any default teleport
-                        Tween(CFrame.new(-16021, 8, 696))
-                        hasTweened = true
-                    else
-                        -- Move around to look for mobs if none are found
-                        -- This helps locate mobs in the general area
-                        local randomOffset = Vector3.new(math.random(-100, 100), 0, math.random(-100, 100))
-                        local currentPos = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
-                        Tween(CFrame.new(currentPos + randomOffset))
-                    end
+                end
+                
+                -- Brief wait if no mob was found to prevent excessive looping
+                if not foundMob then
+                    task.wait(1)
                 end
             end)
         end
