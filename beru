@@ -428,6 +428,12 @@ spawn(function()
 end)
 
 
+
+
+
+
+local hasTweened = false
+
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
     Flag = "Main/AutoFarmAllTikiMobs",
@@ -452,13 +458,12 @@ spawn(function()
                     "Serpent Hunter"
                 }
 
-                -- Move this block outside the farming loop
+                -- Teleport to the Tiki location once
                 if not hasTweened then
-                    Tween(CFrame.new(-16960, 392, 1507)) -- teleport once
+                    Tween(CFrame.new(-16021, 8, 696)) -- tp once to the location
                     hasTweened = true
                 end
 
-                -- Now farming loop starts
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
 
