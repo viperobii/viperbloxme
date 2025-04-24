@@ -40,6 +40,8 @@ Discord:AddDiscordInvite({
 })
 
 
+
+
 Main:AddDropdown({
     Name = "UI Scale",
     Flag = "Main/UIScale",
@@ -47,10 +49,10 @@ Main:AddDropdown({
     Options = { "small", "medium", "large", "bigger" },
     Callback = function(option)
         local scales = {
-            small = 900,
-            medium = 600,
-            large = 300,
-            bigger = 200,
+            small = 1400,   -- smaller UI
+            medium = 1000,  -- slightly smaller
+            large = 800,    -- default size, no change
+            bigger = 600    -- larger UI
         }
         if scales[option] then
             redzlib:SetScale(scales[option])
