@@ -15674,23 +15674,18 @@ end);
 
 end);
 
-v16.Race:AddButton({
-
+v16.Race:AddToggle({
     Title = "Teleport Temple Of Time",
+    Description = "lol",
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
 
-    Description = "",
-
-    Callback = function()
-
-        game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
-
-        -- Move MapStash children back into the workspace
-        for _, v in ipairs(game.ReplicatedStorage.MapStash:GetChildren()) do
-            v.Parent = workspace.Map
+            for _, v in ipairs(game.ReplicatedStorage.MapStash:GetChildren()) do
+                v.Parent = workspace.Map
+            end
         end
-
     end
-
 })
 
 v16.Race:AddButton({
