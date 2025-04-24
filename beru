@@ -1250,7 +1250,7 @@ Trial:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
         end
     end
 })
@@ -1262,7 +1262,7 @@ Trial:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
             Tween2(CFrame.new(28575.181640625, 14936.6279296875, 72.31636810302734))
         end
     end
@@ -1275,7 +1275,7 @@ Trial:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
             Tween2(CFrame.new(28981.552734375, 14888.4267578125, -120.245849609375))
         end
     end
@@ -1288,7 +1288,7 @@ Trial:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(29536.826171875, 15068.751953125, -86.30783081054688))
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
             Tween2(CFrame.new(29536.826171875, 15068.751953125, -86.30783081054688))
         end
     end
@@ -1301,7 +1301,7 @@ Trial:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", workspace.Map["Temple of Time"].TeleportSpawn.Position)
             if game:GetService("Players").LocalPlayer.Data.Race.Value == "Human" then
                 Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
             elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Skypiea" then
