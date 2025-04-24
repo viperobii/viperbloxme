@@ -31,6 +31,12 @@ local Player = Window:MakeTab({
     Icon = "swords",  -- Fixed the split "Icon"
 })
 
+local Raids = Window:MakeTab({
+    Title = "Raid/Fruit",
+    Description = "Info",
+    Icon = "cherry",  -- Fixed the split "Icon"
+})
+
 local Trial = Window:MakeTab({
     Title = "Race V4",
     Description = "Info",
@@ -1263,6 +1269,50 @@ end)
 
 
 
+Setting:AddToggle({
+    Name = "Auto Activate Race V3",
+    Flag = "Setting/AutoActivateRaceV3",
+    Callback = function(value)
+        getgenv().AutoT = value
+        if value then
+            spawn(function()
+                while getgenv().AutoT do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.CommE:FireServer("ActivateAbility")
+                    end)
+                    wait()
+                end
+            end)
+        end
+    end
+})
+
+
+
+Setting:AddToggle({
+    Name = "Auto Activate V4",
+    Flag = "Setting/AutoActivateV4",
+    Callback = function(value)
+        getgenv().AutoY = value
+        if value then
+            spawn(function()
+                while getgenv().AutoY do
+                    pcall(function()
+                        local char = game.Players.LocalPlayer.Character
+                        if char:FindFirstChild("RaceEnergy") and char.RaceEnergy.Value >= 1 and char:FindFirstChild("RaceTransformed") and not char.RaceTransformed.Value then
+                            local args = { [1] = true }
+                            game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Awakening").RemoteFunction:InvokeServer(unpack(args))
+                        end
+                    end)
+                    wait(0.5)
+                end
+            end)
+        end
+    end
+})
+
+
+
 Setting:AddSection("Stats");
 
 Setting:AddToggle({
@@ -1546,8 +1596,7 @@ Trial:AddToggle({
     end
 })
 
-
-Trial:AddSection("Trial");
+Trial:AddSection("Trial")
 
 -- Add toggle for Auto Trial
 Trial:AddToggle({
@@ -1566,7 +1615,7 @@ spawn(function()
             pcall(function()
                 local Player = game:GetService("Players").LocalPlayer
                 local PlayerRace = Player.Data.Race.Value
-                
+
                 if PlayerRace == "Human" then
                     -- Human Trial
                     for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
@@ -1581,7 +1630,7 @@ spawn(function()
                             end)
                         end
                     end
-                    
+
                 elseif PlayerRace == "Skypiea" then
                     -- Skypiea Trial
                     for _, part in pairs(game:GetService("Workspace").Map.SkyTrial.Model:GetDescendants()) do
@@ -1589,47 +1638,43 @@ spawn(function()
                             BTPZ(part.CFrame * CFrame.new(0, 0, 0))
                         end
                     end
-                    
+
                 elseif PlayerRace == "Fishman" then
                     -- Fishman Trial
                     for _, part in pairs(game:GetService("Workspace").SeaBeasts.SeaBeast1:GetDescendants()) do
                         if part.Name == "HumanoidRootPart" then
-                            -- Define Pos if not already defined
                             if not Pos then
                                 Pos = CFrame.new(0, 30, 0)
                             end
-                            
+
                             Tween(part.CFrame * Pos)
-                            
-                            -- Use all weapon types for attack sequence
+
                             local weaponTypes = {"Melee", "Blox Fruit", "Sword", "Gun"}
-                            
+
                             for _, weaponType in pairs(weaponTypes) do
-                                -- Equip appropriate weapon
                                 for _, tool in pairs(Player.Backpack:GetChildren()) do
                                     if tool:IsA("Tool") and tool.ToolTip == weaponType then
                                         Player.Character.Humanoid:EquipTool(tool)
                                         break
                                     end
                                 end
-                                
-                                -- Attack sequence with each weapon (Z, X, C)
-                                local keys = {122, 120, 99} -- Z, X, C in ASCII
+
+                                local keys = {122, 120, 99} -- Z, X, C
                                 for _, key in pairs(keys) do
                                     game:GetService("VirtualInputManager"):SendKeyEvent(true, key, false, Player.Character.HumanoidRootPart)
                                     game:GetService("VirtualInputManager"):SendKeyEvent(false, key, false, Player.Character.HumanoidRootPart)
                                     wait(0.2)
                                 end
-                                
-                                wait(0.5) -- Wait before switching weapons
+
+                                wait(0.5)
                             end
                         end
                     end
-                    
+
                 elseif PlayerRace == "Cyborg" then
                     -- Cyborg Trial
                     Tween(CFrame.new(28654, 14898.7832, -30))
-                    
+
                 elseif PlayerRace == "Ghoul" then
                     -- Ghoul Trial
                     for _, mob in pairs(game.Workspace.Enemies:GetDescendants()) do
@@ -1644,7 +1689,7 @@ spawn(function()
                             end)
                         end
                     end
-                    
+
                 elseif PlayerRace == "Mink" then
                     -- Mink Trial
                     for _, object in pairs(game:GetService("Workspace"):GetDescendants()) do
@@ -1655,52 +1700,24 @@ spawn(function()
                 end
             end)
         end
-   
+    end
+end)
 
 
-Trial:AddToggle({
-    Name = "Auto Kill Players In Trial",
-    Flag = "Trial/AutoKillTrial",
-    Description = "Manual Use Skill To Win Only Melee Skills",
-    Default = false,
-    Callback = function(value)
-        getgenv().AutoKillTrial = value
-        spawn(function()
-            while wait() do
-                pcall(function()
-                    if getgenv().AutoKillTrial then
-                        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-                            if player.Name ~= game.Players.LocalPlayer.Name and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
-                                if (player.Character.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 100 and player.Character.Humanoid.Health > 0 then
-                                    repeat
-                                        wait(getgenv().Fast_Delay or 0.1)
-                                        EquipTool(SelectWeapon)
-                                        AutoHaki()
-                                        Tween(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
-                                        player.Character.HumanoidRootPart.CanCollide = false
-                                        player.Character.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                                        AttackNoCoolDown()
-                                    until not getgenv().AutoKillTrial or not player.Parent or player.Character.Humanoid.Health <= 0
-                                end
-                            end
-                        end
-                    end
-                end)
-            end
-        end)
+Raids:AddDropdown({
+    Name = "Select Raid",
+    Flag = "Raids/SelectChip",
+    Default = "Flame", -- Pick one from the list or leave it as nil (no quotes)
+    Options = {
+        "Flame", "Ice", "Quake", "Light", "Dark", "Spider",
+        "Rumble", "Magma", "Buddha", "Sand", "Phoenix", "Dough"
+    },
+    Callback = function(option)
+        SelectChip = option
     end
 })
 
 
-Trial:AddButton({
-    Name = "Viper Fly Character",
-    Flag = "Trial/ViperFly",
-    Description = "Use For Draco Trial And Normal Trial Ez Win",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/viperobii/viperbloxme/refs/heads/main/translator"))()
-    end
-})   end
-})
 
 local v22 = Instance.new("ScreenGui")
 local v23 = Instance.new("ImageButton")
