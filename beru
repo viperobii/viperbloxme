@@ -45,7 +45,7 @@ Discord:AddDiscordInvite({
 Main:AddDropdown({
     Name = "UI Scale",
     Flag = "Main/UIScale",
-    Default = "large",
+    Default = "bigger",
     Options = { "small", "medium", "large", "bigger" },
     Callback = function(option)
         local scales = {
@@ -430,16 +430,22 @@ Main:AddToggle({
     end
 })
 
+local hasTeleported = false  -- Flag to check if teleport has already been done
+
 spawn(function()
     while task.wait() do
         if _G.AutoFarmTyrant then
             pcall(function()
                 local mobName = "Tyrant of the Skies"
 
-                -- Teleport to the area and tween to main spot
-                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(5756, 610, -282))
-                Tween(CFrame.new(-16224, 9, 439))
+                -- Teleport to the area only once
+                if not hasTeleported then
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
+                    Tween(CFrame.new(-16224, 9, 439))  -- Tween to the main spot
+                    hasTeleported = true  -- Set the flag to true after teleporting
+                end
 
+                -- Mob-farming loop
                 repeat
                     local mobFound = false
                     for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
