@@ -428,6 +428,12 @@ spawn(function()
 end)
 
 
+
+
+
+
+local hasTweened = false
+
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
     Flag = "Main/AutoFarmAllTikiMobs",
@@ -444,23 +450,20 @@ spawn(function()
         if _G.AutoFarmTiki then
             pcall(function()
                 local mobs = {
-                    "Skull Slayer",
+                    "Sun-kissed Warrior",
                     "Isle Outlaw",
                     "Island Boy",
-                    "Sun-kissed Warrior",
+                    "Skull Slayer",
                     "Isle Champion",
                     "Serpent Hunter"
                 }
 
-                -- Teleport only once, before starting to farm mobs
+                -- Teleport to the Tiki location once
                 if not hasTweened then
-                    -- Here you can either put a default location for the teleport or leave it empty to just go to mobs
-                    -- Example of default location, if you want:
-                    -- Tween(CFrame.new(0, 0, 0)) -- You can remove the coordinates if no specific location
+                    Tween(CFrame.new(-16021, 8, 696)) -- tp once to the location
                     hasTweened = true
                 end
 
-                -- Start farming mobs once teleportation is done
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
 
@@ -474,14 +477,7 @@ spawn(function()
                                 enemy.HumanoidRootPart.CanCollide = false
                                 enemy.Humanoid.WalkSpeed = 0
                                 if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                
-                                -- Move towards the mob if it's far away
-                                local distance = (enemy.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                                if distance > 50 then
-                                    -- If the mob is far, teleport to it (adjust distance as needed)
-                                    Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                                end
-                                
+                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
                                 AttackNoCoolDown()
                                 break
                             end
