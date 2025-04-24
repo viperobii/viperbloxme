@@ -276,7 +276,8 @@ end)
 
 Main:AddSection("Bones");
 
-local hasTweened = false
+
+local hasTeleportedToBoneIsland = false
 
 Main:AddToggle({
     Name = "Auto Farm Bones",
@@ -285,7 +286,9 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmBones = Value
-        hasTweened = false -- reset tween status when toggled off/on
+        if Value == false then
+            hasTeleportedToBoneIsland = false -- Reset when turning off
+        end
     end
 })
 
@@ -293,38 +296,50 @@ spawn(function()
     while task.wait() do
         if _G.AutoFarmBones then
             pcall(function()
+                -- First teleport to Bone Island once when enabled
+                if not hasTeleportedToBoneIsland then
+                    Tween(CFrame.new(-9480.80762, 142.130661, 5566.37305, -0.00655503059, 4.5295423e-8, -0.999978542, 2.0492047e-8, 1, 4.5162068e-8, 0.999978542, -2.0195568e-8, -0.00655503059))
+                    hasTeleportedToBoneIsland = true
+                    task.wait(1) -- Wait for teleport to complete
+                end
+                
                 local mobs = {
                     "Reborn Skeleton",
                     "Living Zombie",
                     "Posessed Mummy",
                     "Demonic Soul"
                 }
-
-                if not hasTweened then
-                    Tween(CFrame.new(-9480.80762, 142.130661, 5566.37305, -0.00655503059, 4.5295423e-8, -0.999978542, 2.0492047e-8, 1, 4.5162068e-8, 0.999978542, -2.0195568e-8, -0.00655503059))
-                    hasTweened = true
-                end
-
+                
+                -- Scan for any Bone mob in the entire workspace
+                local foundMob = false
+                local targetMob = nil
+                
                 for _, mobName in ipairs(mobs) do
-                    if not _G.AutoFarmBones then break end
-
-                    repeat
-                        local mobFound = false
-                        for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
-                            if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
-                                mobFound = true
-                                AutoHaki()
-                                EquipTool(_G.SelectWeapon or SelectWeapon)
-                                enemy.HumanoidRootPart.CanCollide = false
-                                enemy.Humanoid.WalkSpeed = 0
-                                if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                                Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                                AttackNoCoolDown()
-                                break
-                            end
+                    for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and 
+                           enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
+                            targetMob = enemy
+                            foundMob = true
+                            break
                         end
-                        task.wait()
-                    until not mobFound or not _G.AutoFarmBones
+                    end
+                    if foundMob then break end
+                end
+                
+                -- If we found a mob, attack it
+                if foundMob and targetMob then
+                    AutoHaki()
+                    EquipTool(_G.SelectWeapon or SelectWeapon)
+                    targetMob.HumanoidRootPart.CanCollide = false
+                    targetMob.Humanoid.WalkSpeed = 0
+                    if targetMob:FindFirstChild("Head") then targetMob.Head.CanCollide = false end
+                    Tween(targetMob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    AttackNoCoolDown()
+                end
+                
+                -- Brief wait if no mob was found to prevent excessive looping
+                if not foundMob then
+                    task.wait(1)
                 end
             end)
         end
