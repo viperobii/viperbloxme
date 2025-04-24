@@ -1188,6 +1188,130 @@ Items:AddButton({
 })
 
 
+Setting:AddTextBox({
+    Name = "Job ID",  -- Title of the input box
+    Flag = "Main/JobID",  -- Unique identifier for the input field
+    Placeholder = "Input Job ID",  -- Placeholder text when the input is empty
+    Default = "",  -- Default value
+    Numeric = false,  -- Set to false since it's not a numeric input
+    Finished = false,  -- Whether the input is finished or not
+    Callback = function(v301)  -- Callback when the input is finished
+        _G.Job = v301  -- Store the value in a global variable _G.Job
+    end
+})
+
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+Setting:AddToggle({
+    Name = "Join Job ID",
+    Flag = "Setting/JoinJobID",
+    Default = false,
+    Callback = function(state)
+        _G.Join = state
+
+        if _G.Join and _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
+            pcall(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, _G.Job, player)
+            end)
+        end
+    end
+})
+
+Setting:AddButton({
+    Name = "Copy Job ID",
+    Flag = "Setting/CopyJobID",
+    Description = "",
+    Callback = function()
+        if setclipboard then
+            setclipboard(tostring(game.JobId))
+        else
+            warn("Clipboard function not supported.")
+        end
+    end
+})
+
+Setting:AddToggle({
+    Name = "Spam Join Job ID",
+    Flag = "Setting/SpamJoinJobID",
+    Default = false,
+    Callback = function(value)
+        _G.Join = value
+        if _G.Join then
+            spawn(function()
+                while _G.Join do
+                    if _G.Job and _G.Job ~= "" and _G.Job ~= game.JobId then
+                        pcall(function()
+                            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, _G.Job, game.Players.LocalPlayer)
+                        end)
+                    end
+                    task.wait() -- 0 delay spam (1 frame)
+                end
+            end)
+        end
+    end
+})
+
+
+Setting:AddSection("Mobs")
+
+
+Setting:AddDropdown({
+    Name = "Bring Mob Mode",
+    Flag = "Setting/BringMobMode",
+    Default = "Low",
+    Options = { "Low", "Normal", "Super Bring" },
+    Callback = function(Value)
+        if Value == "Low" then
+            _G.BringMode = 250
+        elseif Value == "Normal" then
+            _G.BringMode = 300
+        elseif Value == "Super Bring" then
+            _G.BringMode = 350
+        end
+    end
+})
+
+
+Setting:AddToggle({
+    Name = "Bring Mob",
+    Flag = "Setting/BringMob",
+    Description = "Brings mobs to you",
+    Default = false,
+    Callback = function(Value)
+        _G.BringMonster = Value
+    end
+})
+
+
+spawn(function()
+    while task.wait() do
+        pcall(function()
+            if _G.BringMonster and _G.Level and StartMagnet then
+                for _, mob in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                    if mob.Name == Mon and mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                        local dist = (mob.HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        if dist <= _G.BringMode then
+                            mob.HumanoidRootPart.Size = Vector3.new(50, 50, 50)
+                            mob.HumanoidRootPart.CFrame = PosMon
+                            mob.Humanoid:ChangeState(14)
+                            mob.HumanoidRootPart.CanCollide = false
+                            mob.Head.CanCollide = false
+                            if mob.Humanoid:FindFirstChild("Animator") then
+                                mob.Humanoid.Animator:Destroy()
+                            end
+                            sethiddenproperty(game:GetService("Players").LocalPlayer, "SimulationRadius", math.huge)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+
+
 Setting:AddSection("Stats");
 
 Setting:AddToggle({
@@ -1363,25 +1487,26 @@ Trial:AddToggle({
     Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
-    if Value then
-        local race = game:GetService("Players").LocalPlayer.Data.Race.Value
-        print("Current Race:", race)
+        if Value then
+            local race = game:GetService("Players").LocalPlayer.Data.Race.Value
+            print("Current Race:", race)
 
-        if race == "Human" then
-            Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
-        elseif race == "Skypiea" then
-            Tween2(CFrame.new(28960.158203125, 14919.6240234375, 235.03948974609375))
-        elseif race == "Fishman" then
-            Tween2(CFrame.new(28231.17578125, 14890.9755859375, -211.64173889160156))
-        elseif race == "Cyborg" then
-            Tween2(CFrame.new(28502.681640625, 14895.9755859375, -423.7279357910156))
-        elseif race == "Ghoul" then
-            Tween2(CFrame.new(28674.244140625, 14890.6767578125, 445.4310607910156))
-        elseif race == "Mink" then
-            Tween2(CFrame.new(29012.341796875, 14890.9755859375, -380.1492614746094))
+            if race == "Human" then
+                Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
+            elseif race == "Skypiea" then
+                Tween2(CFrame.new(28960.158203125, 14919.6240234375, 235.03948974609375))
+            elseif race == "Fishman" then
+                Tween2(CFrame.new(28231.17578125, 14890.9755859375, -211.64173889160156))
+            elseif race == "Cyborg" then
+                Tween2(CFrame.new(28502.681640625, 14895.9755859375, -423.7279357910156))
+            elseif race == "Ghoul" then
+                Tween2(CFrame.new(28674.244140625, 14890.6767578125, 445.4310607910156))
+            elseif race == "Mink" then
+                Tween2(CFrame.new(29012.341796875, 14890.9755859375, -380.1492614746094))
+            end
         end
     end
-end
+})
 
 
 
