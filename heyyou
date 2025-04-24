@@ -420,7 +420,7 @@ Main:AddToggle({
 
 Main:AddSection("Tiki")
 
-local hasTeleportedToTyrant = false  -- Flag to ensure teleport happens only once
+local hasTeleportedToTyrant = false
 
 Main:AddToggle({
     Name = "Auto Farm Tyrant of the Skies",
@@ -439,35 +439,39 @@ spawn(function()
     while task.wait() do
         if _G.AutoFarmTyrant then
             pcall(function()
-                -- First teleport to Tyrant of the Skies area once when enabled
-                if not hasTeleportedToTyrant then
-                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
-                    Tween(CFrame.new(-16224, 9, 439))  -- Tween to the main spot for farming
-                    hasTeleportedToTyrant = true  -- Set the flag to true after teleporting
-                    task.wait(1)  -- Wait for the teleportation to complete
-                end
-                
                 local mobName = "Tyrant of the Skies"
                 local mobFound = false
-
-                -- Scan for Tyrant of the Skies mob
+                local targetMob = nil
+                
+                -- Check if the mob exists
                 for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
                     if enemy.Name == mobName and enemy:FindFirstChild("Humanoid") and
                        enemy:FindFirstChild("HumanoidRootPart") and enemy.Humanoid.Health > 0 then
                         mobFound = true
-                        AutoHaki()
-                        EquipTool(_G.SelectWeapon or SelectWeapon)
-                        enemy.HumanoidRootPart.CanCollide = false
-                        enemy.Humanoid.WalkSpeed = 0
-                        if enemy:FindFirstChild("Head") then enemy.Head.CanCollide = false end
-                        Tween(enemy.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                        AttackNoCoolDown()
+                        targetMob = enemy
                         break
                     end
                 end
-
-                -- Wait briefly if no mob found to prevent excessive looping
-                if not mobFound then
+                
+                -- If mob not found and haven't teleported yet, request entrance
+                if not mobFound and not hasTeleportedToTyrant then
+                    game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(-5075.50927734375, 314.5155029296875, -3150.0224609375))
+                    hasTeleportedToTyrant = true
+                    task.wait(3) -- Wait longer for the teleport to process
+                    return -- Skip this iteration to avoid errors
+                end
+                
+                -- If mob found, attack it
+                if mobFound and targetMob then
+                    AutoHaki()
+                    EquipTool(_G.SelectWeapon or SelectWeapon)
+                    targetMob.HumanoidRootPart.CanCollide = false
+                    targetMob.Humanoid.WalkSpeed = 0
+                    if targetMob:FindFirstChild("Head") then targetMob.Head.CanCollide = false end
+                    Tween(targetMob.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
+                    AttackNoCoolDown()
+                else
+                    -- If still no mob found after teleporting, wait before trying again
                     task.wait(1)
                 end
             end)
