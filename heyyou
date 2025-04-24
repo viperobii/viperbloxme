@@ -31,10 +31,22 @@ local Player = Window:MakeTab({
     Icon = "swords",  -- Fixed the split "Icon"
 })
 
+local Trial = Window:MakeTab({
+    Title = "Race V4",
+    Description = "Info",
+    Icon = "palm",  -- Fixed the split "Icon"
+})
+
 local Items = Window:MakeTab({
     Title = "Items Shop",
     Description = "Info",
     Icon = "shopping-cart",  -- Fixed the split "Icon"
+})
+
+local Setting = Window:MakeTab({
+    Title = "Settings",
+    Description = "Settings",
+    Icon = "settings",
 })
 
 
@@ -1123,6 +1135,190 @@ Items:AddButton({
         game:GetService("ReplicatedStorage").Modules.Net:FindFirstChild("RF/InteractDragonQuest"):InvokeServer(unpack(args))
     end
 })
+
+
+Setting:AddSection("Stats");
+
+Setting:AddToggle({
+    Name = "Auto Stats Melee",
+    Flag = "Items/AutoStatsMelee",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Melee = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Melee then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Melee",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+Setting:AddToggle({
+    Name = "Auto Stats Defense",
+    Flag = "Items/AutoStatsDefense",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Defense = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Defense then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Defense",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+Setting:AddToggle({
+    Name = "Auto Stats Swords",
+    Flag = "Items/AutoStatsSword",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Sword = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Sword then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Sword",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+
+Setting:AddToggle({
+    Name = "Auto Stats Gun",
+    Flag = "Items/AutoStatsGun",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Gun = Value
+    end
+})
+
+Setting:AddToggle({
+    Name = "Auto Stats Fruit",
+    Flag = "Items/AutoStatsFruit",
+    Description = "",
+    Default = false,
+    Callback = function(Value)
+        _G.Auto_Stats_Devil_Fruit = Value
+    end
+})
+
+spawn(function()
+    while wait() do
+        if _G.Auto_Stats_Devil_Fruit then
+            local args = {
+                [1] = "AddPoint",
+                [2] = "Demon Fruit",
+                [3] = 3
+            }
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer(unpack(args))
+        end
+    end
+end)
+
+
+Trial:AddToggle({
+    Name = "Teleport Temple Of Time",
+    Flag = "Trial/TeleportTempleOfTime",
+    Description = "Enable or Disable teleport to Temple Of Time",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28325.7422, 14886.8555, 104.809998))
+        end
+    end
+})
+
+Trial:AddToggle({
+    Name = "Teleport To Pull Lever",
+    Flag = "Trial/TeleportPullLever",
+    Description = "Enable or Disable teleport to Pull Lever",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            Tween2(CFrame.new(28575.181640625, 14936.6279296875, 72.31636810302734))
+        end
+    end
+})
+
+Trial:AddToggle({
+    Name = "Teleport To Ancient One",
+    Flag = "Trial/TeleportAncientOne",
+    Description = "Enable or Disable teleport to Ancient One",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            Tween2(CFrame.new(28981.552734375, 14888.4267578125, -120.245849609375))
+        end
+    end
+})
+
+Trial:AddToggle({
+    Name = "Teleport To TempleClock",
+    Flag = "Trial/TeleportTempleClock",
+    Description = "Enable or Disable teleport to TempleClock (Only works at Temple of Time)",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(29536.826171875, 15068.751953125, -86.30783081054688))
+            Tween2(CFrame.new(29536.826171875, 15068.751953125, -86.30783081054688))
+        end
+    end
+})
+
+Trial:AddToggle({
+    Name = "Teleport To Race Door",
+    Flag = "Trial/TeleportRaceDoor",
+    Description = "Enable or Disable teleport to Race Door",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            if game:GetService("Players").LocalPlayer.Data.Race.Value == "Human" then
+                Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
+            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Skypiea" then
+                Tween2(CFrame.new(28960.158203125, 14919.6240234375, 235.03948974609375))
+            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Fishman" then
+                Tween2(CFrame.new(28231.17578125, 14890.9755859375, -211.64173889160156))
+            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Cyborg" then
+                Tween2(CFrame.new(28502.681640625, 14895.9755859375, -423.7279357910156))
+            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Ghoul" then
+                Tween2(CFrame.new(28674.244140625, 14890.6767578125, 445.4310607910156))
+            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Mink" then
+                Tween2(CFrame.new(29012.341796875, 14890.9755859375, -380.1492614746094))
+            end
+        end
+    end
+})
+
 
 
 local v22 = Instance.new("ScreenGui")
