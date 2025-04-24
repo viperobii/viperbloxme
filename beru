@@ -276,6 +276,8 @@ end)
 
 Main:AddSection("Bones");
 
+local hasTweened = false
+
 Main:AddToggle({
     Name = "Auto Farm Bones",
     Flag = "Main/AutoFarmBones",
@@ -283,11 +285,11 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmBones = Value
+        hasTweened = false -- reset tween status when toggled off/on
     end
 })
 
 spawn(function()
-    local hasTweened = false
     while task.wait() do
         if _G.AutoFarmBones then
             pcall(function()
@@ -325,8 +327,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmBones
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
@@ -428,6 +428,9 @@ spawn(function()
 end)
 
 
+
+local hasTweened = false
+
 Main:AddToggle({
     Name = "Auto Farm All Tiki Mobs",
     Flag = "Main/AutoFarmAllTikiMobs",
@@ -435,6 +438,7 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmTiki = Value
+        hasTweened = false -- reset when toggle off/on
     end
 })
 
@@ -451,19 +455,14 @@ spawn(function()
                     "Serpent Hunter"
                 }
 
-                -- Teleport to the area and tween to main spot
                 if not hasTweened then
-                    
-                   Tween(CFrame.new(-16224, 9, 439))
-                    
+                    Tween(CFrame.new(-16960 392 1507)) -- teleport once
                     hasTweened = true
                 end
-                
 
                 for _, mobName in ipairs(mobs) do
                     if not _G.AutoFarmTiki then break end
 
-                    -- Wait until all mobs of this type are cleared
                     repeat
                         local mobFound = false
                         for _, enemy in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
@@ -483,8 +482,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmTiki
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
@@ -595,6 +592,11 @@ spawn(function()
     end
 end)
 
+
+
+
+local hasTweened = false
+
 Main:AddToggle({
     Name = "Auto Farm Cake Island Mobs",
     Flag = "Main/AutoFarmCakeIslandMobs",
@@ -602,6 +604,7 @@ Main:AddToggle({
     Default = false,
     Callback = function(Value)
         _G.AutoFarmCakeIsland = Value
+        hasTweened = false -- reset so it teleports once when toggled back on
     end
 })
 
@@ -613,12 +616,10 @@ spawn(function()
                     "Baking Staff",
                     "Head Baker",
                     "Cookie Crafter",
-                    
                 }
 
-                -- Teleport to Cake Island base spot
                 if not hasTweened then
-                    Tween(CFrame.new(-2021, 123, -12194)) -- adjust if needed
+                    Tween(CFrame.new(-2021, 123, -12194)) -- tp once
                     hasTweened = true
                 end
 
@@ -644,8 +645,6 @@ spawn(function()
                     until not mobFound or not _G.AutoFarmCakeIsland
                 end
             end)
-        else
-            hasTweened = false
         end
     end
 end)
