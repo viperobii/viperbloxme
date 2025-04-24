@@ -44,7 +44,7 @@ local Trial = Window:MakeTab({
 })
 
 local Teleport = Window:MakeTab({
-    Title = "Teleportation",
+    Title = "Teleports",
     Description = "Info",
     Icon = "locate",  -- Fixed the split "Icon"
 })
@@ -1842,7 +1842,6 @@ end)
 Raids:AddToggle({
     Name = "Instant Start Raid",
     Flag = "Raids/AutoRaidSummon",
-    Description "<font color='rgb(255, 0, 0)'>Don't Use This Still Updating</font>",
     Callback = function(value)
         getgenv().AutoRaidSummon = value
         if value then
@@ -1922,6 +1921,150 @@ spawn(function()
     end
 end)
 
+
+local IslandCFramesSea1 = {
+    ["Starter Island"] = CFrame.new(106.88, 17.39, 1402.55),
+    ["Jungle"] = CFrame.new(-1234.03, 11.84, 360.47),
+    ["Pirate Village"] = CFrame.new(-1142.62, 4.75, 3827.36),
+    ["Desert"] = CFrame.new(1086.4, 6.55, 4372.83),
+    ["Middle Island"] = CFrame.new(-655.83, 7.88, 4953.47),
+    ["Frozen Village"] = CFrame.new(114.56, 26.04, -1323.17),
+    ["Marine Fortress"] = CFrame.new(-4505.45, 20.43, 4260.42),
+    ["Skylands"] = CFrame.new(-4948.36, 717.71, -2622.97),
+    ["Colosseum"] = CFrame.new(-1837.57, 7.33, -2740.22),
+    ["Magma Village"] = CFrame.new(-5231.96, 8.61, 8466.38),
+    ["Underwater City"] = CFrame.new(3875.12, 5.29, -1900.9),
+    ["Fountain City"] = CFrame.new(5131.87, 4.71, 4037.5),
+    ["Shanda"] = CFrame.new(-7895.1, 5545.61, -493.19),
+    ["Upper Yard"] = CFrame.new(-7640.15, 5636.09, -1703.53),
+    ["Prison"] = CFrame.new(4862.73, 5.67, 742.6)
+}
+
+Teleport:AddSection('Sea 1')
+
+Teleport:AddDropdown({
+    Name = "Select Island Teleport",
+    Flag = "Teleport/IslandSelectionSea1",
+    Default = "Starter Island",
+    Options = {
+        "Starter Island", "Jungle", "Pirate Village", "Desert", "Middle Island",
+        "Frozen Village", "Marine Fortress", "Skylands", "Colosseum", "Magma Village",
+        "Underwater City", "Fountain City", "Shanda", "Upper Yard", "Prison"
+    },
+    Callback = function(option)
+        _G.SelectedTeleportIslandSea1 = option
+        print("Selected Sea 1 Island:", _G.SelectedTeleportIslandSea1)
+    end
+})
+
+
+Teleport:AddToggle({
+    Name = "Teleport To Island",
+    Flag = "Teleport/EnableTeleportSea1",
+    Default = false,
+    Callback = function(Value)
+        if Value and game.PlaceId == 2753915549 then -- First Sea PlaceId
+            if IslandCFramesSea1[_G.SelectedTeleportIslandSea1] then
+                Tween2(IslandCFramesSea1[_G.SelectedTeleportIslandSea1])
+            end
+        end
+    end
+})
+
+
+local IslandCFramesSea2 = {
+    ["Kingdom of Rose"] = CFrame.new(-394.05, 73.06, 285.34),
+    ["Green Zone"] = CFrame.new(-2282.23, 71.81, -977.4),
+    ["Graveyard"] = CFrame.new(-5376.74, 7.42, -708.53),
+    ["Dark Arena"] = CFrame.new(-5940.56, 6.2, -1411.93),
+    ["Snow Mountain"] = CFrame.new(1368.66, 430.12, -1328.18),
+    ["Hot and Cold"] = CFrame.new(-5826.79, 82.72, -2326.17),
+    ["Cursed Ship"] = CFrame.new(-8754.21, 4.74, 6038.57),
+    ["Ice Castle"] = CFrame.new(5400.64, 28.2, -6235.99),
+    ["Forgotten Island"] = CFrame.new(-3051.72, 239.6, -10191.7),
+    ["Usoap Island"] = CFrame.new(4816.86, 8.46, 2863.82)
+}
+
+Teleport:AddSection("Sea 2")
+
+Teleport:AddDropdown({
+    Name = "Select Island Teleport",
+    Flag = "Teleport/IslandSelectionSea2",
+    Default = "Kingdom of Rose",
+    Options = {
+        "Kingdom of Rose", "Green Zone", "Graveyard", "Dark Arena", "Snow Mountain",
+        "Hot and Cold", "Cursed Ship", "Ice Castle", "Forgotten Island", "Usoap Island"
+    },
+    Callback = function(option)
+        _G.SelectedTeleportIslandSea2 = option
+        print("Selected Sea 2 Island:", _G.SelectedTeleportIslandSea2)
+    end
+})
+
+
+Teleport:AddToggle({
+    Name = "Teleport To Island",
+    Flag = "Teleport/EnableTeleportSea2",
+    Default = false,
+    Callback = function(Value)
+        if Value and game.PlaceId == 7449423635 then -- Make sure this is the correct PlaceId for Second Sea
+            if IslandCFramesSea2[_G.SelectedTeleportIslandSea2] then
+                Tween2(IslandCFramesSea2[_G.SelectedTeleportIslandSea2])
+            end
+        end
+    end
+})
+
+
+-- Sea 3
+Teleport:AddSection("Sea 3")
+
+-- Finish IslandCFramesSea3 (you had this partially)
+local IslandCFramesSea3 = {
+    ["Ussop Island"] = CFrame.new(4816.86, 8.46, 2863.82),
+    ["Mini Sky Island"] = CFrame.new(-288.74, 49326.32, -35248.59),
+    ["Great Tree"] = CFrame.new(2681.27, 1682.81, -7190.99),
+    ["Port Town"] = CFrame.new(-290.74, 6.73, 5343.55),
+    ["Floating Turtle"] = CFrame.new(-13274.53, 531.82, -7579.22),
+    ["Haunted Castle"] = CFrame.new(-9515.37, 164.01, 5786.06),
+    ["Ice Cream Island"] = CFrame.new(-902.57, 79.93, -10988.85),
+    ["Peanut Island"] = CFrame.new(-2062.75, 50.47, -10232.57),
+    ["Cake Island"] = CFrame.new(-1884.77, 19.33, -11666.90),
+    ["Cocoa Island"] = CFrame.new(87.94, 73.55, -12319.46),
+    ["Candy Island"] = CFrame.new(-1014.42, 149.11, -14555.96),
+    ["Tiki Outpost"] = CFrame.new(-16542.45, 55.69, 480.29),
+    ["Castle on the Sea"] = CFrame.new(-244.65, 73.06, -11731.81)
+}
+
+-- Dropdown for Sea 3
+Teleport:AddDropdown({
+    Name = "Select Island Teleport",
+    Flag = "Teleport/IslandSelectionSea3",
+    Default = "Port Town",
+    Options = {
+        "Ussop Island", "Mini Sky Island", "Great Tree", "Port Town", "Floating Turtle",
+        "Haunted Castle", "Ice Cream Island", "Peanut Island", "Cake Island",
+        "Cocoa Island", "Candy Island", "Tiki Outpost", "Castle on the Sea"
+    },
+    Callback = function(option)
+        _G.SelectedTeleportIslandSea3 = option
+        print("Selected Sea 3 Island:", _G.SelectedTeleportIslandSea3)
+    end
+})
+
+-- Toggle for Sea 3 teleport
+Teleport:AddToggle({
+    Name = "Teleport To Island",
+    Flag = "Teleport/EnableTeleportSea3",
+    Default = false,
+    Callback = function(Value)
+        if Value and game.PlaceId == 7449423635 then -- Third Sea
+            if IslandCFramesSea3[_G.SelectedTeleportIslandSea3] then
+                Tween2(IslandCFramesSea3[_G.SelectedTeleportIslandSea3])
+            end
+        end
+    end
+})
 
 
 
