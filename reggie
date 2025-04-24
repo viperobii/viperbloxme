@@ -44,7 +44,7 @@ local Trial = Window:MakeTab({
 })
 
 local Teleport = Window:MakeTab({
-    Title = "Teleportation",
+    Title = "Teleports",
     Description = "Info",
     Icon = "locate",  -- Fixed the split "Icon"
 })
@@ -1842,7 +1842,6 @@ end)
 Raids:AddToggle({
     Name = "Instant Start Raid",
     Flag = "Raids/AutoRaidSummon",
-    Description "<font color='rgb(255, 0, 0)'>Don't Use This Still Updating</font>",
     Callback = function(value)
         getgenv().AutoRaidSummon = value
         if value then
