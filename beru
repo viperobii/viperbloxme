@@ -984,6 +984,57 @@ Player:AddToggle({
 })
 
 
+Setting:AddToggle({
+    Name = "Bring Mobs",
+    Flag = "Setting/BringMobs",
+    Description = "",
+    Default = false,
+    Callback = function(value)
+        getgenv().BringMob = value
+        if value then
+            spawn(function()
+                while getgenv().BringMob do
+                    pcall(function()
+                        for _, mob in pairs(workspace.Enemies:GetChildren()) do
+                            if mob.Name == MonFarm and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                                local root = mob:FindFirstChild("HumanoidRootPart")
+                                if root and FarmPos and (root.Position - FarmPos.Position).Magnitude <= 1500 then
+                                    -- Bring mob to FarmPos
+                                    root.CFrame = FarmPos
+                                    
+                                    -- Disable collision and movement
+                                    root.Size = Vector3.new(60, 60, 60)
+                                    root.Transparency = 1
+                                    root.CanCollide = false
+
+                                    if mob:FindFirstChild("Head") then
+                                        mob.Head.CanCollide = false
+                                    end
+
+                                    mob.Humanoid.WalkSpeed = 0
+                                    mob.Humanoid.JumpPower = 0
+                                    
+                                    local animator = mob.Humanoid:FindFirstChildOfClass("Animator")
+                                    if animator then
+                                        animator:Destroy()
+                                    end
+                                    
+                                    mob.Humanoid:ChangeState(11) -- Staggered
+                                    mob.Humanoid:ChangeState(14) -- Platform stand
+
+                                    -- Extend Simulation Radius
+                                    sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+                                end
+                            end
+                        end
+                    end)
+                    task.wait()
+                end
+            end)
+        end
+    end
+})
+
 Items:AddSection("Buy Melee");
 
 Items:AddButton({
@@ -1246,7 +1297,7 @@ end)
 Trial:AddToggle({
     Name = "Teleport NPC Great Tree",
     Flag = "Trial/TeleportNPCGreatTree",
-    Description = "Use This As Of Now To Go Trial Because Bloxfruit Updated Anti <font color='rgb(255, 0, 0)'>Toggle</font> Cheat System Anti Teleport",
+    Description = "Use This Because Bloxfruit Update The <font color='rgb(255, 0, 0)'>Anti Cheat</font>",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -1258,7 +1309,7 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport Temple Of Time",
     Flag = "Trial/TeleportTempleOfTime",
-    Description = "Enable or Disable teleport to Temple Of Time",
+    Description = "Discontinued Reason <font color='rgb(255, 0, 0)'>Anti Cheat</font>",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -1270,11 +1321,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To Pull Lever",
     Flag = "Trial/TeleportPullLever",
-    Description = "Enable or Disable teleport to Pull Lever",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            
             Tween2(CFrame.new(28575.181640625, 14936.6279296875, 72.31636810302734))
         end
     end
@@ -1283,11 +1334,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To Ancient One",
     Flag = "Trial/TeleportAncientOne",
-    Description = "Enable or Disable teleport to Ancient One",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
+            
             Tween2(CFrame.new(28981.552734375, 14888.4267578125, -120.245849609375))
         end
     end
@@ -1296,11 +1347,11 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To TempleClock",
     Flag = "Trial/TeleportTempleClock",
-    Description = "Enable or Disable teleport to TempleClock (Only works at Temple of Time)",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
         if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(29536.826171875, 15068.751953125, -86.30783081054688))
+           
             Tween2(CFrame.new(29536.826171875, 15068.751953125, -86.30783081054688))
         end
     end
@@ -1309,27 +1360,28 @@ Trial:AddToggle({
 Trial:AddToggle({
     Name = "Teleport To Race Door",
     Flag = "Trial/TeleportRaceDoor",
-    Description = "Enable or Disable teleport to Race Door",
+    Description = "<font color='rgb(0, 255, 0)'>Use At Temple Of Time</font>",
     Default = false,
     Callback = function(Value)
-        if Value then
-            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("requestEntrance", Vector3.new(28286.35546875, 14895.3017578125, 102.62469482421875))
-            if game:GetService("Players").LocalPlayer.Data.Race.Value == "Human" then
-                Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
-            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Skypiea" then
-                Tween2(CFrame.new(28960.158203125, 14919.6240234375, 235.03948974609375))
-            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Fishman" then
-                Tween2(CFrame.new(28231.17578125, 14890.9755859375, -211.64173889160156))
-            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Cyborg" then
-                Tween2(CFrame.new(28502.681640625, 14895.9755859375, -423.7279357910156))
-            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Ghoul" then
-                Tween2(CFrame.new(28674.244140625, 14890.6767578125, 445.4310607910156))
-            elseif game:GetService("Players").LocalPlayer.Data.Race.Value == "Mink" then
-                Tween2(CFrame.new(29012.341796875, 14890.9755859375, -380.1492614746094))
-            end
+    if Value then
+        local race = game:GetService("Players").LocalPlayer.Data.Race.Value
+        print("Current Race:", race)
+
+        if race == "Human" then
+            Tween2(CFrame.new(29221.822265625, 14890.9755859375, -205.99114990234375))
+        elseif race == "Skypiea" then
+            Tween2(CFrame.new(28960.158203125, 14919.6240234375, 235.03948974609375))
+        elseif race == "Fishman" then
+            Tween2(CFrame.new(28231.17578125, 14890.9755859375, -211.64173889160156))
+        elseif race == "Cyborg" then
+            Tween2(CFrame.new(28502.681640625, 14895.9755859375, -423.7279357910156))
+        elseif race == "Ghoul" then
+            Tween2(CFrame.new(28674.244140625, 14890.6767578125, 445.4310607910156))
+        elseif race == "Mink" then
+            Tween2(CFrame.new(29012.341796875, 14890.9755859375, -380.1492614746094))
         end
     end
-})
+end
 
 
 
