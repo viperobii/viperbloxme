@@ -1292,28 +1292,6 @@ Setting:AddToggle({
 
 
 
-Setting:AddToggle({
-    Name = "Auto Activate V4",
-    Flag = "Setting/AutoActivateV4",
-    Callback = function(value)
-        getgenv().AutoY = value
-        if value then
-            spawn(function()
-                while getgenv().AutoY do
-                    pcall(function()
-                        local char = game.Players.LocalPlayer.Character
-                        if char:FindFirstChild("RaceEnergy") and char.RaceEnergy.Value >= 1 and char:FindFirstChild("RaceTransformed") and not char.RaceTransformed.Value then
-                            local args = { [1] = true }
-                            game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Awakening").RemoteFunction:InvokeServer(unpack(args))
-                        end
-                    end)
-                end
-            end)
-        end
-    end
-})
-
-
 
 Setting:AddSection("Stats");
 
@@ -1687,31 +1665,6 @@ spawn(function()
         end
     end
 end)
-
-Raids:AddToggle({
-    Name = "Instant Start Raid",
-    Flag = "Raids/AutoRaidSummon",
-    Callback = function(value)
-        getgenv().AutoRaidSummon = value
-        if value then
-            spawn(function()
-                while getgenv().AutoRaidSummon do
-                    pcall(function()
-                        if World2 then
-                            fireclickdetector(game:GetService("Workspace").Map.CircleIsland.RaidSummon2.Button.Main.ClickDetector)
-                        elseif World3 then
-                            fireclickdetector(game:GetService("Workspace").Map["Boat Castle"].RaidSummon2.Button.Main.ClickDetector)
-                        end
-                    end)
-                end
-            end)
-        end
-    end
-})
-
-
-
-
 
 
 Trial:AddSection("Temple")
