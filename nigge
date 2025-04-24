@@ -40,7 +40,13 @@ local Raids = Window:MakeTab({
 local Trial = Window:MakeTab({
     Title = "Race V4",
     Description = "Info",
-    Icon = "palm",  -- Fixed the split "Icon"
+    Icon = "moon",  -- Fixed the split "Icon"
+})
+
+local Teleport = Window:MakeTab({
+    Title = "Teleportation",
+    Description = "Info",
+    Icon = "locate",  -- Fixed the split "Icon"
 })
 
 local Items = Window:MakeTab({
@@ -319,6 +325,20 @@ end)
 
 
 Main:AddSection("Bones");
+
+Main:AddParagraph({
+    "Total Bone",
+    "Total Bone: N/A"
+})
+
+spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            local boneCount = game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("Bones", "Check")
+            Main.Flags["Total Bone"]:Set("Total Bone: " .. boneCount)
+        end)
+    end
+end)
 
 
 local hasTeleportedToBoneIsland = false
@@ -1848,6 +1868,7 @@ Raids:AddToggle({
                             fireclickdetector(game:GetService("Workspace").Map["Boat Castle"].RaidSummon2.Button.Main.ClickDetector)
                         end
                     end)
+                    task.wait(1) -- Add delay to prevent crash
                 end
             end)
         end
