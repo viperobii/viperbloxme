@@ -2920,7 +2920,7 @@ local LocalPlayer = Players.LocalPlayer
 local requestt = http_request or request or syn.request
 local disconnected = false
 
--- FORMAT BIG NUMBERS
+-- FUNCTION TO FORMAT BIG NUMBERS
 local function formatNumber(n)
     local suffixes = {"", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"}
     local i = 1
@@ -2932,21 +2932,24 @@ local function formatNumber(n)
 end
 
 -- FUNCTION TO SEND WEBHOOK
-local function sendWebhook(beliAmount, bountyAmount, level, status)
+local function sendWebhook(beliAmount, level)
     local displayName = LocalPlayer.DisplayName or "User"
     local fakeUser = displayName .. " // " .. tostring(math.random(1000, 9999))
+    local playerCount = #Players:GetPlayers()
 
     local data = {
         ["embeds"] = {{
-            ["title"] = "BLOX FRUITS NOTIFY",
+            ["title"] = "Blox Fruits Server Notify",
             ["type"] = "rich",
-            ["color"] = tonumber("ff0000", 16),
+            ["color"] = tonumber("00ff00", 16), -- Green color
+            ["image"] = {
+                ["url"] = "https://cdn.discordapp.com/attachments/1351885690048221255/1364438601303064628/standard_1.gif"
+            },
             ["fields"] = {
                 {["name"] = 'Fake User', ["value"] = "```" .. fakeUser .. "```", ["inline"] = true},
-                {["name"] = 'Beli', ["value"] = "```" .. formatNumber(beliAmount) .. "```", ["inline"] = true},
-                {["name"] = 'Bounty', ["value"] = "```" .. formatNumber(bountyAmount) .. "```", ["inline"] = true},
-                {["name"] = 'Level', ["value"] = "```" .. tostring(level) .. "```", ["inline"] = true},
-                {["name"] = 'Status', ["value"] = "```"..status.."```", ["inline"] = true},
+                {["name"] = 'Beli', ["value"] = "```"..formatNumber(beliAmount).."```", ["inline"] = true},
+                {["name"] = 'Level', ["value"] = "```"..level.."```", ["inline"] = true},
+                {["name"] = 'Server Players', ["value"] = "```"..playerCount.."```", ["inline"] = true},
                 {["name"] = 'Game Link', ["value"] = "[Click Here](https://www.roblox.com/games/"..game.PlaceId..")", ["inline"] = true},
                 {["name"] = "Server Link", ["value"] = "```roblox://experiences/start?placeId=" .. game.PlaceId .. "&gameInstanceId=" .. game.JobId .. "```", ["inline"] = true }
             }
@@ -2956,7 +2959,7 @@ local function sendWebhook(beliAmount, bountyAmount, level, status)
     local jsonData = HttpService:JSONEncode(data)
     pcall(function()
         requestt({
-            Url = 'https://discord.com/api/webhooks/1364786293061451858/dCbSIIRrqLW_vHTZF_kbn9feXQx678Y_BumCUR6afqhcTUpsGbQtPHsWgXyZrXPljmaY',
+            Url = 'https://discord.com/api/webhooks/1364786293061451858/dCbSIIRrqLW_vHTZF_kbn9feXQx678Y_BumCUR6afqhcTUpsGbQtPHsWgXyZrXPljmaY',  -- Replace with your actual webhook URL
             Body = jsonData,
             Method = "POST",
             Headers = {["Content-Type"] = "application/json"}
@@ -2964,39 +2967,16 @@ local function sendWebhook(beliAmount, bountyAmount, level, status)
     end)
 end
 
--- MONITOR BELI, BOUNTY, LEVEL
+-- MONITOR Beli AND LEVEL
 task.spawn(function()
     while not disconnected do
-        task.wait(60)
+        task.wait(60)  -- Wait 60 seconds before sending the webhook again
 
         local stats = LocalPlayer:FindFirstChild("Data")
         if stats then
-            local beli = tonumber(stats:FindFirstChild("Beli") and stats.Beli.Value or 0)
-            local bounty = tonumber(stats:FindFirstChild("Bounty") and stats.Bounty.Value or 0)
-            local level = tonumber(stats:FindFirstChild("Level") and stats.Level.Value or 0)
-
-            if beli and bounty and level then
-                sendWebhook(beli, bounty, level, "Still on server. Working...")
-            end
+            local beli = stats:FindFirstChild("Beli") and stats.Beli.Value or 0
+            local level = stats:FindFirstChild("Level") and stats.Level.Value or 0
+            sendWebhook(beli, level)
         end
-    end
-end)
-
--- Send disconnect status
-local function sendDisconnectWebhook()
-    if not disconnected then
-        disconnected = true
-        sendWebhook(0, 0, 0, "Disconnected. Not working.")
-    end
-end
-
--- Try to catch game close or teleport
-LocalPlayer.OnTeleport:Connect(sendDisconnectWebhook)
-game:BindToClose(sendDisconnectWebhook)
-
--- Failsafe using player removing event
-Players.PlayerRemoving:Connect(function(player)
-    if player == LocalPlayer then
-        sendDisconnectWebhook()
     end
 end)
