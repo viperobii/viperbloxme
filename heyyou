@@ -51,7 +51,7 @@ Main:AddDropdown({
         local scales = {
             small = 1400,   -- smaller UI
             medium = 1000,  -- slightly smaller
-            large = 800,    -- default size, no change
+            large = 400,    -- default size, no change
             bigger = 600    -- larger UI
         }
         if scales[option] then
